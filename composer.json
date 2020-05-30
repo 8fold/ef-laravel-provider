@@ -1,5 +1,5 @@
 {
-	"name": "8fold/universal",
+	"name": "8fold/laravel-provider",
 	"type": "library",
 	"license": "MIT",
 	"require": {
