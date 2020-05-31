@@ -80,19 +80,6 @@ abstract class ContentBuilder
                     $path = $titleContentPathParts;
                     $return = static::titleForPathParts($path);
 
-                } elseif ($uriRoot === "events") {
-                    $isMonth = Shoop::string($part)->count()->isUnfolded(2);
-                    $isYear = Shoop::string($part)->count()->isUnfolded(4);
-                    if ($isMonth) {
-                        $return = Carbon::now()->month($part)->format("F");
-
-                    } elseif ($isYear) {
-                        $return = Carbon::now()->year($part)->format("Y");
-
-                    } elseif ($part === $uriRoot) {
-                        $rootPath = $titleContentPathParts->dropLast(2);
-                        $return = static::pathTitle($rootPath);
-                    }
                 } else {
                     $path = $titleContentPathParts;
                     $return = static::titleForPathParts($path);
@@ -175,8 +162,6 @@ abstract class ContentBuilder
                     Element::fold("pubDate", $timestamp)
             );
     }
-
-// -> Any route
 
 // -> Markdown
     static public function markdown(string $path = "")
