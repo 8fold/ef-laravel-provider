@@ -234,10 +234,9 @@ abstract class ContentBuilder
 
     }
 
-    static public function contentPathParts(): ESArray
-    {
-        return Shoop::string(base_path())->divide("/")->dropLast(2)->noEmpties();
-    }
+    abstract static public function contentPathParts(): ESArray;
+
+    abstract static public function assetsPathParts(): ESArray;
 
     static public function shortName(): ESString
     {
