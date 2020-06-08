@@ -13,8 +13,8 @@ Route::prefix("assets/favicons")->group(function() use ($contentBuilderClass) {
             $extension = "x-icon";
         }
 
-        $path = $contentBuilderClass::contentPathParts()->dropLast()
-            ->plus(".assets", $contentBuilderClass::domain(), "favicons", $image)
+        $path = $contentBuilderClass::assetsPathParts()
+            ->plus($contentBuilderClass::domain(), "favicons", $image)->noEmpties()
             ->join("/")->start("/");
         return response()->file($path, ["Content-Type: image/{$extension}"]);
     });
