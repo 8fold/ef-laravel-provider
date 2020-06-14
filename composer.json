@@ -1,5 +1,6 @@
 {
 	"name": "8fold/laravel-provider",
+  "description": "A generic Laravel Service Provider and resources for creating Laravel sites",
 	"type": "library",
 	"license": "MIT",
 	"require": {
@@ -9,8 +10,8 @@
 		"spatie/yaml-front-matter": "2.0.*"
 	},
 	"require-dev": {
-        "phpunit/phpunit": "9.1.*",
-        "phpunit/php-code-coverage": "8.0.*"
+    "phpunit/phpunit": "9.1.*",
+    "phpunit/php-code-coverage": "8.0.*"
 	},
 	"config": {
 		"optimize-autoloader": true,
