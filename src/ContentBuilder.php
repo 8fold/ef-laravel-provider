@@ -231,7 +231,6 @@ abstract class ContentBuilder
             return static::contentPathParts()
                 ->plus(...$value)->noEmpties()->join("/")->start("/");
         });
-
     }
 
     abstract static public function contentPathParts(): ESArray;
