@@ -5,7 +5,6 @@
 	"license": "MIT",
 	"require": {
 		"php": "7.*",
-		"8fold/php-shoop": "0.4.*",
     "8fold/php-shoop-extras": "0.1.*",
 		"8fold/php-markup": "0.1.*"
 	},
