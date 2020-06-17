@@ -6,16 +6,15 @@ use Carbon\Carbon;
 
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 
+use Eightfold\ShoopExtras\Shoop;
+
 use Eightfold\Shoop\{
-    Shoop,
     ESArray,
     ESString
 };
 
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
-
-use Eightfold\ShoopExtras\Shoop;
 
 abstract class ContentBuilder
 {
