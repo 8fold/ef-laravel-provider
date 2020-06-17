@@ -15,7 +15,7 @@ use Eightfold\Shoop\{
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
 
-use Eightfold\Site\Shoop\ESMarkdown;
+use Eightfold\ShoopExtras\Shoop;
 
 abstract class ContentBuilder
 {
@@ -95,7 +95,7 @@ abstract class ContentBuilder
             if ($result) {
                 return Shoop::string("");
             }
-            $title = ESMarkdown::fold($value)->meta()->title;
+            $title = Shoop::markdown($value)->meta()->title;
             return ($title === null) ? "" : $title;
         });
     }
@@ -107,7 +107,7 @@ abstract class ContentBuilder
                 return Shoop::string("");
             }
 
-            $markdown = ESMarkdown::fold($value);
+            $markdown = Shoop::markdown($value);
             $description = $markdown->meta()->description;
             if ($description === null) {
                 $description = $markdown->html();
@@ -168,14 +168,14 @@ abstract class ContentBuilder
     {
         return Shoop::string($path)->isEmpty(function($result, $value) use ($path) {
             if ($result) {
-                return ESMarkdown::fold(static::contentForUri());
+                return Shoop::markdown(static::contentForUri());
             }
             return static::contentPath($path)->plus("/content.md")->pathContent()
                 ->isEmpty(function($result, $value) use ($path) {
                     if ($result) {
-                        return ESMarkdown::fold("");
+                        return Shoop::markdown("");
                     }
-                    return ESMarkdown::fold($value);
+                    return Shoop::markdown($value);
                 });
         });
     }
@@ -184,7 +184,7 @@ abstract class ContentBuilder
     {
         $content = $pathParts->plus("content.md")->noEmpties()
             ->join("/")->start("/")->pathContent();
-        return ESMarkdown::fold($content);
+        return Shoop::markdown($content);
     }
 
     static public function contentForUri(string $fileName = "content.md")
