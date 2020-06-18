@@ -25,6 +25,36 @@ abstract class ContentBuilder
 {
     abstract static public function view(...$content);
 
+    /**
+     * @return ESString The requested path from the user, no domain. ex. /path/to/page
+     */
+    abstract static public function uri(): ESString;
+
+    /**
+     * @return ESStore An ESStore where the path goes to the root of the content folder.
+     */
+    abstract static public function contentStore(): ESStore;
+
+    /**
+     * The `/.assets` folder can contain whatever you like, but should contain the favicons if you use the `faviconPack()` method and routes.
+     *
+     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
+     */
+    static public function assetsStore(): ESStore;
+    {
+        return self::contentStore()->plus(".assets");
+    }
+
+    /**
+     * The `/.media` folder can contain whatever you like, but should contain images if you use the `media` routes.
+     *
+     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
+     */
+    static public function mediaStore()
+    {
+        return self::contentStore()->plus(".media");
+    }
+
     static public function stylesheets()
     {
         return Shoop::array([])
@@ -96,16 +126,24 @@ abstract class ContentBuilder
         });
     }
 
-    static public function uriContentStore($uri = "", $root = ""): ESStore
+    static public function uriContentStore($uri = ""): ESStore
     {
-        $path = $root . $uri;
-        return static::contentStore($path)->plus("content.md");
+        $uri = Shoop::string($uri)->isEmpty(function($result, $uri) {
+            return ($result)
+                ? static::uri()
+                : Shoop::string($uri)->startsWith("/", function($result, $uri) {
+                        return ($result)
+                            ? Shoop::string($uri)
+                            : Shoop::string($uri)->start("/");
+                    });
+        })->divide("/")->noEmpties();
+        return static::contentStore()->plus(...$uri)->plus("content.md");
     }
 
-    static public function uriPageTitle($uri = "", $root = ""): ESString
+    static public function uriPageTitle(): ESString
     {
-        $store = static::uriContentStore($uri, $root)->parent();
-        return Shoop::string($uri)->divide("/")->each(function($part) use (&$store) {
+        $store = static::uriContentStore()->parent();
+        return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
             $title = $store->plus("content.md")->markdown()->meta()->title;
             $store = $store->parent();
             return $title;
@@ -117,7 +155,7 @@ abstract class ContentBuilder
         return Shoop::string("");
     }
 
-    abstract static public function contentStore($root = ""): ESStore;
+
 
 // -> RSS
     static public function descriptionForPathParts(ESArray $pathParts): string

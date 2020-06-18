@@ -6,8 +6,8 @@ use Eightfold\Shoop\Shoop;
 
 use Eightfold\Markup\Element;
 
-// Route::prefix("feed")->group(function() use ($contentBuilderClass) {
-    Route::get("feed/rss", function() use ($contentBuilderClass) {
+Route::prefix("feed")->group(function() use ($contentBuilderClass) {
+    Route::get("/rss", function() use ($contentBuilderClass) {
         $items = $contentBuilderClass::markdown("/feed")->meta()->items()
             ->each(function($path) use ($contentBuilderClass) {
                 return $contentBuilderClass::rssItemForPath($path);
@@ -39,5 +39,5 @@ use Eightfold\Markup\Element;
             );
         return response($compiled)->header("Content-Type", "application/xml");
     });
-// });
+});
 
