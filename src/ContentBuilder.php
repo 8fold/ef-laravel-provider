@@ -40,7 +40,7 @@ abstract class ContentBuilder
      *
      * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
      */
-    static public function assetsStore(): ESStore;
+    static public function assetsStore(): ESStore
     {
         return self::contentStore()->plus(".assets");
     }
