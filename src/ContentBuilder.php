@@ -6,7 +6,12 @@ use Carbon\Carbon;
 
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 
-use Eightfold\ShoopExtras\Shoop;
+use Eightfold\ShoopExtras\{
+    Shoop,
+    ESStore
+};
+
+use Eightfold\Shoop\Helpers\Type;
 
 use Eightfold\Shoop\{
     ESArray,
@@ -20,25 +25,11 @@ abstract class ContentBuilder
 {
     abstract static public function view(...$content);
 
-    abstract static public function domain(): ESString;
-
-    abstract static public function copyrightContent(): ESString;
-
-    static public function faviconPack()
-    {
-        return Shoop::array([
-            UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
-            UIKit::link()->attr("rel apple-touch-icon", "href /assets/favicons/apple-touch-icon.png", "sizes 180x180"),
-            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-32x32.png", "sizes 32x32"),
-            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-16x16.png", "sizes 16x16")
-        ]);
-    }
-
     static public function stylesheets()
     {
         return Shoop::array([])
             ->plus(
-                UIKit::link()->attr("rel stylesheet", "href ". self::assetPath("css"))
+                UIKit::link()->attr("rel stylesheet", "href ". self::assetUri("css"))
             );
     }
 
@@ -46,59 +37,89 @@ abstract class ContentBuilder
     {
         return Shoop::array([])
             ->plus(
-                UIKit::script()->attr("src ". self::assetPath("js"))
+                UIKit::script()->attr("src ". self::assetUri("js"))
             );
     }
 
-    static public function assetPath(string $extension): ESString
+    static public function faviconPack()
     {
-        $folder = $extension;
-        $shortName = static::shortName();
-        $fileName = Shoop::array(["main", $extension])->join(".");
-        $uri = Shoop::array([])->plus($folder, $shortName, $fileName)
-            ->noEmpties()->join("/")->start("/");
-        return $uri;
+        return Shoop::array([
+            UIKit::link()->attr(
+                "type image/x-icon",
+                "rel icon",
+                "href /assets/favicons/favicon.ico"
+            ),
+            UIKit::link()->attr(
+                "rel apple-touch-icon",
+                "href /assets/favicons/apple-touch-icon.png",
+                "sizes 180x180"
+            ),
+            UIKit::link()->attr(
+                "rel image/png",
+                "href /assets/favicons/favicon-32x32.png",
+                "sizes 32x32"
+            ),
+            UIKit::link()->attr(
+                "rel image/png",
+                "href /assets/favicons/favicon-16x16.png",
+                "sizes 16x16"
+            )
+        ]);
     }
 
-    static public function pageTitle()
+    static private function assetUri($extension): ESString
     {
-        $uriRoot = static::uriRoot();
-
-        $contentPathRoot = static::contentPathParts()->last;
-        $titleContentPathParts = static::uriContentPathParts();
-
-        $break = false;
-        return $titleContentPathParts->toggle()
-            ->each(function($part, $index) use ($uriRoot, $contentPathRoot, &$titleContentPathParts, &$break) {
-                $return = "";
-                if ($break) {
-                    $return = "";
-
-                } elseif ($part === $contentPathRoot) {
-                    $break = true;
-                    $path = $titleContentPathParts;
-                    $return = static::titleForPathParts($path);
-
-                } else {
-                    $path = $titleContentPathParts;
-                    $return = static::titleForPathParts($path);
-                }
-                $titleContentPathParts = $titleContentPathParts->dropLast();
-                return $return;
-            })->noEmpties()->join(" | ");
+        $extension = Type::sanitizeType($extension, ESString::class)->unfold();
+        return Shoop::array([$extension])->plus(
+            static::shortName(),
+            Shoop::array(["main", $extension])->join(".")
+        )->noEmpties()->join("/")->start("/");
     }
 
-    static public function titleForPathParts(ESArray $pathParts): string
+    static public function uriParts($uri = ""): ESArray
     {
-        return static::markdownForPathParts($pathParts)->isEmpty(function($result, $value) {
-            if ($result) {
-                return Shoop::string("");
-            }
-            $title = Shoop::markdown($value)->meta()->title;
-            return ($title === null) ? "" : $title;
+        $uri = Type::sanitizeType($uri, ESString::class);
+        return $uri->isEmpty(function($result, $uri) {
+            $uri = ($result)
+                ? url()->current()
+                : $uri;
+            return Shoop::string($uri)->divide("/")->dropFirst(3)->noEmpties();
         });
     }
 
+    static public function uriRoot($uri = ""): ESString
+    {
+        return static::uriParts($uri)->isEmpty(function($result, $parts) {
+            return ($result)
+                ? Shoop::string("")
+                : $parts->first();
+        });
+    }
+
+    static public function uriContentStore($uri = "", $root = ""): ESStore
+    {
+        $path = $root . $uri;
+        return static::contentStore($path)->plus("content.md");
+    }
+
+    static public function uriPageTitle($uri = "", $root = ""): ESString
+    {
+        $store = static::uriContentStore($uri, $root)->parent();
+        return Shoop::string($uri)->divide("/")->each(function($part) use (&$store) {
+            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $store = $store->parent();
+            return $title;
+        })->noEmpties()->join(" | ");
+    }
+
+    static public function shortName(): ESString
+    {
+        return Shoop::string("");
+    }
+
+    abstract static public function contentStore($root = ""): ESStore;
+
+// -> RSS
     static public function descriptionForPathParts(ESArray $pathParts): string
     {
         return static::markdownForPathParts($pathParts)->isEmpty(function($result, $value) {
@@ -160,84 +181,5 @@ abstract class ContentBuilder
                     Element::fold("description", htmlspecialchars($description)),
                     Element::fold("pubDate", $timestamp)
             );
-    }
-
-// -> Markdown
-    static public function markdown(string $path = "")
-    {
-        return Shoop::string($path)->isEmpty(function($result, $value) use ($path) {
-            if ($result) {
-                return Shoop::markdown(static::contentForUri());
-            }
-            return static::contentPath($path)->plus("/content.md")->pathContent()
-                ->isEmpty(function($result, $value) use ($path) {
-                    if ($result) {
-                        return Shoop::markdown("");
-                    }
-                    return Shoop::markdown($value);
-                });
-        });
-    }
-
-    static public function markdownForPathParts(ESArray $pathParts)
-    {
-        $content = $pathParts->plus("content.md")->noEmpties()
-            ->join("/")->start("/")->pathContent();
-        return Shoop::markdown($content);
-    }
-
-    static public function contentForUri(string $fileName = "content.md")
-    {
-        if (! file_exists(static::uriContentPath($fileName))) {
-            return "";
-        }
-        return static::uriContentPath($fileName)->pathContent();
-    }
-
-// -> Helpers
-    static public function uriPathParts(): ESArray
-    {
-        $parts = Shoop::string(url()->current())->divide("/")->dropFirst(3)->noEmpties();
-        return $parts;
-    }
-
-    static public function uriRoot(): string
-    {
-        $uriParts = static::uriPathParts();
-        $return = ($uriParts->isEmpty) ? "" : $uriParts->first;
-        return $return;
-    }
-
-    static public function uriContentPathParts()
-    {
-        $uriParts = static::uriPathParts();
-        return static::contentPathParts()->plus(...$uriParts);
-    }
-
-    static public function uriContentPath(string $fileName = "content.md")
-    {
-        return static::uriContentPathParts()
-            ->plus($fileName)->join("/")->start("/");
-    }
-
-    static public function contentPath(string $path = "")
-    {
-        return Shoop::string($path)->isEmpty(function($result, $value) {
-            if ($result) {
-                return static::contentPathParts()->join("/");
-            }
-            $value = Shoop::string($value)->divide("/");
-            return static::contentPathParts()
-                ->plus(...$value)->noEmpties()->join("/")->start("/");
-        });
-    }
-
-    abstract static public function contentPathParts(): ESArray;
-
-    abstract static public function assetsPathParts(): ESArray;
-
-    static public function shortName(): ESString
-    {
-        return Shoop::string("");
     }
 }
