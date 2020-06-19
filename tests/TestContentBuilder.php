@@ -20,18 +20,21 @@ use Eightfold\Shoop\{
 
 class TestContentBuilder extends ContentBuilder
 {
-    static public function contentStore($root = ""): ESStore
-    {
-        $root = Type::sanitizeType($root, ESString::class)->unfold();
-        return Shoop::string($root)->isEmpty(function($result, $root) {
-            return ($result)
-                ? Shoop::store(base_path())
-                : Shoop::store($root);
-        });
-    }
-
     static public function view(...$content)
     {
-        return UIKit::webView(static::pageTitle()->unfold());
+        return UIKit::webView(
+            static::uriPageTitle()->unfold(),
+            static::uriContentStore()->markdown()->html()->unfold()
+        );
+    }
+
+    static public function uri(): ESString
+    {
+        return Shoop::string(request()->path())->start("/");
+    }
+
+    static public function contentStore(): ESStore
+    {
+        return Shoop::store(__DIR__)->plus("content");
     }
 }

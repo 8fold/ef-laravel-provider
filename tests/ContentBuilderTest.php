@@ -1,6 +1,7 @@
 <?php
 
-use Orchestra\Testbench\TestCase;
+use Orchestra\Testbench\BrowserKit\TestCase;
+// use Orchestra\Testbench\TestCase;
 
 use Eightfold\Site\Tests\TestContentBuilder as ContentBuilder;
 
@@ -10,7 +11,7 @@ class ContentBuilderTest extends TestCase
 {
     protected function getPackageProviders($app)
     {
-        return ['Eightfold\Site\Provider'];
+        return ['Eightfold\Site\Tests\TestProvider'];
     }
 
     public function testCanGetRemoteAssets()
@@ -30,50 +31,51 @@ class ContentBuilderTest extends TestCase
 
     public function testUri()
     {
-        $base = "http://8fold.dev/somewhere/else";
+        $this->visit("/somewhere");
+        $expected = "/somewhere";
+        $actual = ContentBuilder::uri();
+        $this->assertSame($expected, $actual->unfold());
+
+        $this->visit("/somewhere/else");
 
         $expected = ["somewhere", "else"];
-        $actual = ContentBuilder::uriParts($base);
+        $actual = ContentBuilder::uriParts();
         $this->assertSame($expected, $actual->unfold());
 
         $expected = "somewhere";
-        $actual = ContentBuilder::uriRoot($base);
+        $actual = ContentBuilder::uriRoot();
         $this->assertSame($expected, $actual->unfold());
     }
 
     public function testStore()
     {
-        $base = __DIR__;
-
-        $expected = __DIR__;
-        $actual = ContentBuilder::contentStore($base);
-        $this->assertSame($expected, $actual->unfold());
+        // $base = __DIR__;
 
         $expected = __DIR__ ."/content";
-        $actual = ContentBuilder::contentStore($base)->plus("content");
+        $actual = ContentBuilder::contentStore();
         $this->assertSame($expected, $actual->unfold());
 
         $expected = "Root";
-        $actual = ContentBuilder::uriContentStore("", $base ."/content")
-            ->markdown()->meta()->title;
+        $actual = ContentBuilder::uriContentStore()->markdown()->meta()->title;
         $this->assertSame($expected, $actual);
 
+        $this->visit("/somewhere/else");
         $expected = "Else";
-        $actual = ContentBuilder::uriContentStore(
-                "/somewhere/else",
-                $base ."/content"
-            )->markdown()->meta()->title;
+        $actual = ContentBuilder::uriContentStore()->markdown()->meta()->title;
         $this->assertSame($expected, $actual);
     }
 
     public function testPageTitle()
     {
+        $this->visit("/somewhere/else");
         $base = __DIR__;
         $expected = "Else | Somewhere | Root";
-        $actual = ContentBuilder::uriPageTitle(
-            "/somewhere/else",
-            $base ."/content"
-        );
+        $actual = ContentBuilder::uriPageTitle();
         $this->assertSame($expected, $actual->unfold());
+    }
+
+    public function testPageContent()
+    {
+        $this->visit("/somewhere/else")->see("Hello, World!");
     }
 }

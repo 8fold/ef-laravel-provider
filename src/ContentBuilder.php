@@ -30,6 +30,31 @@ abstract class ContentBuilder
      */
     abstract static public function uri(): ESString;
 
+    static public function uriRoot(): ESString
+    {
+        return static::uriParts()->first();
+    }
+
+    static public function uriParts(): ESArray
+    {
+        return static::uri()->divide("/")->noEmpties()->reindex();
+    }
+
+    static public function uriContentStore(): ESStore
+    {
+        return static::contentStore()->plus(...static::uriParts())->plus("content.md");
+    }
+
+    static public function uriPageTitle(): ESString
+    {
+        $store = static::uriContentStore()->parent();
+        return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
+            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $store = $store->parent();
+            return $title;
+        })->noEmpties()->join(" | ");
+    }
+
     /**
      * @return ESStore An ESStore where the path goes to the root of the content folder.
      */
@@ -99,55 +124,12 @@ abstract class ContentBuilder
 
     static private function assetUri($extension): ESString
     {
+        // TODO: Only used for CSS and JS, make subfolder and routes
         $extension = Type::sanitizeType($extension, ESString::class)->unfold();
         return Shoop::array([$extension])->plus(
             static::shortName(),
             Shoop::array(["main", $extension])->join(".")
         )->noEmpties()->join("/")->start("/");
-    }
-
-    static public function uriParts($uri = ""): ESArray
-    {
-        $uri = Type::sanitizeType($uri, ESString::class);
-        return $uri->isEmpty(function($result, $uri) {
-            $uri = ($result)
-                ? url()->current()
-                : $uri;
-            return Shoop::string($uri)->divide("/")->dropFirst(3)->noEmpties();
-        });
-    }
-
-    static public function uriRoot($uri = ""): ESString
-    {
-        return static::uriParts($uri)->isEmpty(function($result, $parts) {
-            return ($result)
-                ? Shoop::string("")
-                : $parts->first();
-        });
-    }
-
-    static public function uriContentStore($uri = ""): ESStore
-    {
-        $uri = Shoop::string($uri)->isEmpty(function($result, $uri) {
-            return ($result)
-                ? static::uri()
-                : Shoop::string($uri)->startsWith("/", function($result, $uri) {
-                        return ($result)
-                            ? Shoop::string($uri)
-                            : Shoop::string($uri)->start("/");
-                    });
-        })->divide("/")->noEmpties();
-        return static::contentStore()->plus(...$uri)->plus("content.md");
-    }
-
-    static public function uriPageTitle(): ESString
-    {
-        $store = static::uriContentStore()->parent();
-        return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = $store->plus("content.md")->markdown()->meta()->title;
-            $store = $store->parent();
-            return $title;
-        })->noEmpties()->join(" | ");
     }
 
     static public function shortName(): ESString

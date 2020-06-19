@@ -4,25 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28775ca4aea990e5b039cc8a81b9f20a",
+    "content-hash": "e1b0d6b2a63b9189940b12b3259dc80c",
     "packages": [
         {
             "name": "8fold/php-markup",
-            "version": "0.1.9",
+            "version": "0.1.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
-                "reference": "48afc8bb96b4c1ebb5bdf30f57ac13e2e58ad5c4"
+                "reference": "329993b1de99c313f07e74c6966c7cfaf91f55de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-markup/zipball/48afc8bb96b4c1ebb5bdf30f57ac13e2e58ad5c4",
-                "reference": "48afc8bb96b4c1ebb5bdf30f57ac13e2e58ad5c4",
+                "url": "https://api.github.com/repos/8fold/php-markup/zipball/329993b1de99c313f07e74c6966c7cfaf91f55de",
+                "reference": "329993b1de99c313f07e74c6966c7cfaf91f55de",
                 "shasum": ""
             },
             "require": {
                 "8fold/php-shoop-extras": "0.1.*",
-                "league/commonmark": "1.4.*",
                 "nesbot/carbon": "2.35.*",
                 "php": ">=7.0"
             },
@@ -57,7 +56,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-17T00:45:25+00:00"
+            "time": "2020-06-17T01:02:29+00:00"
         },
         {
             "name": "8fold/php-shoop",
@@ -111,16 +110,16 @@
         },
         {
             "name": "8fold/php-shoop-extras",
-            "version": "0.1.3",
+            "version": "0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-extras.git",
-                "reference": "01c48490730bc4774ef45e1b808d3ed9cff6d0c7"
+                "reference": "6f4b498774875b081fe4e4123a8b2e0cefe960eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/01c48490730bc4774ef45e1b808d3ed9cff6d0c7",
-                "reference": "01c48490730bc4774ef45e1b808d3ed9cff6d0c7",
+                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/6f4b498774875b081fe4e4123a8b2e0cefe960eb",
+                "reference": "6f4b498774875b081fe4e4123a8b2e0cefe960eb",
                 "shasum": ""
             },
             "require": {
@@ -160,7 +159,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-17T22:02:04+00:00"
+            "time": "2020-06-18T15:14:45+00:00"
         },
         {
             "name": "league/commonmark",
@@ -1417,6 +1416,68 @@
             "time": "2016-01-20T08:20:44+00:00"
         },
         {
+            "name": "laravel/browser-kit-testing",
+            "version": "v6.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/browser-kit-testing.git",
+                "reference": "ead8d337031ba41a8a5c38dac1a6d158d91a4551"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/browser-kit-testing/zipball/ead8d337031ba41a8a5c38dac1a6d158d91a4551",
+                "reference": "ead8d337031ba41a8a5c38dac1a6d158d91a4551",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-json": "*",
+                "illuminate/contracts": "^7.0",
+                "illuminate/database": "^7.0",
+                "illuminate/http": "^7.0",
+                "illuminate/support": "^7.0",
+                "illuminate/testing": "^7.0",
+                "mockery/mockery": "^1.0",
+                "php": "^7.2",
+                "phpunit/phpunit": "^8.5|^9.0",
+                "symfony/console": "^5.0",
+                "symfony/css-selector": "^5.0",
+                "symfony/dom-crawler": "^5.0",
+                "symfony/http-foundation": "^5.0",
+                "symfony/http-kernel": "^5.0"
+            },
+            "require-dev": {
+                "laravel/framework": "^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\BrowserKitTesting\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Provides backwards compatibility for BrowserKit testing in the latest Laravel release.",
+            "keywords": [
+                "laravel",
+                "testing"
+            ],
+            "time": "2020-03-03T13:37:48+00:00"
+        },
+        {
             "name": "laravel/framework",
             "version": "v7.16.1",
             "source": {
@@ -1990,6 +2051,60 @@
                 }
             ],
             "time": "2020-05-30T01:04:58+00:00"
+        },
+        {
+            "name": "orchestra/testbench-browser-kit",
+            "version": "v5.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/orchestral/testbench-browser-kit.git",
+                "reference": "9f9aad8017deab64d97eec3a08bf95260fb56456"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/orchestral/testbench-browser-kit/zipball/9f9aad8017deab64d97eec3a08bf95260fb56456",
+                "reference": "9f9aad8017deab64d97eec3a08bf95260fb56456",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/browser-kit-testing": "^6.0",
+                "orchestra/testbench": "^5.1",
+                "php": ">=7.2.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Orchestra\\Testbench\\BrowserKit\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mior Muhammad Zaki",
+                    "email": "crynobone@gmail.com",
+                    "homepage": "https://github.com/crynobone"
+                }
+            ],
+            "description": "Laravel Browser Kit Testing Helper for Packages Development",
+            "funding": [
+                {
+                    "url": "https://paypal.me/crynobone",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.patreon.com/crynobone",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2020-03-11T02:49:48+00:00"
         },
         {
             "name": "orchestra/testbench-core",
@@ -4182,6 +4297,82 @@
                 }
             ],
             "time": "2020-05-20T17:43:50+00:00"
+        },
+        {
+            "name": "symfony/dom-crawler",
+            "version": "v5.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/dom-crawler.git",
+                "reference": "907187782c465a564f9030a0c6ace59e8821106f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/907187782c465a564f9030a0c6ace59e8821106f",
+                "reference": "907187782c465a564f9030a0c6ace59e8821106f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-mbstring": "~1.0",
+                "symfony/polyfill-php80": "^1.15"
+            },
+            "conflict": {
+                "masterminds/html5": "<2.6"
+            },
+            "require-dev": {
+                "masterminds/html5": "^2.6",
+                "symfony/css-selector": "^4.4|^5.0"
+            },
+            "suggest": {
+                "symfony/css-selector": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\DomCrawler\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony DomCrawler Component",
+            "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-05-23T13:08:13+00:00"
         },
         {
             "name": "symfony/error-handler",
