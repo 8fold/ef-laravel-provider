@@ -16,16 +16,8 @@ class ContentBuilderTest extends TestCase
 
     public function testCanGetRemoteAssets()
     {
-        $expected = '<link rel="stylesheet" href="/css/main.css">';
-        $actual = ContentBuilder::stylesheets()->first;
-        $this->assertEquals($expected, $actual->unfold());
-
-        $expected = '<script src="/js/main.js"></script>';
-        $actual = ContentBuilder::javascripts()->first;
-        $this->assertEquals($expected, $actual->unfold());
-
         $expected = 4;
-        $actual = ContentBuilder::faviconPack()->count;
+        $actual = ContentBuilder::meta()->count;
         $this->assertEquals($expected, $actual);
     }
 

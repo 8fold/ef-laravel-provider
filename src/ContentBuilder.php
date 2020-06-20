@@ -25,10 +25,10 @@ abstract class ContentBuilder
 {
     abstract static public function view(...$content);
 
-    /**
-     * @return ESString The requested path from the user, no domain. ex. /path/to/page
-     */
-    abstract static public function uri(): ESString;
+    static public function uri(): ESString
+    {
+        return Shoop::string(request()->path())->start("/");
+    }
 
     static public function uriRoot(): ESString
     {
@@ -43,6 +43,26 @@ abstract class ContentBuilder
     static public function uriContentStore(): ESStore
     {
         return static::contentStore()->plus(...static::uriParts())->plus("content.md");
+    }
+
+    static public function uriContentMarkdown()
+    {
+        return static::uriContentStore()->markdown()->extensions(
+            GithubFlavoredMarkdownExtension::class,
+            ExternalLinkExtension::class,
+            SmartPunctExtension::class
+        );
+    }
+
+    static public function markdownConfig()
+    {
+        return [
+            "html_input" => "strip",
+            "allow_unsafe_links" => false,
+            "external_link" => [
+                "open_in_new_window" => true
+            ]
+        ];
     }
 
     static public function uriPageTitle(): ESString
@@ -80,23 +100,7 @@ abstract class ContentBuilder
         return self::contentStore()->plus(".media");
     }
 
-    static public function stylesheets()
-    {
-        return Shoop::array([])
-            ->plus(
-                UIKit::link()->attr("rel stylesheet", "href ". self::assetUri("css"))
-            );
-    }
-
-    static public function javascripts()
-    {
-        return Shoop::array([])
-            ->plus(
-                UIKit::script()->attr("src ". self::assetUri("js"))
-            );
-    }
-
-    static public function faviconPack()
+    static public function meta()
     {
         return Shoop::array([
             UIKit::link()->attr(
@@ -121,23 +125,6 @@ abstract class ContentBuilder
             )
         ]);
     }
-
-    static private function assetUri($extension): ESString
-    {
-        // TODO: Only used for CSS and JS, make subfolder and routes
-        $extension = Type::sanitizeType($extension, ESString::class)->unfold();
-        return Shoop::array([$extension])->plus(
-            static::shortName(),
-            Shoop::array(["main", $extension])->join(".")
-        )->noEmpties()->join("/")->start("/");
-    }
-
-    static public function shortName(): ESString
-    {
-        return Shoop::string("");
-    }
-
-
 
 // -> RSS
     static public function descriptionForPathParts(ESArray $pathParts): string
