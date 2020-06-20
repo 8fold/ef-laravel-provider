@@ -8,7 +8,7 @@
     "packages": [
         {
             "name": "8fold/php-markup",
-            "version": "0.1.11",
+            "version": "0.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
@@ -110,16 +110,16 @@
         },
         {
             "name": "8fold/php-shoop-extras",
-            "version": "0.1.4",
+            "version": "0.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-extras.git",
-                "reference": "6f4b498774875b081fe4e4123a8b2e0cefe960eb"
+                "reference": "5307672cf66c26cff711d5f7abcd7227f47aa281"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/6f4b498774875b081fe4e4123a8b2e0cefe960eb",
-                "reference": "6f4b498774875b081fe4e4123a8b2e0cefe960eb",
+                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/5307672cf66c26cff711d5f7abcd7227f47aa281",
+                "reference": "5307672cf66c26cff711d5f7abcd7227f47aa281",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-18T15:14:45+00:00"
+            "time": "2020-06-19T19:38:11+00:00"
         },
         {
             "name": "league/commonmark",
@@ -2388,16 +2388,16 @@
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "7462d5f123dfc080dfdf26897032a6513644fc95"
+                "reference": "30441f2752e493c639526b215ed81d54f369d693"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/7462d5f123dfc080dfdf26897032a6513644fc95",
-                "reference": "7462d5f123dfc080dfdf26897032a6513644fc95",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/30441f2752e493c639526b215ed81d54f369d693",
+                "reference": "30441f2752e493c639526b215ed81d54f369d693",
                 "shasum": ""
             },
             "require": {
@@ -2411,7 +2411,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.x-dev"
+                    "dev-1.x": "1.x-dev"
                 }
             },
             "autoload": {
@@ -2430,7 +2430,7 @@
                 }
             ],
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
-            "time": "2020-02-18T18:59:58+00:00"
+            "time": "2020-06-19T20:22:09+00:00"
         },
         {
             "name": "phpoption/phpoption",
