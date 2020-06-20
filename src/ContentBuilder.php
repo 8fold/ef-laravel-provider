@@ -57,6 +57,7 @@ abstract class ContentBuilder
         });
     }
 
+
     static public function uriParts(): ESArray
     {
         return static::uri()->divide("/")->noEmpties()->reindex();
