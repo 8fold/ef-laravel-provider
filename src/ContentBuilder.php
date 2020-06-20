@@ -52,7 +52,9 @@ abstract class ContentBuilder
 
     static public function uriRoot(): ESString
     {
-        return static::uriParts()->first();
+        return static::uriParts()->isEmpty(function($result, $array) {
+            return ($result) ? Shoop::string("") : $array->first();
+        });
     }
 
     static public function uriParts(): ESArray

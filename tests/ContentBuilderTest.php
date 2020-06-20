@@ -37,6 +37,11 @@ class ContentBuilderTest extends TestCase
         $expected = "somewhere";
         $actual = ContentBuilder::uriRoot();
         $this->assertSame($expected, $actual->unfold());
+
+        $this->visit("/");
+        $expected = "";
+        $actual = ContentBuilder::uriRoot();
+        $this->assertSame($expected, $actual->unfold());
     }
 
     public function testStore()
