@@ -114,7 +114,7 @@ abstract class ContentBuilder
      */
     static public function assetsStore(): ESStore
     {
-        return self::contentStore()->plus(".assets");
+        return static::contentStore()->plus(".assets");
     }
 
     /**
@@ -124,7 +124,7 @@ abstract class ContentBuilder
      */
     static public function mediaStore()
     {
-        return self::contentStore()->plus(".media");
+        return static::contentStore()->plus(".media");
     }
 
     static public function meta()
