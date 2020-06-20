@@ -65,6 +65,13 @@ abstract class ContentBuilder
         ];
     }
 
+    static public function uriContentMarkdownHtml()
+    {
+        return static::uriContentMarkdown()->html(
+            [], [], true, true, static::markdownConfig()
+        );
+    }
+
     static public function uriPageTitle(): ESString
     {
         $store = static::uriContentStore()->parent();
