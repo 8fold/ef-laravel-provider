@@ -49,8 +49,7 @@ abstract class ContentBuilder
             "view",
             UIKit::webView(
                 static::uriPageTitle(),
-                UIKit::article(...$content),
-                static::footer()
+                ...$content
             )->meta(...static::meta())
         );
     }
