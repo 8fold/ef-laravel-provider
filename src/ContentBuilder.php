@@ -117,7 +117,10 @@ abstract class ContentBuilder
     /**
      * @return ESStore An ESStore where the path goes to the root of the content folder.
      */
-    abstract static public function contentStore(): ESStore;
+    static public function contentStore(): ESStore
+    {
+        return Shoop::store(__DIR__)->plus("Content");
+    }
 
     /**
      * The `/.assets` folder can contain whatever you like, but should contain the favicons if you use the `faviconPack()` method and routes.
