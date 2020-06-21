@@ -52,7 +52,7 @@ abstract class ContentBuilder
                 ...Shoop::array($content)->isEmpty(function($result, $content) {
                     return ($result)
                         ? Shoop::array(static::uriContentMarkdownHtml())
-                        : $content
+                        : $content;
                 })
             )->meta(...static::meta())
         );
