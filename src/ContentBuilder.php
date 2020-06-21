@@ -49,7 +49,11 @@ abstract class ContentBuilder
             "view",
             UIKit::webView(
                 static::uriPageTitle(),
-                ...$content
+                Shoop::array($content)->isEmpty(function($result, $content) {
+                    return ($result)
+                        ? static::uriContentMarkdownHtml()
+                        : ...$content
+                })
             )->meta(...static::meta())
         );
     }
