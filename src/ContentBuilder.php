@@ -43,7 +43,17 @@ use Eightfold\Markup\Element;
 
 abstract class ContentBuilder
 {
-    abstract static public function view(...$content);
+    static public function view(...$content)
+    {
+        return view("ef::default")->with(
+            "view",
+            UIKit::webView(
+                static::uriPageTitle(),
+                UIKit::article(...$content),
+                static::footer()
+            )->meta(...static::meta())
+        );
+    }
 
     static public function uri(): ESString
     {
@@ -56,7 +66,6 @@ abstract class ContentBuilder
             return ($result) ? Shoop::string("") : $array->first();
         });
     }
-
 
     static public function uriParts(): ESArray
     {
