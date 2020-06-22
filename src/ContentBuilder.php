@@ -126,7 +126,14 @@ abstract class ContentBuilder
         ];
     }
 
-    static public function uriContentMarkdownHtml($details = true)
+    static public function uriContentMarkdownHtml(
+        $details = true,
+        $markdownReplacements = [],
+        $htmlReplacements = [],
+        $caseSensitive = true,
+        $minified = true,
+        $config = []
+    )
     {
         $details = Type::sanitizeType($details, ESBool::class)->unfold();
 
@@ -141,14 +148,20 @@ abstract class ContentBuilder
                 ->join(UIKit::br())->unfold()
         );
 
-        if ($details) {
-            return static::uriContentMarkdown()->html(
-                [], [], true, true, static::markdownConfig()
-            )->start($title->unfold(), $details->unfold());
-        }
-        return static::uriContentMarkdown()->html(
-            [], [], true, true, static::markdownConfig()
+        $config = (empty($config)) ? static::markdownConfig() : $config;
+
+        $html = static::uriContentMarkdown()->html(
+            $markdownReplacements,
+            $htmlReplacements,
+            $caseSensitive,
+            $minified,
+            $config
         );
+
+        if ($details) {
+            return $html->start($title->unfold(), $details->unfold());
+        }
+        return $html;
     }
 
     static public function uriPageTitle(): ESString
