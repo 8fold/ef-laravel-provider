@@ -161,10 +161,15 @@ abstract class ContentBuilder
                 ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
                 : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
 
-            $details = UIKit::p(
-                static::uriContentMarkdownDetails()->noEmpties()
-                    ->join(UIKit::br())->unfold()
-            );
+            $details = static::uriContentMarkdownDetails()->noEmpties()->count()
+                ->isEmpty(function($result) {
+                    return ($return)
+                        ? ""
+                        : UIKit::p(
+                            static::uriContentMarkdownDetails()->noEmpties()
+                                ->join(UIKit::br())->unfold()
+                        );
+                });
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;
