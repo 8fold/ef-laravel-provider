@@ -77,7 +77,7 @@ abstract class ContentBuilder
     {
         $uri = Type::sanitizeType($uri, ESString::class)
             ->isEmpty(function($result, $uri) {
-                return ($result) ? static::uriParts() : $uri->divide("/");
+                return ($result) ? static::uriParts() : $uri->divide("/")->noEmpties();
             });
         return static::contentStore()->plus(...$uri)->plus("content.md");
     }
