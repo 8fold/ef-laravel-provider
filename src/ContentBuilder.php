@@ -191,6 +191,11 @@ abstract class ContentBuilder
     static public function meta()
     {
         return Shoop::array([
+            UIKit::meta()->attr(
+                "name viewport",
+                "content width=device-width,
+                initial-scale=1"
+            ),
             UIKit::link()->attr(
                 "type image/x-icon",
                 "rel icon",
