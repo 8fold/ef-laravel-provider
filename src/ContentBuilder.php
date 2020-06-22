@@ -85,10 +85,17 @@ abstract class ContentBuilder
     static public function uriContentMarkdown()
     {
         return static::uriContentStore()->markdown()->extensions(
+            ...static::uriContentMarkdownExtensions()
+        );
+    }
+
+    static public function uriContentMarkdownExtensions()
+    {
+        return Shoop::array([
             GithubFlavoredMarkdownExtension::class,
             ExternalLinkExtension::class,
             SmartPunctExtension::class
-        );
+        ]);
     }
 
     static public function uriContentMarkdownDetails()
@@ -137,17 +144,6 @@ abstract class ContentBuilder
     {
         $details = Type::sanitizeType($details, ESBool::class)->unfold();
 
-        $markdown = static::uriContentMarkdown();
-
-        $title = ($markdown->meta()->heading === null)
-            ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
-            : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
-
-        $details = UIKit::p(
-            static::uriContentMarkdownDetails()->noEmpties()
-                ->join(UIKit::br())->unfold()
-        );
-
         $config = (empty($config)) ? static::markdownConfig() : $config;
 
         $html = static::uriContentMarkdown()->html(
@@ -159,6 +155,16 @@ abstract class ContentBuilder
         );
 
         if ($details) {
+            $markdown = static::uriContentMarkdown();
+
+            $title = ($markdown->meta()->heading === null)
+                ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
+                : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
+
+            $details = UIKit::p(
+                static::uriContentMarkdownDetails()->noEmpties()
+                    ->join(UIKit::br())->unfold()
+            );
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;
