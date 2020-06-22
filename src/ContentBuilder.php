@@ -163,7 +163,7 @@ abstract class ContentBuilder
 
             $details = static::uriContentMarkdownDetails()->noEmpties()->count()
                 ->isEmpty(function($result) {
-                    return ($return)
+                    return ($result)
                         ? ""
                         : UIKit::p(
                             static::uriContentMarkdownDetails()->noEmpties()
