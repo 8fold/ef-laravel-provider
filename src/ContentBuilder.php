@@ -35,6 +35,7 @@ use Eightfold\Shoop\Helpers\Type;
 
 use Eightfold\Shoop\{
     ESArray,
+    ESBool,
     ESString
 };
 
@@ -89,6 +90,28 @@ abstract class ContentBuilder
         );
     }
 
+    static public function uriContentMarkdownDetails()
+    {
+        $modified = ($markdown->meta()->modified === null)
+            ? Shoop::string("")
+            : Shoop::string("Modified on: ")->plus(
+                    Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
+                        ->toFormattedDateString()
+                );
+
+        $created = ($markdown->meta()->created === null)
+            ? Shoop::string("")
+            : Shoop::string("Created on: ")->plus(
+                    Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
+                        ->toFormattedDateString()
+                );
+
+        return Shoop::array([])->plus(
+            $modified,
+            $created
+        );
+    }
+
     static public function markdownConfig()
     {
         return [
@@ -100,8 +123,26 @@ abstract class ContentBuilder
         ];
     }
 
-    static public function uriContentMarkdownHtml()
+    static public function uriContentMarkdownHtml($details = true)
     {
+        $details = Type::sanitizeType($details, ESBool::class)->unfold();
+
+        $markdown = static::uriContentMarkdown();
+
+        $title = ($markdown->meta()->heading === null)
+            ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
+            : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
+
+        $details = UIKit::p(
+            static::uriContentMarkdownDetails()->noEmpties()
+                ->join(UIKit::br())->unfold()
+        );
+
+        if ($details) {
+            return static::uriContentMarkdown()->html(
+                [], [], true, true, static::markdownConfig()
+            )->start($title->unfold(), $details->unfold());
+        }
         return static::uriContentMarkdown()->html(
             [], [], true, true, static::markdownConfig()
         );
