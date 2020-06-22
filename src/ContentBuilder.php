@@ -249,20 +249,8 @@ abstract class ContentBuilder
                         if ($description->count()->isUnfolded(0)) {
                             return "";
                         }
-                        $description = $description->replace([
-                            "</h1>" => ":",
-                            "</h2>" => ":",
-                            "</h3>" => ":",
-                            "</h4>" => ":",
-                            "</h5>" => ":",
-                            "</h6>" => ":",
-                            "<h1>" => "",
-                            "<h2>" => "",
-                            "<h3>" => "",
-                            "<h4>" => "",
-                            "<h5>" => "",
-                            "<h6>" => ""
-                        ])->dropTags()->divide(" ")->isGreaterThan(50, function($result, $description) {
+                        $description = $description->replace(static::rssDescriptionReplacements())
+                            ->dropTags()->divide(" ")->isGreaterThan(50, function($result, $description) {
                             return ($result)
                                 ? $description->first(50)->join(" ")->plus("...")
                                 : $description->join(" ");
@@ -292,6 +280,24 @@ abstract class ContentBuilder
                 )
             )->attr("version 2.0")->unfold()
         )->start("<?xml version=\"1.0\"?>\n");
+    }
+
+    static public function rssDescriptionReplacements()
+    {
+        return Shoop::dictionary([
+            "</h1>" => ":",
+            "</h2>" => ":",
+            "</h3>" => ":",
+            "</h4>" => ":",
+            "</h5>" => ":",
+            "</h6>" => ":",
+            "<h1>" => "",
+            "<h2>" => "",
+            "<h3>" => "",
+            "<h4>" => "",
+            "<h5>" => "",
+            "<h6>" => ""
+        ]);
     }
 
     static public function rssItemsStore()
