@@ -46,17 +46,14 @@ abstract class ContentBuilder
 {
     static public function view(...$content)
     {
-        return view("ef::default")->with(
-            "view",
-            UIKit::webView(
-                static::uriPageTitle(),
-                ...Shoop::array($content)->isEmpty(function($result, $content) {
-                    return ($result)
-                        ? Shoop::array(static::uriContentMarkdownHtml())
-                        : $content;
-                })
-            )->meta(...static::meta())
-        );
+        return UIKit::webView(
+            static::uriPageTitle(),
+            ...Shoop::array($content)->isEmpty(function($result, $content) {
+                return ($result)
+                    ? Shoop::array(static::uriContentMarkdownHtml())
+                    : $content;
+            })
+        )->meta(...static::meta());
     }
 
     static public function uri(): ESString
@@ -76,9 +73,13 @@ abstract class ContentBuilder
         return static::uri()->divide("/")->noEmpties()->reindex();
     }
 
-    static public function uriContentStore(): ESStore
+    static public function uriContentStore($uri = ""): ESStore
     {
-        return static::contentStore()->plus(...static::uriParts())->plus("content.md");
+        $uri = Type::sanitizeType($uri, ESString::class)
+            ->isEmpty(function($result, $uri) {
+                return ($result) ? static::uriParts() : $uri->divide("/");
+            });
+        return static::contentStore()->plus(...$uri)->plus("content.md");
     }
 
     static public function uriContentMarkdown()

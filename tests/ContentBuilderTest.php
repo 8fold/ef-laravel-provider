@@ -16,7 +16,7 @@ class ContentBuilderTest extends TestCase
 
     public function testCanGetRemoteAssets()
     {
-        $expected = 4;
+        $expected = 5;
         $actual = ContentBuilder::meta()->count;
         $this->assertEquals($expected, $actual);
     }
@@ -46,8 +46,6 @@ class ContentBuilderTest extends TestCase
 
     public function testStore()
     {
-        // $base = __DIR__;
-
         $expected = __DIR__ ."/content";
         $actual = ContentBuilder::contentStore();
         $this->assertSame($expected, $actual->unfold());
