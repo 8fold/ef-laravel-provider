@@ -164,7 +164,7 @@ abstract class ContentBuilder
             $details = static::uriContentMarkdownDetails()->noEmpties()->count()
                 ->isEmpty(function($result) {
                     return ($result)
-                        ? ""
+                        ? Shoop::string("")
                         : UIKit::p(
                             static::uriContentMarkdownDetails()->noEmpties()
                                 ->join(UIKit::br())->unfold()
