@@ -92,6 +92,8 @@ abstract class ContentBuilder
 
     static public function uriContentMarkdownDetails()
     {
+        $markdown = static::uriContentMarkdown();
+
         $modified = ($markdown->meta()->modified === null)
             ? Shoop::string("")
             : Shoop::string("Modified on: ")->plus(
