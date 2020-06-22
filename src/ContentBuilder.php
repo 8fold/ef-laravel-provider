@@ -220,67 +220,102 @@ abstract class ContentBuilder
         ]);
     }
 
+    static public function copyright($holder = "")
+    {
+        return Shoop::string("Copyright © {$holder} ". date("Y") .". All rights reserved.");
+    }
+
 // -> RSS
-    static public function descriptionForPathParts(ESArray $pathParts): string
+    static public function rssCompiled()
     {
-        return static::markdownForPathParts($pathParts)->isEmpty(function($result, $value) {
-            if ($result) {
-                return Shoop::string("");
-            }
+        return Shoop::string(
+            Element::fold("rss",
+                Element::fold("channel",
+                    Element::fold("title", static::rssTitle()),
+                    Element::fold("link", static::rssLink()),
+                    Element::fold("description", static::rssDescription()),
+                    Element::fold("language", "en-us"),
+                    Element::fold("copyright", static::copyright()->unfold()),
+                    ...static::rssItemsStoreItems()->each(function($path) {
+                        $markdown = static::uriContentStore($path)->markdown();
 
-            $markdown = Shoop::markdown($value);
-            $description = $markdown->meta()->description;
-            if ($description === null) {
-                $description = $markdown->html();
+                        $title = $markdown->meta()->title;
+                        $link = Shoop::string(static::rssLink())
+                            ->plus($path)->unfold();
 
-            } else {
-                $description = Shoop::string($description);
+                        $description = ($markdown->meta()->description === null)
+                            ? $markdown->html()
+                            : $markdown->meta()->description();
+                        if ($description->count()->isUnfolded(0)) {
+                            return "";
+                        }
+                        $description = $description->replace([
+                            "</h1>" => ":",
+                            "</h2>" => ":",
+                            "</h3>" => ":",
+                            "</h4>" => ":",
+                            "</h5>" => ":",
+                            "</h6>" => ":",
+                            "<h1>" => "",
+                            "<h2>" => "",
+                            "<h3>" => "",
+                            "<h4>" => "",
+                            "<h5>" => "",
+                            "<h6>" => ""
+                        ])->dropTags()->divide(" ")->isGreaterThan(50, function($result, $description) {
+                            return ($result)
+                                ? $description->first(50)->join(" ")->plus("...")
+                                : $description->join(" ");
+                        });
 
-            }
-            return $description->replace(static::rssReplacements())
-                ->dropTags()->divide(" ")->first(50)->join(" ")->plus("...");
-        });
+                        $timestamp = ($markdown->meta()->created === null)
+                            ? ""
+                            : Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Detroit")
+                                ->hour(12)
+                                ->minute(0)
+                                ->second(0)
+                                ->toRssString();
+                        $t = (strlen($timestamp) > 0)
+                            ? Element::fold("pubDate", $timestamp)
+                            : "";
+
+                        $item = Element::fold(
+                                "item",
+                                    Element::fold("title", htmlspecialchars($title)),
+                                    Element::fold("link", $link),
+                                    Element::fold("guid", $link),
+                                    Element::fold("description", htmlspecialchars($description)),
+                                    $t
+                            );
+                        return $item;
+                    })->noEmpties()
+                )
+            )->attr("version 2.0")->unfold()
+        )->start("<?xml version=\"1.0\"?>\n");
     }
 
-    static public function rssReplacements()
+    static public function rssItemsStore()
     {
-        return Shoop::dictionary([
-            "</h1>" => ":",
-            "</h2>" => ":",
-            "</h3>" => ":",
-            "</h4>" => ":",
-            "</h5>" => ":",
-            "</h6>" => ":",
-            "<h1>" => "",
-            "<h2>" => "",
-            "<h3>" => "",
-            "<h4>" => "",
-            "<h5>" => "",
-            "<h6>" => ""
-        ]);
+        return static::contentStore()->plus("feed", "content.md");
     }
 
-    static public function rssItemForPath(string $path)
+    static public function rssTitle()
     {
-        $cp = static::contentPath($path)->divide("/");
-        $title = static::titleForPathParts($cp);
-        $link = "https://". static::domain() . $path;
-        $description = static::descriptionForPathParts($cp);
-        $timestamp = static::markdownForPathParts($cp)->meta()
-            ->isEmpty(function($result, $value) {
-                if ($result or $value->published_on()->isEmptyUnfolded()) {
-                    return "";
-                }
-                return Carbon::createFromFormat("Ymd", $value->published_on, "America/Detroit")
-                    ->toRssString();
-            });
-        return Element::fold(
-                "item",
-                    Element::fold("title", htmlspecialchars($title)),
-                    Element::fold("link", $link),
-                    Element::fold("guid", $link),
-                    Element::fold("description", htmlspecialchars($description)),
-                    Element::fold("pubDate", $timestamp)
-            );
+        return static::rssItemsStore()->markdown()->meta()->rssTitle;
+    }
+
+    static public function rssLink()
+    {
+        return static::rssItemsStore()->markdown()->meta()->rssLink;
+    }
+
+    static public function rssDescription()
+    {
+        return static::rssItemsStore()->markdown()->meta()->rssDescription;
+    }
+
+    static public function rssItemsStoreItems()
+    {
+        return static::rssItemsStore()->markdown()->meta()->rssItems();
     }
 }

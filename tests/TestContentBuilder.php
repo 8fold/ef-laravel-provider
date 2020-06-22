@@ -37,4 +37,9 @@ class TestContentBuilder extends ContentBuilder
     {
         return Shoop::store(__DIR__)->plus("content");
     }
+
+    static public function copyright($holder = "")
+    {
+        return parent::copyright("Eightfold");
+    }
 }
