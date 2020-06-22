@@ -175,6 +175,7 @@ abstract class ContentBuilder
         return $html;
     }
 
+
     static public function uriPageTitle(): ESString
     {
         $store = static::uriContentStore()->parent();
