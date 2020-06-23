@@ -1,2 +1,3 @@
-# laravel-provider
-A Laravel service provider used in most sites developed by 8fold
+# 8fold Laravel Provider
+
+Description coming soon. Short version is this is mainly for 8fold products.
