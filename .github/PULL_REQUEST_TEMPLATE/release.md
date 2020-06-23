@@ -1,8 +1,3 @@
----
-name: Release PR
-about: Preparing for next release.
----
-
 ## Publisher
 
 - [ ] Release notes in [draft GitHub release](https://github.com/8fold/laravel-provider/releases) are up to date?
