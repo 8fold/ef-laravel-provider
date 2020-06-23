@@ -10,6 +10,8 @@ use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\DocParser;
 use League\CommonMark\Environment;
 use League\CommonMark\HtmlRenderer;
+
+// available extensions
 use League\CommonMark\Extension\{
     GithubFlavoredMarkdownExtension,
     Autolink\AutolinkExtension,
@@ -26,6 +28,9 @@ use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
+use Eightfold\CommonMarkAbbreviations\AbbreviationsExtension;
+// end extensions
+//
 use Eightfold\ShoopExtras\{
     Shoop,
     ESStore
@@ -94,7 +99,9 @@ abstract class ContentBuilder
         return Shoop::array([
             GithubFlavoredMarkdownExtension::class,
             ExternalLinkExtension::class,
-            SmartPunctExtension::class
+            SmartPunctExtension::class,
+            AbbreviationsExtension::class,
+            HeadingPermalinkExtension::class
         ]);
     }
 
@@ -124,13 +131,12 @@ abstract class ContentBuilder
 
     static public function markdownConfig()
     {
-        return [
+        return Shoop::dictionary([
             "html_input" => "strip",
-            "allow_unsafe_links" => false,
-            "external_link" => [
-                "open_in_new_window" => true
-            ]
-        ];
+            "allow_unsafe_links" => false
+        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
+        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
+        ->unfold();
     }
 
     static public function uriContentMarkdownHtml(
