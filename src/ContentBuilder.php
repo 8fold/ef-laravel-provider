@@ -28,7 +28,7 @@ use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
-use Eightfold\CommonMarkAbbreviations\AbbreviationsExtension;
+use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
 // end extensions
 //
 use Eightfold\ShoopExtras\{
@@ -100,7 +100,7 @@ abstract class ContentBuilder
             GithubFlavoredMarkdownExtension::class,
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
-            AbbreviationsExtension::class,
+            AbbreviationExtension::class,
             HeadingPermalinkExtension::class
         ]);
     }
