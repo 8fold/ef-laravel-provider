@@ -102,7 +102,7 @@ abstract class ContentBuilder
             TaskListExtension::class,
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
-            AbbreviationExtension::class,
+            // AbbreviationExtension::class,
             HeadingPermalinkExtension::class
         ]);
     }
