@@ -97,7 +97,9 @@ abstract class ContentBuilder
     static public function uriContentMarkdownExtensions()
     {
         return Shoop::array([
-            GithubFlavoredMarkdownExtension::class,
+            StrikethroughExtension::class,
+            TableExtension::class,
+            TaskListExtension::class,
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
             AbbreviationExtension::class,
