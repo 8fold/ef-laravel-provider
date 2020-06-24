@@ -215,6 +215,18 @@ abstract class ContentBuilder
         })->noEmpties()->join(" | ");
     }
 
+    static public function uriShareTitle(): ESString
+    {
+        $store = static::uriContentStore()->parent();
+        $titles = Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
+            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $store = $store->parent();
+            return $title;
+        })->noEmpties();
+        return Shoop::array([$titles->last])->plus($titles->first)
+            ->toggle()->join(" | ");
+    }
+
     /**
      * @return ESStore An ESStore where the path goes to the root of the content folder.
      */
