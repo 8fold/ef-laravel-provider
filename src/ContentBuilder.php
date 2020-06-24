@@ -129,6 +129,27 @@ abstract class ContentBuilder
         );
     }
 
+// TODO: Test
+    static public function uriBreadcrumbs()
+    {
+        $store = static::uriContentStore()->parent();
+        $uri = static::uriParts();
+        $paths = static::uriParts()->each(function($part) use (&$store, &$uri) {
+            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $href = $uri->join("/")->start("/");
+            $anchor = UIKit::anchor($title, $href);
+
+            $store = $store->parent();
+            $uri = $uri->dropLast();
+
+            return $anchor;
+        })->noEmpties()->dropFirst();
+
+        return UIKit::nav(
+                UIKit::listWith(...$paths)
+            )->attr("class breadcrumbs");
+    }
+
     static public function markdownConfig()
     {
         return Shoop::dictionary([
