@@ -102,7 +102,7 @@ abstract class ContentBuilder
             TaskListExtension::class,
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
-            AbbreviationExtension::class,
+            // AbbreviationExtension::class,
             HeadingPermalinkExtension::class
         ]);
     }
@@ -213,6 +213,18 @@ abstract class ContentBuilder
             $store = $store->parent();
             return $title;
         })->noEmpties()->join(" | ");
+    }
+
+    static public function uriShareTitle(): ESString
+    {
+        $store = static::uriContentStore()->parent();
+        $titles = Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
+            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $store = $store->parent();
+            return $title;
+        })->noEmpties();
+        return Shoop::array([$titles->last])->plus($titles->first)
+            ->toggle()->join(" | ");
     }
 
     /**
