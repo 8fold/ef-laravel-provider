@@ -116,14 +116,14 @@ abstract class ContentBuilder
             : Shoop::string("Modified on: ")->plus(
                     Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
                         ->toFormattedDateString()
-                );
+                )->unfold();
 
         $created = ($markdown->meta()->created === null)
             ? Shoop::string("")
             : Shoop::string("Created on: ")->plus(
                     Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
                         ->toFormattedDateString()
-                );
+                )->unfold();
 
         return Shoop::array([$modified, $created])->noEmpties();
     }
@@ -201,12 +201,6 @@ abstract class ContentBuilder
 
             $details = static::uriContentMarkdownDetails();
             if (Type::is($details, ESArray::class)) {
-                $details = $details->each(function($value) {
-                    if (Type::isShooped($value)) {
-                        return $value->unfold();
-                    }
-                    return "";
-                })->noEmpties();
                 return $html->start($title->unfold(), ...$details);
             }
             return $html->start($title->unfold(), $details->unfold());
