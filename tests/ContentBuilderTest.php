@@ -100,4 +100,19 @@ class ContentBuilderTest extends TestCase
         $actual = ContentBuilder::rssCompiled();
         $this->assertEquals($expected, $actual->unfold());
     }
+
+    public function testContentDetails()
+    {
+        $this->visit("/somewhere/else");
+        $expected = Shoop::array([
+            "Modified on: Apr 1, 2020",
+            "Created on: Apr 1, 2020"
+        ]);
+        $actual = ContentBuilder::uriContentMarkdownDetails();
+        $this->assertSame($expected->unfold(), $actual->unfold());
+
+        $expected = '<p>Modified on: Apr 1, 2020<br>Created on: Apr 1, 2020</p>';
+        $actual = ContentBuilder::uriContentMarkdownDetailsParagraph();
+        $this->assertSame($expected, $actual->unfold());
+    }
 }

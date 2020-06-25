@@ -125,13 +125,17 @@ abstract class ContentBuilder
                         ->toFormattedDateString()
                 );
 
-        return Shoop::array([$modified, $created])->noEmpties()->count()
-            ->isEmpty(function($result) use ($modified, $created) {
+        return Shoop::array([$modified, $created])->noEmpties();
+    }
+
+    static public function uriContentMarkdownDetailsParagraph()
+    {
+        return static::uriContentMarkdownDetails()->count()
+            ->is(0, function($result) {
                 return ($result)
                     ? Shoop::string("")
                     : UIKit::p(
-                        Shoop::array([$modified, $created])->noEmpties()
-                            ->join(UIKit::br())->unfold()
+                        static::uriContentMarkdownDetails()->join(UIKit::br())->unfold()
                     );
             });
     }
