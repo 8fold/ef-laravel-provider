@@ -130,7 +130,7 @@ abstract class ContentBuilder
 
     static public function uriContentMarkdownDetailsParagraph()
     {
-        return static::uriContentMarkdownDetails()->count()
+        return self::uriContentMarkdownDetails()->count()
             ->is(0, function($result) {
                 return ($result)
                     ? Shoop::string("")
