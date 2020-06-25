@@ -125,10 +125,15 @@ abstract class ContentBuilder
                         ->toFormattedDateString()
                 );
 
-        return Shoop::array([])->plus(
-            $modified,
-            $created
-        );
+        return Shoop::array([$modified, $created])->noEmpties()->count()
+            ->isEmpty(function($result) use ($modified, $created) {
+                return ($result)
+                    ? Shoop::string("")
+                    : UIKit::p(
+                        Shoop::array([$modified, $created])->noEmpties()
+                            ->join(UIKit::br())->unfold()
+                    );
+            });
     }
 
 // TODO: Test
@@ -190,15 +195,7 @@ abstract class ContentBuilder
                 ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
                 : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
 
-            $details = static::uriContentMarkdownDetails()->noEmpties()->count()
-                ->isEmpty(function($result) {
-                    return ($result)
-                        ? Shoop::string("")
-                        : UIKit::p(
-                            static::uriContentMarkdownDetails()->noEmpties()
-                                ->join(UIKit::br())->unfold()
-                        );
-                });
+            $details = static::uriContentMarkdownDetails();
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;

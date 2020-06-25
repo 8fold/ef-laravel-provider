@@ -40,8 +40,13 @@ Metadata is delineated from the content by YAML surrounded by three hyphens befo
 |title       |(required) Used to generate titles. Optionally used to generate the main heading of the page.     |
 |heading     |Allows you to have different content for the page title and main heading of the page.             |
 |created     |A date (no time) formatted as a four digit year, two digit month, and two digit day representing the day the content was created. ex. 2020101 is Jan 1st 2020. |
-|poster      |The path to an image representing the content. Typically used for video previews or for sharing metadata. |
+|posterAlt   |`alt` text for a poster image.                                                                    |
 |description |Used primarily for [.RSS](Real Simple Syndication) and sharing metadata. When not present, a 50 word description will be generated from the content. |
 |format      |An [Open Graph type](https://ogp.me/#types) representing the content. (This will also be used for generating sharing metadata.) |
 
 You can add other tags to the metadata area (and we may as well). In other words, these tags are just those recognized by the content builder.
+
+## Reserved names
+
+- **content.md:** This file is used for automating content generation. The reserve name scope is limited to the content folder and subfolders.
+- **poster.jpg:** This file is used for automating social sharing capabilities. The reserve name scope is limited to the `.media` folder.
