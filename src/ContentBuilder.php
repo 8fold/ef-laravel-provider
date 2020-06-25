@@ -200,6 +200,9 @@ abstract class ContentBuilder
                 : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
 
             $details = static::uriContentMarkdownDetails();
+            if (Type::is($details, ESArray::class)) {
+                return $html->start($title->unfold(), ...$details);
+            }
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;
