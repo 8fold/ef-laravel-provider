@@ -116,16 +116,23 @@ abstract class ContentBuilder
             : Shoop::string("Modified on: ")->plus(
                     Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
                         ->toFormattedDateString()
-                )->unfold();
+                );
 
         $created = ($markdown->meta()->created === null)
             ? Shoop::string("")
             : Shoop::string("Created on: ")->plus(
                     Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
                         ->toFormattedDateString()
-                )->unfold();
+                );
 
-        return Shoop::array([$modified, $created])->noEmpties();
+        $moved = ($markdown->meta()->moved === null)
+            ? Shoop::string("")
+            : Shoop::string("Moved on: ")->plus(
+                    Carbon::createFromFormat("Ymd", $markdown->meta()->moved, "America/Chicago")
+                        ->toFormattedDateString()
+                );
+
+        return Shoop::array([$modified, $created, $moved])->noEmpties();
     }
 
     static public function uriContentMarkdownDetailsParagraph()

@@ -105,8 +105,8 @@ class ContentBuilderTest extends TestCase
     {
         $this->visit("/somewhere/else");
         $expected = Shoop::array([
-            "Modified on: Apr 1, 2020",
-            "Created on: Apr 1, 2020"
+            "<p>Modified on: Apr 1, 2020<br>Created on: Apr 1, 2020</p>",
+            "<p>Hello</p>"
         ]);
         $actual = ContentBuilder::uriContentMarkdownDetails();
         $this->assertSame($expected->unfold(), $actual->unfold());
