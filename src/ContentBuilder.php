@@ -135,7 +135,7 @@ abstract class ContentBuilder
                 return ($result)
                     ? Shoop::string("")
                     : UIKit::p(
-                        static::uriContentMarkdownDetails()->join(UIKit::br())->unfold()
+                        self::uriContentMarkdownDetails()->join(UIKit::br())->unfold()
                     );
             });
     }
@@ -201,6 +201,12 @@ abstract class ContentBuilder
 
             $details = static::uriContentMarkdownDetails();
             if (Type::is($details, ESArray::class)) {
+                $details = $details->each(function($value) {
+                    if (Type::isShooped($value)) {
+                        return $value->unfold();
+                    }
+                    return "";
+                })->noEmpties();
                 return $html->start($title->unfold(), ...$details);
             }
             return $html->start($title->unfold(), $details->unfold());
