@@ -7,11 +7,6 @@ use Eightfold\Shoop\Shoop;
 use Eightfold\Markup\Element;
 
 Route::prefix("feed")->group(function() use ($contentBuilderClass) {
-    Route::get("/page/2", function() {
-        die("here");
-        die(var_dump($pageNumber));
-    });
-
     Route::get("/rss", function() use ($contentBuilderClass) {
         return response($contentBuilderClass::rssCompiled()->unfold())
             ->header("Content-Type", "application/xml");
