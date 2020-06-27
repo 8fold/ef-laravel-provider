@@ -141,4 +141,9 @@ class ContentBuilderTest extends TestCase
         })->join("");
         $this->assertSame($expected, $actual->unfold());
     }
+
+    public function testPaginationPages()
+    {
+        $this->visit("/feed/page/2");
+    }
 }
