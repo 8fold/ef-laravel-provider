@@ -152,7 +152,7 @@ abstract class ContentBuilder
     {
         $store = static::uriContentStore()->parent();
         $uri = static::uriParts();
-        $paths = static::uriParts()->each(function($part) use (&$store, &$uri) {
+        return static::uriParts()->each(function($part) use (&$store, &$uri) {
             $title = $store->plus("content.md")->markdown()->meta()->title;
             $href = $uri->join("/")->start("/");
             $anchor = UIKit::anchor($title, $href);
@@ -161,11 +161,13 @@ abstract class ContentBuilder
             $uri = $uri->dropLast();
 
             return $anchor;
-        })->noEmpties()->dropFirst();
-
-        return UIKit::nav(
-                UIKit::listWith(...$paths)
-            )->attr("class breadcrumbs");
+        })->noEmpties()->dropFirst()->isEmpty(function($result, $paths) {
+            return ($result)
+                ? ""
+                : UIKit::nav(
+                    UIKit::listWith(...$paths)
+                )->attr("class breadcrumbs");
+        });
     }
 
     static public function markdownConfig()
@@ -215,7 +217,6 @@ abstract class ContentBuilder
         return $html;
     }
 
-
     static public function uriPageTitle(): ESString
     {
         $store = static::uriContentStore()->parent();
@@ -236,6 +237,51 @@ abstract class ContentBuilder
         })->noEmpties();
         return Shoop::array([$titles->last])->plus($titles->first)
             ->toggle()->join(" | ");
+    }
+
+    static public function contentList($page = 1, $limit = 10)
+    {
+        if (static::rssItemsStoreItems() === null) {
+            return Shoop::string("");
+        }
+        $items = static::rssItemsStoreItems();
+        $links = $items->divide(($page - 1) * $limit)
+            ->last()->first(10)->isEmpty(function($result, $items) {
+                return ($result)
+                    ? Shoop::string("")
+                    : $items->each(function($uri) {
+                        $title = (static::uriContentStore($uri)->markdown()
+                            ->meta()->heading === null)
+                            ? static::uriContentStore($uri)->markdown()
+                                ->meta()->title
+                            : static::uriContentStore($uri)->markdown()
+                                ->meta()->heading;
+                        return ($title === null)
+                            ? Shoop::string("")
+                            : UIKit::anchor($title, $uri);
+                    });
+            })->noEmpties();
+        $list = UIKit::listWith(...$links);
+        $nav = $items->count()->isGreaterThan($limit, function($result, $count) use ($limit) {
+            $pageLinks = $count->roundUp($limit)->range(1)->each(function($pageNumber) {
+                return UIKit::anchor($pageNumber, "/feed/page/{$pageNumber}");
+            });
+
+            if ($pageLinks->count()->isUnfolded(1)) {
+                return "";
+
+            } elseif ($pageLinks->count()->isGreaterThanUnfolded(2)) {
+                die("build next previous links and first and last pages");
+                return UIKit::listWith(...$pageLinks);
+
+            } else {
+                return UIKit::nav(UIKit::listWith(...$pageLinks));
+            }
+        });
+        return Shoop::array([
+            $list,
+            $nav
+        ]);
     }
 
     /**
@@ -399,6 +445,9 @@ abstract class ContentBuilder
 
     static public function rssItemsStoreItems()
     {
+        if (static::rssItemsStore()->markdown()->meta()->rssItems === null) {
+            return Shoop::array([]);
+        }
         return static::rssItemsStore()->markdown()->meta()->rssItems();
     }
 }
