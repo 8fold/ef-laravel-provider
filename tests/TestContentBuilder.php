@@ -42,4 +42,12 @@ class TestContentBuilder extends ContentBuilder
     {
         return parent::copyright("Eightfold");
     }
+
+    static public function uriContentMarkdownDetails()
+    {
+        return Shoop::array([])->plus(
+            UIKit::p(parent::uriContentMarkdownDetails()->join(UIKit::br())->unfold())->unfold(),
+            UIKit::p("Hello")->unfold()
+        );
+    }
 }

@@ -35,14 +35,20 @@ Metadata is delineated from the content by YAML surrounded by three hyphens befo
 
 8fold Laravel Provider tries to automate a fair amount of building out pages. Therefore, the following members are used for the noted purposes.
 
-|YAML member |Notes                                                                                             |
-|:-----------|:-------------------------------------------------------------------------------------------------|
-|title       |(required) Used to generate titles. Optionally used to generate the main heading of the page.     |
-|heading     |Allows you to have different content for the page title and main heading of the page.             |
-|created     |A date (no time) formatted as a four digit year, two digit month, and two digit day representing the day the content was created. ex. 2020101 is Jan 1st 2020. |
-|posterAlt   |`alt` text for a poster image.                                                                    |
-|description |Used primarily for [.RSS](Real Simple Syndication) and sharing metadata. When not present, a 50 word description will be generated from the content. |
-|format      |An [Open Graph type](https://ogp.me/#types) representing the content. (This will also be used for generating sharing metadata.) |
+|YAML member    |Notes                                                                                                 |
+|:--------------|:-----------------------------------------------------------------------------------------------------|
+|title          |(required) Used to generate titles. Optionally used to generate the main heading of the page.         |
+|heading        |Allows you to have different content for the page title and main heading of the page.                 |
+|created        |A date (no time) formatted as a four digit year, two digit month, and two digit day representing the day the content was created. ex. 2020101 is Jan 1st 2020. |
+|moved          |A date (no time) formatted as a four digit year, two digit month, and two digit day representing the day the content was moved from an originating platform. ex. 20200201 is Feb 1st 2020. |
+|original       |A Markdown link to the original post on the original platform or the name of the originating platform.|
+|posterAlt      |`alt` text for a poster image.                                                                        |
+|description    |Used primarily for [.RSS](Real Simple Syndication) and sharing metadata. When not present, a 50 word description will be generated from the content. |
+|format         |An [Open Graph type](https://ogp.me/#types) representing the content. (This will also be used for generating sharing metadata.) |
+|toc            |A list of paths representing content for a table of contents.                                         |
+|rssTitle       |A title to be used for the RSS feed itself.                                                           |
+|rssDescription |A description to be used for the RSS feed itself.                                                     |
+|rssLink        |The domain or link to the website of the channel for the RSS feed, not the feed itself.               |
 
 You can add other tags to the metadata area (and we may as well). In other words, these tags are just those recognized by the content builder.
 
