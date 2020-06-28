@@ -203,7 +203,9 @@ abstract class ContentBuilder
         $store = static::uriContentStore()->parent();
         $uri = static::uriParts();
         return static::uriParts()->each(function($part) use (&$store, &$uri) {
-            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $title = ($store->markdown()->meta()->heading === null)
+                ? $store->markdown()->meta()->title
+                : $store->markdown()->meta()->heading;
             $href = $uri->join("/")->start("/");
             $anchor = UIKit::anchor($title, $href);
 
