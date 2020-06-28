@@ -41,7 +41,8 @@ use Eightfold\Shoop\Helpers\Type;
 use Eightfold\Shoop\{
     ESArray,
     ESBool,
-    ESString
+    ESString,
+    ESInt
 };
 
 use Eightfold\Markup\UIKit;
@@ -58,6 +59,21 @@ abstract class ContentBuilder
                     ? Shoop::array(static::uriContentMarkdownHtml())
                     : $content;
             })
+        )->meta(...static::meta());
+    }
+
+    static public function uriTocView(
+        $currentPage = 1
+        // $linkPrefix = "/feed/page",
+        // $totalItemsPerPage = 10,
+        // $middleLimit = 5
+    )
+    {
+        $path = "/feed";
+        return UIKit::webView(
+            static::uriPageTitle(),
+            static::uriContentMarkdownHtml(false, [], [], true, true, [], $path),
+            ...static::uriToc($currentPage, static::uriContentMarkdown($path)->meta()->toc())
         )->meta(...static::meta());
     }
 
@@ -87,9 +103,9 @@ abstract class ContentBuilder
         return static::contentStore()->plus(...$uri)->plus("content.md");
     }
 
-    static public function uriContentMarkdown()
+    static public function uriContentMarkdown($uri = "")
     {
-        return static::uriContentStore()->markdown()->extensions(
+        return static::uriContentStore($uri)->markdown()->extensions(
             ...static::uriContentMarkdownExtensions()
         );
     }
@@ -147,6 +163,40 @@ abstract class ContentBuilder
             });
     }
 
+    static public function uriToc($currentPage, $items = [])
+    {
+        return Type::sanitizeType($items, ESArray::class)
+            ->isEmpty(function($result, $items) {
+                return ($result)
+                    ? Shoop::array([])
+                    : $items->each(function($uri) {
+                        return static::uriContentStore($uri)
+                            ->isFile(function($result, $store) use ($uri) {
+                                if (! $result) {
+                                    return "";
+                                }
+                                $title = ($store->markdown()->meta()->heading === null)
+                                    ? $store->markdown()->meta()->title
+                                    : $store->markdown()->meta()->heading;
+                                return UIKit::anchor($title, $uri);
+                            });
+                    });
+
+            })->isEmpty(function($result, $links) use ($currentPage) {
+                return ($result)
+                    ? Shoop::array([])
+                    : $links->count()->isGreaterThan(0,
+                        function($result, $totalItems) use ($links, $currentPage) {
+                            return (! $result)
+                                ? Shoop::array([])
+                                : Shoop::array([
+                                    UIKit::listWith(...$links),
+                                    UIKit::pagination($currentPage, $totalItems)
+                                ]);
+                        });
+            });
+    }
+
 // TODO: Test
     static public function uriBreadcrumbs()
     {
@@ -186,14 +236,15 @@ abstract class ContentBuilder
         $htmlReplacements = [],
         $caseSensitive = true,
         $minified = true,
-        $config = []
+        $config = [],
+        $uri = ""
     )
     {
         $details = Type::sanitizeType($details, ESBool::class)->unfold();
 
         $config = (empty($config)) ? static::markdownConfig() : $config;
 
-        $html = static::uriContentMarkdown()->html(
+        $html = static::uriContentMarkdown($uri)->html(
             $markdownReplacements,
             $htmlReplacements,
             $caseSensitive,
@@ -202,7 +253,7 @@ abstract class ContentBuilder
         );
 
         if ($details) {
-            $markdown = static::uriContentMarkdown();
+            $markdown = static::uriContentMarkdown($uri);
 
             $title = ($markdown->meta()->heading === null)
                 ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
@@ -239,6 +290,9 @@ abstract class ContentBuilder
             ->toggle()->join(" | ");
     }
 
+    /**
+     * @deprecated
+     */
     static public function contentList($page = 1, $limit = 10)
     {
         if (static::rssItemsStoreItems() === null) {
@@ -445,9 +499,9 @@ abstract class ContentBuilder
 
     static public function rssItemsStoreItems()
     {
-        if (static::rssItemsStore()->markdown()->meta()->rssItems === null) {
+        if (static::rssItemsStore()->markdown()->meta()->toc === null) {
             return Shoop::array([]);
         }
-        return static::rssItemsStore()->markdown()->meta()->rssItems();
+        return static::rssItemsStore()->markdown()->meta()->toc();
     }
 }

@@ -125,25 +125,31 @@ class ContentBuilderTest extends TestCase
         $this->assertSame($expected, $actual->unfold());
     }
 
-    public function testFeedPages()
-    {
-        $this->visit("/feed");
-        $expected = '<ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li></ul><nav><ul><li><a href="/feed/page/1">1</a></li><li><a href="/feed/page/2">2</a></li></ul></nav>';
-        $actual = ContentBuilder::contentList()->each(function($uikit) {
-            return $uikit->unfold();
-        })->join("");
-        $this->assertSame($expected, $actual->unfold());
+    // public function testFeedPages()
+    // {
+    //     $this->visit("/feed");
+    //     $expected = '<ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li></ul><nav><ul><li><a href="/feed/page/1">1</a></li><li><a href="/feed/page/2">2</a></li></ul></nav>';
+    //     $actual = ContentBuilder::contentList()->each(function($uikit) {
+    //         return $uikit->unfold();
+    //     })->join("");
+    //     $this->assertSame($expected, $actual->unfold());
 
-        $this->visit("/feed/page/2");
-        $expected = '<ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li></ul><nav><ul><li><a href="/feed/page/1">1</a></li><li><a href="/feed/page/2">2</a></li></ul></nav>';
-        $actual = ContentBuilder::contentList()->each(function($uikit) {
-            return $uikit->unfold();
-        })->join("");
-        $this->assertSame($expected, $actual->unfold());
-    }
+    //     $this->visit("/feed/page/2");
+    //     $expected = '<ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Root</a></li></ul><nav><ul><li><a href="/feed/page/1">1</a></li><li><a href="/feed/page/2">2</a></li></ul></nav>';
+    //     $actual = ContentBuilder::contentList()->each(function($uikit) {
+    //         return $uikit->unfold();
+    //     })->join("");
+    //     $this->assertSame($expected, $actual->unfold());
+    // }
 
     public function testPaginationPages()
     {
-        $this->visit("/feed/page/2");
+        $this->visit("/feed/page/1")->seePageIs("/feed");
+
+        // $this->visit("/feed/page/2");
+        // $expected = '';
+        // $actual = ContentBuilder::uriTocView();
+        // die(var_dump($actual->unfold()));
+        // $this->assertEquals($expected, $actual->unfold());
     }
 }
