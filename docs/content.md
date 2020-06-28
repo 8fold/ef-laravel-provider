@@ -56,3 +56,4 @@ You can add other tags to the metadata area (and we may as well). In other words
 
 - **content.md:** This file is used for automating content generation. The reserve name scope is limited to the content folder and subfolders.
 - **poster.jpg:** This file is used for automating social sharing capabilities. The reserve name scope is limited to the `.media` folder.
+- **page:** When used as a complete part of a route. ex. page (reserved), page-* (not reserved).
