@@ -63,13 +63,10 @@ abstract class ContentBuilder
     }
 
     static public function uriTocView(
-        $currentPage = 1
-        // $linkPrefix = "/feed/page",
-        // $totalItemsPerPage = 10,
-        // $middleLimit = 5
+        $currentPage = 1,
+        $path = "/feed"
     )
     {
-        $path = "/feed";
         return UIKit::webView(
             static::uriPageTitle(),
             static::uriContentMarkdownHtml(false, [], [], true, true, [], $path),
@@ -257,9 +254,7 @@ abstract class ContentBuilder
 
 
         if ($details) {
-            $title = ($markdown->meta()->heading === null)
-                ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
-                : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
+            $title = UIKit::h1(static::uriTitleForContentStore(static::uriContentStore($uri)));
 
             $details = static::uriContentMarkdownDetails();
             if (Type::is($details, ESArray::class)) {
