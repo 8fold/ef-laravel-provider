@@ -175,9 +175,7 @@ abstract class ContentBuilder
                                 if (! $result) {
                                     return "";
                                 }
-                                $title = ($store->markdown()->meta()->heading === null)
-                                    ? $store->markdown()->meta()->title
-                                    : $store->markdown()->meta()->heading;
+                                $title = static::uriTitleForContentStore($store);
                                 return UIKit::anchor($title, $uri);
                             });
                     });
@@ -203,9 +201,7 @@ abstract class ContentBuilder
         $store = static::uriContentStore()->parent();
         $uri = static::uriParts();
         return static::uriParts()->each(function($part) use (&$store, &$uri) {
-            $title = ($store->markdown()->meta()->heading === null)
-                ? $store->markdown()->meta()->title
-                : $store->markdown()->meta()->heading;
+            $title = static::uriTitleForContentStore($store);
             $href = $uri->join("/")->start("/");
             $anchor = UIKit::anchor($title, $href);
 
@@ -274,11 +270,28 @@ abstract class ContentBuilder
         return $html;
     }
 
+    static public function uriTitleForContentStore(ESStore $store)
+    {
+        return $store->isFolder(function($result, $store) {
+            if ($result) {
+                return $store->plus("content.md")->isFile(function($result, $store) {
+                    if ($result) {
+                        return ($store->markdown()->meta()->heading === null)
+                            ? $store->markdown()->meta()->title
+                            : $store->markdown()->meta()->heading;
+                    }
+                    return "";
+                });
+            }
+            return "";
+        });
+    }
+
     static public function uriPageTitle(): ESString
     {
         $store = static::uriContentStore()->parent();
         return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $title = static::uriTitleForContentStore($store);
             $store = $store->parent();
             return $title;
         })->noEmpties()->join(" | ");
@@ -288,7 +301,7 @@ abstract class ContentBuilder
     {
         $store = static::uriContentStore()->parent();
         $titles = Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = $store->plus("content.md")->markdown()->meta()->title;
+            $title = static::uriTitleForContentStore($store);
             $store = $store->parent();
             return $title;
         })->noEmpties();
