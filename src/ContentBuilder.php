@@ -244,7 +244,12 @@ abstract class ContentBuilder
 
         $config = (empty($config)) ? static::markdownConfig() : $config;
 
-        $html = static::uriContentMarkdown($uri)->html(
+        $markdown = static::uriContentMarkdown($uri);
+        if ($markdown->isEmpty) {
+            abort(404);
+        }
+
+        $html = $markdown->html(
             $markdownReplacements,
             $htmlReplacements,
             $caseSensitive,
@@ -252,9 +257,8 @@ abstract class ContentBuilder
             $config
         );
 
-        if ($details) {
-            $markdown = static::uriContentMarkdown($uri);
 
+        if ($details) {
             $title = ($markdown->meta()->heading === null)
                 ? UIKit::h1(Shoop::string($markdown->meta()->title)->unfold())
                 : UIKit::h1(Shoop::string($markdown->meta()->heading)->unfold());
