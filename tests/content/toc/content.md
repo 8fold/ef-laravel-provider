@@ -1,0 +1,6 @@
+---
+toc:
+- /
+- /somewhere
+- /somewhere/else
+---

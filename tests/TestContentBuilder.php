@@ -4,6 +4,8 @@ namespace Eightfold\Site\Tests;
 
 use Eightfold\Site\ContentBuilder;
 
+use Eightfold\Site\Helpers\Uri;
+
 use Eightfold\Markup\UIKit;
 
 use Eightfold\ShoopExtras\{
@@ -20,22 +22,48 @@ use Eightfold\Shoop\{
 
 class TestContentBuilder extends ContentBuilder
 {
+    static public function pageUri(): ESString
+    {
+        return Shoop::string(request()->path())->isEmpty(function($result) {
+            return ($result)
+                ? Shoop::string("/")
+                : Shoop::string(request()->path());
+        });
+    }
+
+    static public function contentStorePath(): ESString
+    {
+        return Shoop::string(__DIR__)->plus("/content");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     static public function view(...$content)
     {
         return UIKit::webView(
             static::uriPageTitle()->unfold(),
-            static::uriContentStore()->markdown()->html()->unfold()
+            static::contentStore()->markdown()->html()->unfold()
         );
     }
 
-    static public function uri(): ESString
+    static public function uriDir($base = __DIR__): ESString
     {
-        return Shoop::string(request()->path())->start("/");
-    }
-
-    static public function contentStore(): ESStore
-    {
-        return Shoop::store(__DIR__)->plus("content");
+        return parent::uriDir($base);
     }
 
     static public function copyright($holder = "")

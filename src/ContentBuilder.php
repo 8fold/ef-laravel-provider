@@ -33,7 +33,8 @@ use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
 //
 use Eightfold\ShoopExtras\{
     Shoop,
-    ESStore
+    ESStore,
+    ESUri
 };
 
 use Eightfold\Shoop\Helpers\Type;
@@ -48,8 +49,139 @@ use Eightfold\Shoop\{
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
 
+use Eightfold\Site\Helpers\Uri;
+use Eightfold\Site\Helpers\ContentStore;
+
 abstract class ContentBuilder
 {
+    private $uri;
+    private $contentStore;
+
+    /**
+     * Title member from YAML front matter.
+     */
+    public const TITLE = "title";
+
+    /**
+     * Heading member from YAML front matter, falls back to title.
+     */
+    public const HEADING = "heading";
+
+    /**
+     * Recursively uses title member from YAML front matter to build a fully-
+     * qualified title string with separator. ex. Leaf | Branch | Trunk | Root
+     */
+    public const PAGE = "page";
+
+    /**
+     * Uses the title member from YAML front matter to build a two-part title,
+     * which includes the title for the current URL plus the title of the root
+     * page with a separater. ex. Leaf | Root
+     */
+    public const SHARE = "share";
+
+    /**
+     * The root-relative path (no domain or protocol) to base things on.
+     * ex. /root/trunk/branch/leaf
+     */
+    abstract static public function pageUri(): ESString;
+
+    /**
+     * The fully-qualified path to the root folder holding the content.
+     * ex. /Users/8fold/site-name/content
+     */
+    abstract static public function contentStorePath(): ESString;
+
+    static public function fold($uri = "", $contentStorePath = "")
+    {
+        return new static($uri, $contentStorePath);
+    }
+
+    public function __construct($uri = "", $contentStorePath = "")
+    {
+        $uri = Type::sanitizeType($uri, ESString::class)
+            ->isEmpty(function($result) use ($uri) {
+                return ($result)
+                    ? static::pageUri()
+                    : $uri;
+            });
+
+        $contentStorePath = Type::sanitizeType($contentStorePath, ESString::class)
+            ->isEmpty(function($result) use ($contentStorePath) {
+                return ($result)
+                    ? static::contentStorePath()
+                    : $contentStorePath;
+            });
+
+        $this->uri          = Shoop::uri($uri);
+        $this->contentStore = Shoop::store($contentStorePath);
+    }
+
+    public function uri()
+    {
+        return $this->uri;
+    }
+
+    public function store()
+    {
+        return $this->contentStore;
+    }
+
+    public function assets()
+    {
+        return $this->store()->plus(".assets");
+    }
+
+    public function title($type = "page")
+    {
+// var_dump($this->uri()->parts());
+// die(var_dump($this->store()));
+        $store = $this->store()->plus(...static::uri()->parts());
+        $titles = $this->uri()->array()->each(
+            function($part) use ($type, &$store) {
+                return $store->isFolder(
+                    function($result) use ($type, &$store) {
+                        return (! $result)
+                            ? ""
+                            : $store->plus("content.md")->isFile(
+                                function($result) use ($type, &$store) {
+                                    if (! $result) { return ""; }
+                                    $return = $store->plus("content.md")
+                                        ->markdown()->meta()->title;
+                                    $store = $store->parent();
+                                    return $return;
+
+                                });
+                    });
+            });
+
+        $rootTitle = $this->store()->plus("content.md")->markdown()->meta()->title;
+        if ($rootTitle !== null) {
+            $titles = $titles->plus($rootTitle);
+        }
+
+        return $titles->noEmpties()->join(" | ");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     static public function view(...$content)
     {
         return UIKit::webView(
@@ -74,37 +206,32 @@ abstract class ContentBuilder
         )->meta(...static::meta());
     }
 
-    static public function uri(): ESString
-    {
-        return Shoop::string(request()->path())->start("/");
-    }
-
-    static public function uriRoot(): ESString
-    {
-        return static::uriParts()->isEmpty(function($result, $array) {
-            return ($result) ? Shoop::string("") : $array->first();
-        });
-    }
-
-    static public function uriParts(): ESArray
-    {
-        return static::uri()->divide("/")->noEmpties()->reindex();
-    }
-
-    static public function uriContentStore($uri = ""): ESStore
-    {
-        $uri = Type::sanitizeType($uri, ESString::class)
-            ->isEmpty(function($result, $uri) {
-                return ($result) ? static::uriParts() : $uri->divide("/")->noEmpties();
-            });
-        return static::contentStore()->plus(...$uri)->plus("content.md");
-    }
-
     static public function uriContentMarkdown($uri = "")
     {
-        return static::uriContentStore($uri)->markdown()->extensions(
+        return static::contentStore($uri)->markdown()->extensions(
             ...static::uriContentMarkdownExtensions()
         );
+    }
+
+    static private function uriContentMarkdownMeta($uri = "")
+    {
+        $markdown = static::uriContentMarkdown($uri);
+        if ($markdown->meta === null) {
+            return Shoop::object(new \stdClass());
+        }
+        return static::uriContentMarkdown($uri)->meta();
+    }
+
+    static private function uriContentMarkdownMetaForMember($member = "", $uri = "")
+    {
+        $uri = Shoop::string($uri)->isEmpty(function($result, $uri) {
+            return ($result) ? request()->path() : $uri->unfold();
+        });
+        return static::uriContentMarkdownMeta($uri)->hasMember(
+            $member,
+            function($result, $object) use ($uri, $member) {
+                return ($result) ? $object->{$member} : $object;
+            });
     }
 
     static public function uriContentMarkdownExtensions()
@@ -120,33 +247,42 @@ abstract class ContentBuilder
         ]);
     }
 
-    static public function uriContentMarkdownDetails()
-    {
-        $markdown = static::uriContentMarkdown();
+    // static public function uriContentMarkdownToc(): ESArray
+    // {
+    //     $toc = static::uriContentMarkdownMetaForMember("toc");
+    //     if (is_a($toc, ESArray::class)) {
+    //         return $toc;
+    //     }
+    //     return Shoop::array([]);
+    // }
 
-        $modified = ($markdown->meta()->modified === null)
-            ? Shoop::string("")
-            : Shoop::string("Modified on: ")->plus(
-                    Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
-                        ->toFormattedDateString()
-                );
+    // static public function uriContentMarkdownDetails()
+    // {
+    //     $markdown = static::uriContentMarkdown();
 
-        $created = ($markdown->meta()->created === null)
-            ? Shoop::string("")
-            : Shoop::string("Created on: ")->plus(
-                    Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
-                        ->toFormattedDateString()
-                );
+    //     $modified = ($markdown->meta()->modified === null)
+    //         ? Shoop::string("")
+    //         : Shoop::string("Modified on: ")->plus(
+    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
+    //                     ->toFormattedDateString()
+    //             );
 
-        $moved = ($markdown->meta()->moved === null)
-            ? Shoop::string("")
-            : Shoop::string("Moved on: ")->plus(
-                    Carbon::createFromFormat("Ymd", $markdown->meta()->moved, "America/Chicago")
-                        ->toFormattedDateString()
-                );
+    //     $created = ($markdown->meta()->created === null)
+    //         ? Shoop::string("")
+    //         : Shoop::string("Created on: ")->plus(
+    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
+    //                     ->toFormattedDateString()
+    //             );
 
-        return Shoop::array([$modified, $created, $moved])->noEmpties();
-    }
+    //     $moved = ($markdown->meta()->moved === null)
+    //         ? Shoop::string("")
+    //         : Shoop::string("Moved on: ")->plus(
+    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->moved, "America/Chicago")
+    //                     ->toFormattedDateString()
+    //             );
+
+    //     return Shoop::array([$modified, $created, $moved])->noEmpties();
+    // }
 
     static public function uriContentMarkdownDetailsParagraph()
     {
@@ -160,44 +296,64 @@ abstract class ContentBuilder
             });
     }
 
-    static public function uriToc($currentPage, $items = [])
+    static public function uriToc()
     {
-        return Type::sanitizeType($items, ESArray::class)
-            ->isEmpty(function($result, $items) {
-                return ($result)
-                    ? Shoop::array([])
-                    : $items->each(function($uri) {
-                        return static::uriContentStore($uri)
-                            ->isFile(function($result, $store) use ($uri) {
-                                if (! $result) {
-                                    return "";
-                                }
-                                $title = static::uriTitleForContentStore($store);
-                                return UIKit::anchor($title, $uri);
-                            });
-                    });
+        $toc = static::uriContentMarkdownToc();
+        $copy = static::uriContentMarkdownToc();
+        $anchors = Shoop::array([])->noEmpties()->reindex();
+        $toc->each(function($uri) use (&$anchors) {
+            var_dump($uri);
+            $title = static::uriContentMarkdownMetaForMember("title", $uri);
+            if ($title === null) {
+                $anchors = $anchors->plus("");
+                return;
+            }
+            $href = $uri;
+            $anchors = $anchors->plus(
+                UIKit::anchor($title, $href)
+            );
+        });
 
-            })->isEmpty(function($result, $links) use ($currentPage) {
-                return ($result)
-                    ? Shoop::array([])
-                    : $links->count()->isGreaterThan(0,
-                        function($result, $totalItems) use ($links, $currentPage) {
-                            return (! $result)
-                                ? Shoop::array([])
-                                : Shoop::array([
-                                    UIKit::listWith(...$links),
-                                    UIKit::pagination($currentPage, $totalItems)
-                                ]);
-                        });
-            });
+        return Shoop::object(new \stdClass())->plus(
+            UIKit::nav(UIKit::listWith(...$anchors)), "tocAnchors"
+        );
+        // return Type::sanitizeType($items, ESArray::class)
+        //     ->isEmpty(function($result, $items) {
+        //         return ($result)
+        //             ? Shoop::array([])
+        //             : $items->each(function($uri) {
+        //                 return static::contentStore($uri)
+        //                     ->isFile(function($result, $store) use ($uri) {
+        //                         if (! $result) {
+        //                             return "";
+        //                         }
+        //                         $title = static::uriTitleForContentStore($store);
+        //                         return UIKit::anchor($title, $uri);
+        //                     });
+        //             });
+
+        //     })->isEmpty(function($result, $links) use ($currentPage) {
+        //         return ($result)
+        //             ? Shoop::array([])
+        //             : $links->count()->isGreaterThan(0,
+        //                 function($result, $totalItems) use ($links, $currentPage) {
+        //                     return (! $result)
+        //                         ? Shoop::array([])
+        //                         : Shoop::array([
+        //                             UIKit::listWith(...$links),
+        //                             UIKit::pagination($currentPage, $totalItems)
+        //                         ]);
+        //                 });
+        //     });
     }
 
 // TODO: Test
     static public function uriBreadcrumbs()
     {
-        $store = static::uriContentStore()->parent();
+        $store = static::contentStore()->parent();
         $uri = static::uriParts();
         return static::uriParts()->each(function($part) use (&$store, &$uri) {
+
             $title = static::uriTitleForContentStore($store);
             $href = $uri->join("/")->start("/");
             $anchor = UIKit::anchor($title, $href);
@@ -254,7 +410,7 @@ abstract class ContentBuilder
 
 
         if ($details) {
-            $title = UIKit::h1(static::uriTitleForContentStore(static::uriContentStore($uri)));
+            $title = UIKit::h1(static::uriTitleForContentStore(static::contentStore($uri)));
 
             $details = static::uriContentMarkdownDetails();
             if (Type::is($details, ESArray::class)) {
@@ -265,36 +421,36 @@ abstract class ContentBuilder
         return $html;
     }
 
-    static public function uriTitleForContentStore(ESStore $store)
-    {
-        return $store->isFolder(function($result, $store) {
-            if ($result) {
-                return $store->plus("content.md")->isFile(function($result, $store) {
-                    if ($result) {
-                        return ($store->markdown()->meta()->heading === null)
-                            ? $store->markdown()->meta()->title
-                            : $store->markdown()->meta()->heading;
-                    }
-                    return "";
-                });
-            }
-            return "";
-        });
-    }
+    // static public function uriTitleForContentStore(ESStore $store)
+    // {
+    //     return $store->isFolder(function($result, $store) {
+    //         if ($result) {
+    //             return $store->plus("content.md")->isFile(function($result, $store) {
+    //                 if ($result) {
+    //                     return ($store->markdown()->meta()->heading === null)
+    //                         ? $store->markdown()->meta()->title
+    //                         : $store->markdown()->meta()->heading;
+    //                 }
+    //                 return "";
+    //             });
+    //         }
+    //         return "";
+    //     });
+    // }
 
-    static public function uriPageTitle(): ESString
-    {
-        $store = static::uriContentStore()->parent();
-        return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = static::uriTitleForContentStore($store);
-            $store = $store->parent();
-            return $title;
-        })->noEmpties()->join(" | ");
-    }
+    // static public function uriPageTitle(): ESString
+    // {
+    //     $store = static::contentStore()->parent();
+    //     return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
+    //         $title = static::uriTitleForContentStore($store);
+    //         $store = $store->parent();
+    //         return $title;
+    //     })->noEmpties()->join(" | ");
+    // }
 
     static public function uriShareTitle(): ESString
     {
-        $store = static::uriContentStore()->parent();
+        $store = static::contentStore()->parent();
         $titles = Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
             $title = static::uriTitleForContentStore($store);
             $store = $store->parent();
@@ -318,11 +474,11 @@ abstract class ContentBuilder
                 return ($result)
                     ? Shoop::string("")
                     : $items->each(function($uri) {
-                        $title = (static::uriContentStore($uri)->markdown()
+                        $title = (static::contentStore($uri)->markdown()
                             ->meta()->heading === null)
-                            ? static::uriContentStore($uri)->markdown()
+                            ? static::contentStore($uri)->markdown()
                                 ->meta()->title
-                            : static::uriContentStore($uri)->markdown()
+                            : static::contentStore($uri)->markdown()
                                 ->meta()->heading;
                         return ($title === null)
                             ? Shoop::string("")
@@ -355,30 +511,14 @@ abstract class ContentBuilder
     /**
      * @return ESStore An ESStore where the path goes to the root of the content folder.
      */
-    static public function contentStore(): ESStore
-    {
-        return Shoop::store(__DIR__)->plus("Content");
-    }
-
-    /**
-     * The `/.assets` folder can contain whatever you like, but should contain the favicons if you use the `faviconPack()` method and routes.
-     *
-     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
-     */
-    static public function assetsStore(): ESStore
-    {
-        return static::contentStore()->plus(".assets");
-    }
-
-    /**
-     * The `/.media` folder can contain whatever you like, but should contain images if you use the `media` routes.
-     *
-     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
-     */
-    static public function mediaStore()
-    {
-        return static::contentStore()->plus(".media");
-    }
+    // static public function contentStore(
+    //     $uri = "",
+    //     $folderName = "content",
+    //     $base = __DIR__
+    // ): ESStore
+    // {
+    //     return Uri::fold($uri, $base, $folderName)->content();
+    // }
 
     static public function meta()
     {
@@ -428,7 +568,7 @@ abstract class ContentBuilder
                     Element::fold("language", "en-us"),
                     Element::fold("copyright", static::copyright()->unfold()),
                     ...static::rssItemsStoreItems()->each(function($path) {
-                        $markdown = static::uriContentStore($path)->markdown();
+                        $markdown = static::contentStore($path)->markdown();
 
                         $title = $markdown->meta()->title;
                         $link = Shoop::string(static::rssLink())
@@ -517,5 +657,60 @@ abstract class ContentBuilder
             return Shoop::array([]);
         }
         return static::rssItemsStore()->markdown()->meta()->toc();
+    }
+
+// -> URI
+    // static public function uri($uri = ""): ESString
+    // {
+    //     if (strlen($uri) > 0) {
+    //         return Shoop::string($uri);
+    //     }
+    //     return Shoop::string(request()->path())->start("/");
+    // }
+
+    static public function uriDir($base = __DIR__): ESString
+    {
+        return Shoop::string($base);
+    }
+
+    static public function uriFolderName($folderName = "content"): ESString
+    {
+        return Shoop::string($folderName);
+    }
+
+    static public function uriRoot(): ESString
+    {
+        return Uri::fold()->root();
+    }
+
+    static public function uriParts(): ESArray
+    {
+        return Uri::fold()->parts();
+    }
+
+    // static public function contentStore(): ESStore
+    // {
+    //     return Uri::fold(static::uri(), static::uriDir(), static::uriFolderName())
+    //         ->content();
+    // }
+
+    /**
+     * The `/.assets` folder can contain whatever you like, but should contain the favicons if you use the `faviconPack()` method and routes.
+     *
+     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
+     */
+    static public function assetsStore(): ESStore
+    {
+        return Uri::fold()->assets();
+    }
+
+    /**
+     * The `/.media` folder can contain whatever you like, but should contain images if you use the `media` routes.
+     *
+     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
+     */
+    static public function mediaStore($uri = "")
+    {
+        return Uri::fold()->media();
     }
 }

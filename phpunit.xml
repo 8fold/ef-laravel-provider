@@ -12,6 +12,16 @@
 		<testsuite name="base">
 			<directory suffix="Test.php">./tests/</directory>
 		</testsuite>
+		<testsuite name="content">
+			<file>./tests/ContentBuilderTest.php</file>
+		</testsuite>
+		<testsuite name="uri">
+			<file>./tests/HelpersUriTest.php</file>
+		</testsuite>
+		<testsuite name="stores">
+			<file>./tests/HelpersContentStoreTest.php</file>
+		</testsuite>
+
 	</testsuites>
 	<filter>
 		<whitelist>
