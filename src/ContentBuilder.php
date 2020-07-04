@@ -518,16 +518,6 @@ abstract class ContentBuilder
     }
 
     /**
-     * The `/.assets` folder can contain whatever you like, but should contain the favicons if you use the `faviconPack()` method and routes.
-     *
-     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
-     */
-    static public function assetsStore(): ESStore
-    {
-        return static::contentStore()->plus(".assets");
-    }
-
-    /**
      * The `/.media` folder can contain whatever you like, but should contain images if you use the `media` routes.
      *
      * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
