@@ -18,35 +18,35 @@ class HelpersContentStoreTest extends TestCase
     public function testStore()
     {
         $expected = __DIR__ ."/content";
-        $actual = ContentStore::fold(__DIR__)->store();
+        $actual = ContentStore::store();
         $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testContent()
     {
         $expected = __DIR__ ."/content/somewhere/else/content.md";
-        $actual = ContentStore::fold(__DIR__)->uri("somewhere/else")->content();
+        $actual = ContentStore::uri("somewhere/else")->content();
         $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testAssets()
     {
         $expected = __DIR__ ."/content/.assets";
-        $actual = ContentStore::fold(__DIR__)->assets();
+        $actual = ContentStore::assets();
         $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testMedia()
     {
         $expected = __DIR__ ."/content/.media";
-        $actual = ContentStore::fold(__DIR__)->media();
+        $actual = ContentStore::media();
         $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testMarkdown()
     {
         $expected = 'Hello, World!';
-        $actual = ContentStore::fold(__DIR__)->uri("/somewhere/else")->markdown();
+        $actual = ContentStore::uri("/somewhere/else")->markdown();
         $this->assertEquals($expected, $actual->unfold());
     }
 
@@ -57,7 +57,7 @@ class HelpersContentStoreTest extends TestCase
         $expected->created = 20200401;
         $expected->modified = 20200401;
         $expected->moved = 20200401;
-        $actual = ContentStore::fold(__DIR__)->uri("/somewhere/else")->meta();
+        $actual = ContentStore::uri("/somewhere/else")->meta();
         $this->assertEquals($expected, $actual->unfold());
     }
 
@@ -68,7 +68,7 @@ class HelpersContentStoreTest extends TestCase
             "Created on: Apr 1, 2020",
             "Modified on: Apr 1, 2020"
         ];
-        $actual = ContentStore::fold(__DIR__)->uri("/somewhere/else")
+        $actual = ContentStore::uri("/somewhere/else")
             ->details();
         $this->assertEquals($expected, $actual->unfold());
     }
@@ -76,7 +76,7 @@ class HelpersContentStoreTest extends TestCase
     public function testToc()
     {
         $expected = '';
-        $actual = ContentStore::fold(__DIR__)->uri("/toc")
+        $actual = ContentStore::uri("/toc")
             ->toc();
         $this->assertEquals($expected, $actual->unfold());
     }

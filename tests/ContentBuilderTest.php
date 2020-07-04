@@ -24,64 +24,41 @@ class ContentBuilderTest extends TestCase
     public function testUriAndContentStoreSet()
     {
         // TODO: Make these methods private until absolutely necessary.
-        $builder = ContentBuilder::fold();
+        // $builder = ContentBuilder::fold();
 
-        $expected = "/";
-        $actual = $builder->pageUri();
-        $this->assertEquals($expected, $actual->unfold());
+        // $expected = "/";
+        // $actual = ContentBuilder::pageUri();
+        // $this->assertEquals($expected, $actual->unfold());
 
         $expected = __DIR__ ."/content";
-        $actual = $builder->store();
+        $actual = ContentBuilder::store();
         $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testCanGetRemoteAssets()
     {
-        $builder = ContentBuilder::fold();
+        // $builder = ContentBuilder::fold();
 
         $expected = __DIR__ ."/content/.assets";
-        $actual = $builder->assets();
+        $actual = ContentBuilder::assetsStore();
         $this->assertEquals($expected, $actual->unfold());
-    }
-
-    public function testUri()
-    {
-        // $this->visit("/somewhere");
-        // $expected = "/somewhere";
-        // $actual = ContentBuilder::uri();
-        // $this->assertSame($expected, $actual->unfold());
-
-        // $this->visit("/somewhere/else");
-        // $expected = ["somewhere", "else"];
-        // $actual = ContentBuilder::uriParts();
-        // $this->assertSame($expected, $actual->unfold());
-
-        // $expected = "/somewhere";
-        // $actual = ContentBuilder::uriRoot();
-        // $this->assertSame($expected, $actual->unfold());
-
-        // $this->visit("/");
-        // $expected = "/";
-        // $actual = ContentBuilder::uriRoot();
-        // $this->assertSame($expected, $actual->unfold());
     }
 
     public function testStore()
     {
-        $builder = ContentBuilder::fold();
-
         $expected = "Root";
-        $actual = $builder->title();
+        $actual = ContentBuilder::title();
         $this->assertSame($expected, $actual->unfold());
 
         $this->visit("/somewhere/else");
         $expected = "Else | Somewhere | Root";
-        $actual = ContentBuilder::fold()->title();
+        $actual = ContentBuilder::title();
         $this->assertSame($expected, $actual->unfold());
 
-        // $expected = "Else";
-        // $actual = ContentBuilder::contentStore()->markdown()->meta()->title;
-        // $this->assertSame($expected, $actual);
+        $expected = "Else";
+        $actual = ContentBuilder::store()->plus("content.md")
+            ->markdown()->meta()->title;
+        $this->assertSame($expected, $actual);
     }
 
     public function testPageTitle()

@@ -56,7 +56,8 @@ abstract class ContentBuilder
     public const TITLE = "title";
 
     /**
-     * Heading member from YAML front matter, falls back to title.
+     * Heading member from YAML front matter, falls back to title member,
+     * if heading not set.
      */
     public const HEADING = "heading";
 
@@ -67,40 +68,103 @@ abstract class ContentBuilder
     public const PAGE = "page";
 
     /**
+     * @deprecated
+     *
      * Uses the title member from YAML front matter to build a two-part title,
      * which includes the title for the current URL plus the title of the root
      * page with a separater. ex. Leaf | Root
      */
     public const SHARE = "share";
 
-// -> Content
-    static public function titles(): ESArray
-    {
-        return static::store()->plus("content.md")->isFile(function($result, $store) {
-            $parts = Shoop::path(request()->path())->parts();
-            if ($parts->count()->isLessThanUnfolded(1) and $parts->first()->isEmpty) {
-                return $store->metaMember("title");
-            }
+    /**
+     * Uses the title member from YAML front matter to build a two-part title,
+     * which includes the title for the current URL plus the title of the root
+     * page with a separater. ex. Leaf | Root
+     */
+    public const BOOKEND = "book-end";
 
-            $s = $store->dropLast();
-            return $parts->each(function($part) use (&$s) {
-                $title = $s->plus("content.md")->metaMember("title");
-                $s = $s->dropLast();
-                return $title;
-            })->noEmpties()->plus($s->plus("content.md")->metaMember("title"));
+// -> Content
+    static public function titles($checkHeadingFirst = true): ESArray
+    {
+        return static::store()->plus("content.md")->isFile(
+            function($result, $store) use ($checkHeadingFirst) {
+                if (! $result) { return Shoop::array([]); }
+
+                $parts = Shoop::path(request()->path())->parts();
+                if ($parts->count()->isUnfolded(1) and
+                    $parts->first()->isEmpty
+                ) {
+                    if ($checkHeadingFirst and $store->metaMember("headding")->isNotEmpty) {
+                        return Shoop::array([
+                            $store->metaMember("heading")
+                        ]);
+                    }
+
+                    $title = $store->metaMember("title");
+                    if ($title->isEmpty) {
+                        $title = Shoop::string("");
+                    }
+                    return Shoop::array([$title]);
+                }
+
+                $s = $store->dropLast();
+                return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
+                    $content = $s->plus("content.md");
+
+                    $return = "";
+                    if ($checkHeadingFirst and
+                        $s->metaMember("headding")->isNotEmpty
+                    ) {
+                        $return = $content->metaMember("heading");
+
+                    } else {
+                        $return = $content->metaMember("title");
+                        if ($return->isEmpty) {
+                            $return = "";
+
+                        }
+                    }
+
+                    $s = $s->dropLast();
+                    return $return;
+
+                })->noEmpties()->plus(
+                    $s->plus("content.md")->metaMember("title")->unfold()
+                );
         });
     }
 
-    static public function title($type = ""): ESString
+    static public function title($type = "", $checkHeadingFirst = true): ESString
     {
         if (strlen($type) === 0) {
             $type = static::PAGE;
         }
 
-        if (Shoop::string(static::PAGE)->isUnfolded($type)) {
-            $titles = static::titles()->divide(-1);
-            $start = $titles->first();
-            $root = $titles->last();
+        $titles = Shoop::array([]);
+        if ($checkHeadingFirst and
+            Shoop::string(static::HEADING)->isUnfolded($type)
+        ) {
+            $titles = $titles->plus(
+                static::titles($checkHeadingFirst)->first()
+            );
+
+        } elseif (Shoop::string(static::TITLE)->isUnfolded($type)) {
+            $titles = $titles->plus(
+                static::titles(false)->first()
+            );
+
+        } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
+            $t = static::titles($checkHeadingFirst);
+            $titles = $titles->plus($t->first());
+
+            if ($t->count()->isGreaterThanUnfolded(1)) {
+                $titles = $titls->plus($t->last());
+            }
+
+        } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
+            $t = static::titles($checkHeadingFirst)->divide(-1);
+            $start = $t->first();
+            $root = $t->last();
             if (static::uriRoot()->isUnfolded("events")) {
                 $parts = Shoop::string(request()->path())->divide("/");
                 $year = $parts->dropFirst()->first;
@@ -111,10 +175,9 @@ abstract class ContentBuilder
                 )->format("F");
                 $start = $start->start($month, $year);
             }
-            return Shoop::array([])->plus(...$start)->plus(...$root)
-                ->noEmpties()->join(" | ");
+            $titles = $titles->plus(...$start)->plus(...$root);
         }
-        return Shoop::string("");
+        return $titles->noEmpties()->join(" | ");
     }
 
     static public function copyright($name, $startYear = ""): ESString
@@ -185,17 +248,49 @@ abstract class ContentBuilder
         ->unfold();
     }
 
+// -> URI
+    static public function uri($parts = false) // :ESString|ESArray
+    {
+        $base = Shoop::string(request()->path())->start("/");
+        if ($parts) {
+            return $base->divide("/")->noEmpties()->reindex();
+        }
+        return $base;
+    }
+
+    static public function rootUri(): ESString
+    {
+        return static::uriParts()->isEmpty(function($result, $array) {
+            return ($result) ? Shoop::string("") : $array->first();
+        });
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function uriParts(): ESArray
+    {
+        return static::uri(true);
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function uriRoot(): ESString
+    {
+        return static::rootUri();
+    }
+
 // -> Stores
     abstract static public function rootStore(): ESStore;
 
     static public function store(...$plus): ESStore
     {
-        return Shoop::string(request()->path())->is("/", function($result, $path) use ($plus) {
-            if ($result) {
-                return static::rootStore();
-            }
-            return static::rootStore()->plus(...Shoop::path(request()->path())->parts())->plus(...$plus);
-        });
+        if (Shoop::string(request()->path())->isUnfolded("/")) {
+            return static::rootStore();
+        }
+        $parts = Shoop::path(request()->path())->parts();
+        return static::rootStore()->plus(...$parts)->plus(...$plus);
     }
 
     static public function assetsStore(): ESStore
@@ -249,22 +344,6 @@ abstract class ContentBuilder
         )->meta(...static::meta());
     }
 
-    static public function uri(): ESString
-    {
-        return Shoop::string(request()->path())->start("/");
-    }
-
-    static public function uriRoot(): ESString
-    {
-        return static::uriParts()->isEmpty(function($result, $array) {
-            return ($result) ? Shoop::string("") : $array->first();
-        });
-    }
-
-    static public function uriParts(): ESArray
-    {
-        return static::uri()->divide("/")->noEmpties()->reindex();
-    }
 
     static public function uriContentStore($uri = ""): ESStore
     {

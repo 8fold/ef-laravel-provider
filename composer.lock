@@ -12,22 +12,22 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/commonmark-abbreviations.git",
-                "reference": "1fe20af37337f63578742287966a9490678d8e6a"
+                "reference": "11c6309ca23488206a489e3d7595c0b4bf316149"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/commonmark-abbreviations/zipball/1fe20af37337f63578742287966a9490678d8e6a",
-                "reference": "1fe20af37337f63578742287966a9490678d8e6a",
+                "url": "https://api.github.com/repos/8fold/commonmark-abbreviations/zipball/11c6309ca23488206a489e3d7595c0b4bf316149",
+                "reference": "11c6309ca23488206a489e3d7595c0b4bf316149",
                 "shasum": ""
             },
             "require": {
-                "8fold/php-markup": "0.1.*",
-                "8fold/php-shoop": "0.4.*",
-                "league/commonmark": "1.5.*",
+                "8fold/php-markup": "~0.1",
+                "8fold/php-shoop": "~0.4",
+                "league/commonmark": "~1.5",
                 "php": "^7.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "8.0.*"
+                "phpunit/phpunit": "~9.1"
             },
             "type": "library",
             "autoload": {
@@ -56,7 +56,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-23T23:51:08+00:00"
+            "time": "2020-07-04T01:59:24+00:00"
         },
         {
             "name": "8fold/php-events",
@@ -64,23 +64,22 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-events.git",
-                "reference": "145fdda6bb4c8b93954e649294a37bf45a6d8380"
+                "reference": "077dba603aa582418f54d1ab40f58de9acb33df0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-events/zipball/145fdda6bb4c8b93954e649294a37bf45a6d8380",
-                "reference": "145fdda6bb4c8b93954e649294a37bf45a6d8380",
+                "url": "https://api.github.com/repos/8fold/php-events/zipball/077dba603aa582418f54d1ab40f58de9acb33df0",
+                "reference": "077dba603aa582418f54d1ab40f58de9acb33df0",
                 "shasum": ""
             },
             "require": {
-                "8fold/php-markup": "0.1.*",
-                "8fold/php-shoop-extras": "0.1.*",
-                "nesbot/carbon": "2.35.*",
+                "8fold/php-markup": "~0.1",
+                "8fold/php-shoop-extras": "~0.1",
+                "nesbot/carbon": "~2.36",
                 "php": ">=7.0"
             },
             "require-dev": {
-                "phpunit/php-code-coverage": "8.0.*",
-                "phpunit/phpunit": "9.1.*"
+                "phpunit/phpunit": "~9.1"
             },
             "type": "library",
             "autoload": {
@@ -109,7 +108,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-03T17:34:28+00:00"
+            "time": "2020-07-04T02:05:02+00:00"
         },
         {
             "name": "8fold/php-markup",
@@ -164,24 +163,23 @@
         },
         {
             "name": "8fold/php-shoop",
-            "version": "0.4.9",
+            "version": "0.4.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop.git",
-                "reference": "a489f65413610d03a3ec1cd5d60ffb881f990f48"
+                "reference": "71dd612a31cf08e6cf50b7295752cc3b3c4cd9e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop/zipball/a489f65413610d03a3ec1cd5d60ffb881f990f48",
-                "reference": "a489f65413610d03a3ec1cd5d60ffb881f990f48",
+                "url": "https://api.github.com/repos/8fold/php-shoop/zipball/71dd612a31cf08e6cf50b7295752cc3b3c4cd9e3",
+                "reference": "71dd612a31cf08e6cf50b7295752cc3b3c4cd9e3",
                 "shasum": ""
             },
             "require": {
-                "php": "7.*"
+                "php": "~7"
             },
             "require-dev": {
-                "phpunit/php-code-coverage": "8.0.*",
-                "phpunit/phpunit": "9.1.*"
+                "phpunit/phpunit": "~9.1"
             },
             "type": "library",
             "autoload": {
@@ -199,7 +197,7 @@
                     "email": "josh@8fold.pro"
                 }
             ],
-            "description": "A wrapper to create a more ubiquitous API for interacting with PHP Primitives.",
+            "description": "A wrapper to create a more ubiquitous API for interacting with primitive data types.",
             "funding": [
                 {
                     "url": "https://github.com/8fold",
@@ -210,31 +208,30 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-03T01:12:56+00:00"
+            "time": "2020-07-04T02:06:32+00:00"
         },
         {
             "name": "8fold/php-shoop-extras",
-            "version": "0.1.26",
+            "version": "0.1.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-extras.git",
-                "reference": "bf3c2df53ffd72e84901f278bdb4963008c74b86"
+                "reference": "5a5c2ad09691cde74b2ee4cd1b0f5ce4a724848b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/bf3c2df53ffd72e84901f278bdb4963008c74b86",
-                "reference": "bf3c2df53ffd72e84901f278bdb4963008c74b86",
+                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/5a5c2ad09691cde74b2ee4cd1b0f5ce4a724848b",
+                "reference": "5a5c2ad09691cde74b2ee4cd1b0f5ce4a724848b",
                 "shasum": ""
             },
             "require": {
-                "8fold/php-shoop": "0.4.*",
-                "league/commonmark": "1.5.*",
-                "php": "7.*",
-                "spatie/yaml-front-matter": "2.0.*"
+                "8fold/php-shoop": "~0.4",
+                "league/commonmark": "~1.5",
+                "php": "~7",
+                "spatie/yaml-front-matter": "~2.0"
             },
             "require-dev": {
-                "phpunit/php-code-coverage": "8.0.*",
-                "phpunit/phpunit": "9.1.*"
+                "phpunit/phpunit": "~9.1"
             },
             "type": "library",
             "autoload": {
@@ -263,7 +260,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-03T23:04:07+00:00"
+            "time": "2020-07-04T02:08:25+00:00"
         },
         {
             "name": "league/commonmark",
@@ -362,16 +359,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.35.0",
+            "version": "2.36.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "4b9bd835261ef23d36397a46a76b496a458305e5"
+                "reference": "d0b65958d9942fd1b501fdb0800c67e8323aa08d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/4b9bd835261ef23d36397a46a76b496a458305e5",
-                "reference": "4b9bd835261ef23d36397a46a76b496a458305e5",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/d0b65958d9942fd1b501fdb0800c67e8323aa08d",
+                "reference": "d0b65958d9942fd1b501fdb0800c67e8323aa08d",
                 "shasum": ""
             },
             "require": {
@@ -383,9 +380,10 @@
             "require-dev": {
                 "doctrine/orm": "^2.7",
                 "friendsofphp/php-cs-fixer": "^2.14 || ^3.0",
-                "kylekatarnls/multi-tester": "^1.1",
+                "kylekatarnls/multi-tester": "^2.0",
                 "phpmd/phpmd": "^2.8",
-                "phpstan/phpstan": "^0.11",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12.30",
                 "phpunit/phpunit": "^7.5 || ^8.0",
                 "squizlabs/php_codesniffer": "^3.4"
             },
@@ -401,6 +399,11 @@
                 "laravel": {
                     "providers": [
                         "Carbon\\Laravel\\ServiceProvider"
+                    ]
+                },
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
                     ]
                 }
             },
@@ -441,7 +444,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-05-24T18:27:52+00:00"
+            "time": "2020-06-25T20:20:01+00:00"
         },
         {
             "name": "spatie/yaml-front-matter",
