@@ -91,6 +91,31 @@ abstract class ContentBuilder
         });
     }
 
+    static public function title($type = ""): ESString
+    {
+        if (strlen($type) === 0) {
+            $type = static::PAGE;
+        }
+
+        if (Shoop::string(static::PAGE)->isUnfolded($type)) {
+            $titles = static::titles()->divide(-1);
+            $start = $titles->first();
+            $root = $titles->last();
+            if (static::uriRoot()->isUnfolded("events")) {
+                $parts = Shoop::string(request()->path())->divide("/");
+                $year = $parts->dropFirst()->first;
+                $month = Carbon::createFromFormat(
+                    "m",
+                    $parts->dropFirst(2)->first,
+                    "America/Chicago"
+                )->format("F");
+                $start = $start->start($month, $year);
+            }
+            return Shoop::array([])->plus(...$start)->plus(...$root)
+                ->noEmpties()->join(" | ");
+        }
+    }
+
 // -> UI
     static public function meta(): ESArray
     {
