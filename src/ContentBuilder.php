@@ -50,8 +50,43 @@ use Eightfold\Markup\Element;
 
 abstract class ContentBuilder
 {
+    /**
+     * Title member from YAML front matter.
+     */
+    public const TITLE = "title";
 
-    static public function eventStore()
+    /**
+     * Heading member from YAML front matter, falls back to title.
+     */
+    public const HEADING = "heading";
+
+    /**
+     * Recursively uses title member from YAML front matter to build a fully-
+     * qualified title string with separator. ex. Leaf | Branch | Trunk | Root
+     */
+    public const PAGE = "page";
+
+    /**
+     * Uses the title member from YAML front matter to build a two-part title,
+     * which includes the title for the current URL plus the title of the root
+     * page with a separater. ex. Leaf | Root
+     */
+    public const SHARE = "share";
+
+// ->UI
+    abstract static public function meta(): ESArray;
+
+// -> Stores
+    abstract static public function rootStore(): ESStore;
+
+    abstract static public function store(...$plus): ESStore;
+
+    static public function assetsStore(): ESStore
+    {
+        return static::rootStore()->plus(".assets");
+    }
+
+    static public function eventStore(): ESStore
     {
         return static::rootStore()->plus("events");
     }
