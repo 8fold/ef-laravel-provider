@@ -3,7 +3,7 @@
 use Eightfold\ShoopExtras\Shoop;
 
 Route::any("{any}", function(string $any = null) use ($contentBuilderClass) {
-    return $contentBuilderClass::uriContentStore()->isFile(
+    return $contentBuilderClass::store("content.md")->isFile(
         function($result, $path) use ($contentBuilderClass) {
             if (! $result) {
                 abort(404);
