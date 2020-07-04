@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a99aad0a967afbd568083cecbe212b4a",
+    "content-hash": "6b656dd8989deff661f97e8d44641c4c",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
@@ -113,21 +113,20 @@
         },
         {
             "name": "8fold/php-markup",
-            "version": "0.1.19",
+            "version": "0.1.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
-                "reference": "6e3f7c979436799ee7191d27725189649266dcee"
+                "reference": "0d893c4acaf45b573fd821b02844f3e0b611e37a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-markup/zipball/6e3f7c979436799ee7191d27725189649266dcee",
-                "reference": "6e3f7c979436799ee7191d27725189649266dcee",
+                "url": "https://api.github.com/repos/8fold/php-markup/zipball/0d893c4acaf45b573fd821b02844f3e0b611e37a",
+                "reference": "0d893c4acaf45b573fd821b02844f3e0b611e37a",
                 "shasum": ""
             },
             "require": {
                 "8fold/php-shoop-extras": "0.1.*",
-                "nesbot/carbon": "2.35.*",
                 "php": ">=7.0"
             },
             "require-dev": {
@@ -161,7 +160,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-27T19:33:38+00:00"
+            "time": "2020-07-04T01:52:51+00:00"
         },
         {
             "name": "8fold/php-shoop",
@@ -2919,28 +2918,28 @@
         },
         {
             "name": "phpunit/php-timer",
-            "version": "3.1.4",
+            "version": "5.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-timer.git",
-                "reference": "dc9368fae6ef2ffa57eba80a7410bcef81df6258"
+                "reference": "cc49734779cbb302bf51a44297dab8c4bbf941e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/dc9368fae6ef2ffa57eba80a7410bcef81df6258",
-                "reference": "dc9368fae6ef2ffa57eba80a7410bcef81df6258",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/cc49734779cbb302bf51a44297dab8c4bbf941e7",
+                "reference": "cc49734779cbb302bf51a44297dab8c4bbf941e7",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3"
+                "php": "^7.3 || ^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9.0"
+                "phpunit/phpunit": "^9.2"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "5.0-dev"
                 }
             },
             "autoload": {
@@ -2970,7 +2969,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-04-20T06:00:37+00:00"
+            "time": "2020-06-26T11:58:13+00:00"
         },
         {
             "name": "phpunit/php-token-stream",
@@ -3029,16 +3028,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.1.5",
+            "version": "9.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "1b570cd7edbe136055bf5f651857dc8af6b829d2"
+                "reference": "ad7cc5ec3ab2597b329880e30442d9054526023b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1b570cd7edbe136055bf5f651857dc8af6b829d2",
-                "reference": "1b570cd7edbe136055bf5f651857dc8af6b829d2",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ad7cc5ec3ab2597b329880e30442d9054526023b",
+                "reference": "ad7cc5ec3ab2597b329880e30442d9054526023b",
                 "shasum": ""
             },
             "require": {
@@ -3058,7 +3057,7 @@
                 "phpunit/php-file-iterator": "^3.0",
                 "phpunit/php-invoker": "^3.0",
                 "phpunit/php-text-template": "^2.0",
-                "phpunit/php-timer": "^3.1.4",
+                "phpunit/php-timer": "^5.0",
                 "sebastian/code-unit": "^1.0.2",
                 "sebastian/comparator": "^4.0",
                 "sebastian/diff": "^4.0",
@@ -3067,7 +3066,7 @@
                 "sebastian/global-state": "^4.0",
                 "sebastian/object-enumerator": "^4.0",
                 "sebastian/resource-operations": "^3.0",
-                "sebastian/type": "^2.0",
+                "sebastian/type": "^2.1",
                 "sebastian/version": "^3.0"
             },
             "require-dev": {
@@ -3084,7 +3083,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "9.1-dev"
+                    "dev-master": "9.2-dev"
                 }
             },
             "autoload": {
@@ -3123,7 +3122,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-05-22T13:54:05+00:00"
+            "time": "2020-06-22T07:10:55+00:00"
         },
         {
             "name": "psr/container",
