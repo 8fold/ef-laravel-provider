@@ -535,36 +535,36 @@ abstract class ContentBuilder
         return static::contentStore()->plus(".media");
     }
 
-    static public function meta()
-    {
-        return Shoop::array([
-            UIKit::meta()->attr(
-                "name viewport",
-                "content width=device-width,
-                initial-scale=1"
-            ),
-            UIKit::link()->attr(
-                "type image/x-icon",
-                "rel icon",
-                "href /assets/favicons/favicon.ico"
-            ),
-            UIKit::link()->attr(
-                "rel apple-touch-icon",
-                "href /assets/favicons/apple-touch-icon.png",
-                "sizes 180x180"
-            ),
-            UIKit::link()->attr(
-                "rel image/png",
-                "href /assets/favicons/favicon-32x32.png",
-                "sizes 32x32"
-            ),
-            UIKit::link()->attr(
-                "rel image/png",
-                "href /assets/favicons/favicon-16x16.png",
-                "sizes 16x16"
-            )
-        ]);
-    }
+    // static public function meta()
+    // {
+    //     return Shoop::array([
+    //         UIKit::meta()->attr(
+    //             "name viewport",
+    //             "content width=device-width,
+    //             initial-scale=1"
+    //         ),
+    //         UIKit::link()->attr(
+    //             "type image/x-icon",
+    //             "rel icon",
+    //             "href /assets/favicons/favicon.ico"
+    //         ),
+    //         UIKit::link()->attr(
+    //             "rel apple-touch-icon",
+    //             "href /assets/favicons/apple-touch-icon.png",
+    //             "sizes 180x180"
+    //         ),
+    //         UIKit::link()->attr(
+    //             "rel image/png",
+    //             "href /assets/favicons/favicon-32x32.png",
+    //             "sizes 32x32"
+    //         ),
+    //         UIKit::link()->attr(
+    //             "rel image/png",
+    //             "href /assets/favicons/favicon-16x16.png",
+    //             "sizes 16x16"
+    //         )
+    //     ]);
+    // }
 
     static public function copyright($holder = "")
     {
