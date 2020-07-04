@@ -116,6 +116,17 @@ abstract class ContentBuilder
         ]);
     }
 
+    static public function metaShare()
+    {
+        return Shoop::array([
+            UIKit::meta()->attr("property og:title", "content ". static::title(static::SHARE)),
+            UIKit::meta()->attr("property og:url", "content ". url()->current()),
+            UIKit::meta()->attr("property og:image", "content ". static::shareImage())
+        ]);
+    }
+
+    abstract public function shareImage(): ESString;
+
 // -> Stores
     abstract static public function rootStore(): ESStore;
 
