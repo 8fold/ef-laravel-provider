@@ -206,22 +206,6 @@ abstract class ContentBuilder
         ]);
     }
 
-    /**
-     * @deprecated
-     */
-    static public function uriPageTitle(): ESString
-    {
-        return static::title(static::PAGE);
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function uriShareTitle(): ESString
-    {
-        return static::title(static::SHARE);
-    }
-
     static public function copyright($name, $startYear = ""): ESString
     {
         if (strlen($startYear) > 0) {
@@ -278,38 +262,6 @@ abstract class ContentBuilder
         ]);
     }
 
-    /**
-     * @deprecated
-     */
-    static public function metaFavicons()
-    {
-        return static::faviconsMeta();
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function metaStyles()
-    {
-        return static::stylesMeta();
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function metaScripts()
-    {
-        return static::scriptsMeta();
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function metaShare()
-    {
-        return static::shareMeta();
-    }
-
     abstract static public function shareImage(): ESString;
 
     static public function markdownConfig()
@@ -337,22 +289,6 @@ abstract class ContentBuilder
         return static::uriParts()->isEmpty(function($result, $array) {
             return ($result) ? Shoop::string("") : $array->first();
         });
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function uriParts(): ESArray
-    {
-        return static::uri(true);
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function uriRoot(): ESString
-    {
-        return static::rootUri();
     }
 
 // -> Stores
