@@ -114,6 +114,7 @@ abstract class ContentBuilder
             return Shoop::array([])->plus(...$start)->plus(...$root)
                 ->noEmpties()->join(" | ");
         }
+        return Shoop::string("");
     }
 
     static public function copyright($name, $startYear = ""): ESString
@@ -515,60 +516,6 @@ abstract class ContentBuilder
             $nav
         ]);
     }
-
-    /**
-     * @return ESStore An ESStore where the path goes to the root of the content folder.
-     */
-    static public function contentStore(): ESStore
-    {
-        return Shoop::store(__DIR__)->plus("Content");
-    }
-
-    /**
-     * The `/.media` folder can contain whatever you like, but should contain images if you use the `media` routes.
-     *
-     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
-     */
-    static public function mediaStore()
-    {
-        return static::contentStore()->plus(".media");
-    }
-
-    // static public function meta()
-    // {
-    //     return Shoop::array([
-    //         UIKit::meta()->attr(
-    //             "name viewport",
-    //             "content width=device-width,
-    //             initial-scale=1"
-    //         ),
-    //         UIKit::link()->attr(
-    //             "type image/x-icon",
-    //             "rel icon",
-    //             "href /assets/favicons/favicon.ico"
-    //         ),
-    //         UIKit::link()->attr(
-    //             "rel apple-touch-icon",
-    //             "href /assets/favicons/apple-touch-icon.png",
-    //             "sizes 180x180"
-    //         ),
-    //         UIKit::link()->attr(
-    //             "rel image/png",
-    //             "href /assets/favicons/favicon-32x32.png",
-    //             "sizes 32x32"
-    //         ),
-    //         UIKit::link()->attr(
-    //             "rel image/png",
-    //             "href /assets/favicons/favicon-16x16.png",
-    //             "sizes 16x16"
-    //         )
-    //     ]);
-    // }
-
-    // static public function copyright($holder = ""): ESString
-    // {
-    //     return Shoop::string("Copyright © {$holder} ". date("Y") .". All rights reserved.");
-    // }
 
 // -> RSS
     static public function rssCompiled()
