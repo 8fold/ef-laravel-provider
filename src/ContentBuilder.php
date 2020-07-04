@@ -116,7 +116,7 @@ abstract class ContentBuilder
         }
     }
 
-    static public function copyrightContent($name, $startYear = ""): ESString
+    static public function copyright($name, $startYear = ""): ESString
     {
         if (strlen($startYear) > 0) {
             $startYear = $startYear ."&ndash;";
@@ -565,10 +565,10 @@ abstract class ContentBuilder
     //     ]);
     // }
 
-    static public function copyright($holder = ""): ESString
-    {
-        return Shoop::string("Copyright © {$holder} ". date("Y") .". All rights reserved.");
-    }
+    // static public function copyright($holder = ""): ESString
+    // {
+    //     return Shoop::string("Copyright © {$holder} ". date("Y") .". All rights reserved.");
+    // }
 
 // -> RSS
     static public function rssCompiled()
