@@ -206,6 +206,22 @@ abstract class ContentBuilder
         ]);
     }
 
+    /**
+     * @deprecated
+     */
+    static public function uriPageTitle(): ESString
+    {
+        return static::title(static::PAGE);
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function uriShareTitle(): ESString
+    {
+        return static::title(static::SHARE);
+    }
+
     static public function copyright($name, $startYear = ""): ESString
     {
         if (strlen($startYear) > 0) {
@@ -361,6 +377,17 @@ abstract class ContentBuilder
         return static::rootStore()->plus("events");
     }
 
+// -> Deprecated
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -400,16 +427,6 @@ abstract class ContentBuilder
             static::uriContentMarkdownHtml(false, [], [], true, true, [], $path),
             ...static::uriToc($currentPage, static::uriContentMarkdown($path)->meta()->toc())
         )->meta(...static::meta());
-    }
-
-
-    static public function uriContentStore($uri = ""): ESStore
-    {
-        $uri = Type::sanitizeType($uri, ESString::class)
-            ->isEmpty(function($result, $uri) {
-                return ($result) ? static::uriParts() : $uri->divide("/")->noEmpties();
-            });
-        return static::contentStore()->plus(...$uri)->plus("content.md");
     }
 
     static public function uriContentMarkdown($uri = "")
@@ -565,93 +582,6 @@ abstract class ContentBuilder
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;
-    }
-
-    static public function uriTitleForContentStore(ESStore $store)
-    {
-        return $store->isFolder(function($result, $store) {
-            if ($result) {
-                return $store->plus("content.md")->isFile(function($result, $store) {
-                    if ($result) {
-                        return ($store->markdown()->meta()->heading === null)
-                            ? $store->markdown()->meta()->title
-                            : $store->markdown()->meta()->heading;
-                    }
-                    return "";
-                });
-            }
-            return "";
-        });
-    }
-
-    static public function uriPageTitle(): ESString
-    {
-        $store = static::uriContentStore()->parent();
-        return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = static::uriTitleForContentStore($store);
-            $store = $store->parent();
-            return $title;
-        })->noEmpties()->join(" | ");
-    }
-
-    static public function uriShareTitle(): ESString
-    {
-        $store = static::uriContentStore()->parent();
-        $titles = Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = static::uriTitleForContentStore($store);
-            $store = $store->parent();
-            return $title;
-        })->noEmpties();
-        return Shoop::array([$titles->last])->plus($titles->first)
-            ->toggle()->join(" | ");
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function contentList($page = 1, $limit = 10)
-    {
-        if (static::rssItemsStoreItems() === null) {
-            return Shoop::string("");
-        }
-        $items = static::rssItemsStoreItems();
-        $links = $items->divide(($page - 1) * $limit)
-            ->last()->first(10)->isEmpty(function($result, $items) {
-                return ($result)
-                    ? Shoop::string("")
-                    : $items->each(function($uri) {
-                        $title = (static::uriContentStore($uri)->markdown()
-                            ->meta()->heading === null)
-                            ? static::uriContentStore($uri)->markdown()
-                                ->meta()->title
-                            : static::uriContentStore($uri)->markdown()
-                                ->meta()->heading;
-                        return ($title === null)
-                            ? Shoop::string("")
-                            : UIKit::anchor($title, $uri);
-                    });
-            })->noEmpties();
-        $list = UIKit::listWith(...$links);
-        $nav = $items->count()->isGreaterThan($limit, function($result, $count) use ($limit) {
-            $pageLinks = $count->roundUp($limit)->range(1)->each(function($pageNumber) {
-                return UIKit::anchor($pageNumber, "/feed/page/{$pageNumber}");
-            });
-
-            if ($pageLinks->count()->isUnfolded(1)) {
-                return "";
-
-            } elseif ($pageLinks->count()->isGreaterThanUnfolded(2)) {
-                die("build next previous links and first and last pages");
-                return UIKit::listWith(...$pageLinks);
-
-            } else {
-                return UIKit::nav(UIKit::listWith(...$pageLinks));
-            }
-        });
-        return Shoop::array([
-            $list,
-            $nav
-        ]);
     }
 
 // -> RSS
