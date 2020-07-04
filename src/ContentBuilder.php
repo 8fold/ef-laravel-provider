@@ -79,7 +79,15 @@ abstract class ContentBuilder
 // -> Stores
     abstract static public function rootStore(): ESStore;
 
-    abstract static public function store(...$plus): ESStore;
+    static public function store(...$plus): ESStore
+    {
+        return Shoop::string(request()->path())->is("/", function($result, $path) use ($plus) {
+            if ($result) {
+                return static::rootStore();
+            }
+            return static::rootStore()->plus(...Shoop::path(request()->path())->parts())->plus(...$plus);
+        });
+    }
 
     static public function assetsStore(): ESStore
     {
