@@ -174,6 +174,15 @@ abstract class ContentBuilder
 
     abstract public function shareImage(): ESString;
 
+    static public function markdownConfig()
+    {
+        return Shoop::dictionary([
+            "html_input" => "strip",
+            "allow_unsafe_links" => false
+        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
+        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
+        ->unfold();
+    }
 
 // -> Stores
     abstract static public function rootStore(): ESStore;
@@ -378,16 +387,6 @@ abstract class ContentBuilder
                     UIKit::listWith(...$paths)
                 )->attr("class breadcrumbs");
         });
-    }
-
-    static public function markdownConfig()
-    {
-        return Shoop::dictionary([
-            "html_input" => "strip",
-            "allow_unsafe_links" => false
-        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
-        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
-        ->unfold();
     }
 
     static public function uriContentMarkdownHtml(
