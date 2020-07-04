@@ -158,7 +158,7 @@ abstract class ContentBuilder
             $titles = $titles->plus($t->first());
 
             if ($t->count()->isGreaterThanUnfolded(1)) {
-                $titles = $titls->plus($t->last());
+                $titles = $titles->plus($t->last());
             }
 
         } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
