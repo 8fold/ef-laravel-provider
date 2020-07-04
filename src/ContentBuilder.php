@@ -203,7 +203,7 @@ abstract class ContentBuilder
         ->plus(...static::metaScripts());
     }
 
-    static public function metaFavicons()
+    static public function faviconsMeta()
     {
         return Shoop::array([
             UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
@@ -213,27 +213,59 @@ abstract class ContentBuilder
         ]);
     }
 
-    static public function metaStyles()
+    static public function stylesMeta()
     {
         return Shoop::array([
             UIKit::link()->attr("rel stylesheet", "href /css/main.css")
         ]);
     }
 
-    static public function metaScripts()
+    static public function scriptsMeta()
     {
         return Shoop::array([
             UIKit::script()->attr("src /js/main.js")
         ]);
     }
 
-    static public function metaShare()
+    static public function shareMeta()
     {
         return Shoop::array([
             UIKit::meta()->attr("property og:title", "content ". static::title(static::SHARE)),
             UIKit::meta()->attr("property og:url", "content ". url()->current()),
             UIKit::meta()->attr("property og:image", "content ". static::shareImage())
         ]);
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function metaFavicons()
+    {
+        return static::faviconsMeta();
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function metaStyles()
+    {
+        return static::stylesMeta();
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function metaScripts()
+    {
+        return static::scriptsMeta();
+    }
+
+    /**
+     * @deprecated
+     */
+    static public function metaShare()
+    {
+        return static::shareMeta();
     }
 
     abstract static public function shareImage(): ESString;
