@@ -1,6 +1,10 @@
 <?php
 
+use Carbon\Carbon;
 use Eightfold\ShoopExtras\Shoop;
+use Eightfold\Events\Events;
+use Eightfold\Events\Grid;
+use Eightfold\Markup\UIKit;
 
 Route::prefix("events")->group(function() use ($contentBuilderClass) {
     Route::get("/", function() use ($contentBuilderClass) {
