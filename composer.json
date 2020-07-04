@@ -5,16 +5,15 @@
 	"license": "MIT",
 	"require": {
 		"php": "7.*",
-    "8fold/php-shoop-extras": "0.1.*",
-		"8fold/php-markup": "0.1.*",
+    "8fold/php-shoop-extras": "~0.1",
+		"8fold/php-markup": "~0.1",
     "8fold/php-events": "dev-master",
     "8fold/commonmark-abbreviations": "dev-master"
 	},
 	"require-dev": {
-		"orchestra/testbench": "5.3.*",
-		"orchestra/testbench-browser-kit": "^5.1",
-		"phpunit/php-code-coverage": "8.0.*",
-		"phpunit/phpunit": "9.1.*"
+		"orchestra/testbench": "~5.3",
+		"orchestra/testbench-browser-kit": "~5.1",
+		"phpunit/phpunit": "~9.1"
 	},
 	"config": {
 		"optimize-autoloader": true,
