@@ -73,8 +73,48 @@ abstract class ContentBuilder
      */
     public const SHARE = "share";
 
-// ->UI
-    abstract static public function meta(): ESArray;
+// -> Content
+    static public function titles(): ESArray
+    {
+        return static::store()->plus("content.md")->isFile(function($result, $store) {
+            $parts = Shoop::path(request()->path())->parts();
+            if ($parts->count()->isLessThanUnfolded(1) and $parts->first()->isEmpty) {
+                return $store->metaMember("title");
+            }
+
+            $s = $store->dropLast();
+            return $parts->each(function($part) use (&$s) {
+                $title = $s->plus("content.md")->metaMember("title");
+                $s = $s->dropLast();
+                return $title;
+            })->noEmpties()->plus($s->plus("content.md")->metaMember("title"));
+        });
+    }
+
+// -> UI
+    static public function meta(): ESArray
+    {
+        return Shoop::array([
+            UIKit::meta()->attr(
+                "name viewport",
+                "content width=device-width,
+                initial-scale=1"
+            )
+        ])->plus(...static::metaFavicons())
+        ->plus(...static::metaShare())
+        ->plus(...static::metaStyles())
+        ->plus(...static::metaScripts());
+    }
+
+    static public function metaFavicons()
+    {
+        return Shoop::array([
+            UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
+            UIKit::link()->attr("rel apple-touch-icon", "href /assets/favicons/apple-touch-icon.png", "sizes 180x180"),
+            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-32x32.png", "sizes 32x32"),
+            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-16x16.png", "sizes 16x16")
+        ]);
+    }
 
 // -> Stores
     abstract static public function rootStore(): ESStore;
