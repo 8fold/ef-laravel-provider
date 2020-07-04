@@ -86,7 +86,12 @@ abstract class ContentBuilder
 // -> Content
     static public function titles($checkHeadingFirst = true): ESArray
     {
-        return static::store()->plus("content.md")->isFile(
+        $store = static::store();
+        if (static::rootUri()->isUnfolded("events")) {
+            $store = static::eventStore();
+        }
+
+        return $store->plus("content.md")->isFile(
             function($result, $store) use ($checkHeadingFirst) {
                 if (! $result) { return Shoop::array([]); }
 
@@ -94,7 +99,7 @@ abstract class ContentBuilder
                 if ($parts->count()->isUnfolded(1) and
                     $parts->first()->isEmpty
                 ) {
-                    if ($checkHeadingFirst and $store->metaMember("headding")->isNotEmpty) {
+                    if ($checkHeadingFirst and $store->metaMember("heading")->isNotEmpty) {
                         return Shoop::array([
                             $store->metaMember("heading")
                         ]);
@@ -129,7 +134,7 @@ abstract class ContentBuilder
                     return $return;
 
                 })->noEmpties()->plus(
-                    $s->plus("content.md")->metaMember("title")->unfold()
+                    static::rootStore()->plus("content.md")->metaMember("title")->unfold()
                 );
         });
     }
@@ -154,30 +159,51 @@ abstract class ContentBuilder
             );
 
         } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
-            $t = static::titles($checkHeadingFirst);
-            $titles = $titles->plus($t->first());
-
-            if ($t->count()->isGreaterThanUnfolded(1)) {
-                $titles = $titles->plus($t->last());
+            $t = static::titles($checkHeadingFirst)->divide(-1);
+            $start = $t->first();
+            $root = $t->last();
+            if (static::uriRoot()->isUnfolded("events")) {
+                $eventTitles = static::eventsTitles();
+                $start = $start->start($eventTitles->month ." ". $eventTitles->year);
             }
+
+            if ($root->count()->isGreaterThanUnfolded(1)) {
+                $root = $titles->plus($root->last());
+            }
+
+            $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
+            $titles = Shoop::array([
+                $titles->first(),
+                $titles->last()
+            ]);
 
         } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
             $t = static::titles($checkHeadingFirst)->divide(-1);
             $start = $t->first();
             $root = $t->last();
             if (static::uriRoot()->isUnfolded("events")) {
-                $parts = Shoop::string(request()->path())->divide("/");
-                $year = $parts->dropFirst()->first;
-                $month = Carbon::createFromFormat(
-                    "m",
-                    $parts->dropFirst(2)->first,
-                    "America/Chicago"
-                )->format("F");
-                $start = $start->start($month, $year);
+                $eventTitles = static::eventsTitles();
+                $start = $start->start($eventTitles->month, $eventTitles->year);
             }
-            $titles = $titles->plus(...$start)->plus(...$root);
+            $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
         }
         return $titles->noEmpties()->join(" | ");
+    }
+
+    static public function eventsTitles($type = "")
+    {
+        $parts = Shoop::string(request()->path())->divide("/");
+        $year = $parts->dropFirst()->first;
+        $month = Carbon::createFromFormat(
+            "m",
+            $parts->dropFirst(2)->first,
+            "America/Chicago"
+        )->format("F");
+
+        return Shoop::dictionary([
+            "year"  => $year,
+            "month" => $month
+        ]);
     }
 
     static public function copyright($name, $startYear = ""): ESString
