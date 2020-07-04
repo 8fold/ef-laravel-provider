@@ -172,7 +172,7 @@ abstract class ContentBuilder
         ]);
     }
 
-    abstract public function shareImage(): ESString;
+    abstract static public function shareImage(): ESString;
 
     static public function markdownConfig()
     {
