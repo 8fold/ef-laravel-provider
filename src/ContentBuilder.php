@@ -230,7 +230,7 @@ abstract class ContentBuilder
     static public function shareMeta()
     {
         return Shoop::array([
-            UIKit::meta()->attr("property og:title", "content ". static::title(static::SHARE)),
+            UIKit::meta()->attr("property og:title", "content ". static::title(static::BOOKEND)),
             UIKit::meta()->attr("property og:url", "content ". url()->current()),
             UIKit::meta()->attr("property og:image", "content ". static::shareImage())
         ]);
