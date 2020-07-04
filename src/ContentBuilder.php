@@ -116,6 +116,20 @@ abstract class ContentBuilder
         ]);
     }
 
+    static public function metaStyles()
+    {
+        return Shoop::array([
+            UIKit::link()->attr("rel stylesheet", "href /css/main.css")
+        ]);
+    }
+
+    static public function metaScripts()
+    {
+        return Shoop::array([
+            UIKit::script()->attr("src /js/main.js")
+        ]);
+    }
+
     static public function metaShare()
     {
         return Shoop::array([
@@ -126,6 +140,7 @@ abstract class ContentBuilder
     }
 
     abstract public function shareImage(): ESString;
+
 
 // -> Stores
     abstract static public function rootStore(): ESStore;
