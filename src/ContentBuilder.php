@@ -116,6 +116,14 @@ abstract class ContentBuilder
         }
     }
 
+    static public function copyrightContent($name, $startYear = ""): ESString
+    {
+        if (strlen($startYear) > 0) {
+            $startYear = $startYear ."&ndash;";
+        }
+        return Shoop::string("Copyright © {$startYear}". date("Y") ." {$name}. All rights reserved.");
+    }
+
 // -> UI
     static public function meta(): ESArray
     {
