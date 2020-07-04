@@ -565,7 +565,7 @@ abstract class ContentBuilder
     //     ]);
     // }
 
-    static public function copyright($holder = "")
+    static public function copyright($holder = ""): ESString
     {
         return Shoop::string("Copyright © {$holder} ". date("Y") .". All rights reserved.");
     }
