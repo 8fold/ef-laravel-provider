@@ -215,10 +215,10 @@ abstract class ContentBuilder
                 "content width=device-width,
                 initial-scale=1"
             )
-        ])->plus(...static::metaFavicons())
-        ->plus(...static::metaShare())
-        ->plus(...static::metaStyles())
-        ->plus(...static::metaScripts());
+        ])->plus(...static::faviconsMeta())
+        ->plus(...static::shareMeta())
+        ->plus(...static::stylesMeta())
+        ->plus(...static::scriptsMeta());
     }
 
     static public function faviconsMeta()
