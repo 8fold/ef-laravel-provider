@@ -22,6 +22,14 @@ use Eightfold\Shoop\{
 
 class TestContentBuilder extends ContentBuilder
 {
+    static public function view(...$content)
+    {
+        return UIKit::webView(
+            static::title()->unfold(),
+            static::store("content.md")->markdown()->html()->unfold()
+        );
+    }
+
     static public function copyright($name, $startYear = ''): ESString
     {
         return parent::copyright("Eightfold", $startYear);
@@ -55,13 +63,7 @@ class TestContentBuilder extends ContentBuilder
 
 
 
-    static public function view(...$content)
-    {
-        return UIKit::webView(
-            static::uriPageTitle()->unfold(),
-            static::contentStore()->markdown()->html()->unfold()
-        );
-    }
+
 
     static public function uriDir($base = __DIR__): ESString
     {
@@ -69,11 +71,11 @@ class TestContentBuilder extends ContentBuilder
     }
 
 
-    static public function uriContentMarkdownDetails()
-    {
-        return Shoop::array([])->plus(
-            UIKit::p(parent::uriContentMarkdownDetails()->join(UIKit::br())->unfold())->unfold(),
-            UIKit::p("Hello")->unfold()
-        );
-    }
+    // static public function uriContentMarkdownDetails()
+    // {
+    //     return Shoop::array([])->plus(
+    //         UIKit::p(parent::uriContentMarkdownDetails()->join(UIKit::br())->unfold())->unfold(),
+    //         UIKit::p("Hello")->unfold()
+    //     );
+    // }
 }

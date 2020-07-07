@@ -13,9 +13,6 @@ use League\CommonMark\HtmlRenderer;
 
 // available extensions
 use League\CommonMark\Extension\{
-    GithubFlavoredMarkdownExtension,
-    Autolink\AutolinkExtension,
-    DisallowedRawHtml\DisallowedRawHtmlExtension,
     Strikethrough\StrikethroughExtension,
     Table\TableExtension,
     TaskList\TaskListExtension
@@ -23,14 +20,11 @@ use League\CommonMark\Extension\{
 
 use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
-use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkRenderer;
-use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
-use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
 use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
 // end extensions
-//
+
 use Eightfold\ShoopExtras\{
     Shoop,
     ESStore
@@ -90,10 +84,9 @@ abstract class ContentBuilder
         if (static::rootUri()->isUnfolded("events")) {
             $store = static::eventStore();
         }
-
         return $store->plus("content.md")->isFile(
             function($result, $store) use ($checkHeadingFirst) {
-                if (! $result) { return Shoop::array([]); }
+                if (! $result->unfold()) { return Shoop::array([]); }
 
                 $parts = Shoop::path(request()->path())->parts();
                 if ($parts->count()->isUnfolded(1) and
@@ -111,14 +104,13 @@ abstract class ContentBuilder
                     }
                     return Shoop::array([$title]);
                 }
-
                 $s = $store->dropLast();
+
                 return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
                     $content = $s->plus("content.md");
-
                     $return = "";
                     if ($checkHeadingFirst and
-                        $s->metaMember("headding")->isNotEmpty
+                        $s->metaMember("heading")->isNotEmpty
                     ) {
                         $return = $content->metaMember("heading");
 
@@ -162,7 +154,7 @@ abstract class ContentBuilder
             $t = static::titles($checkHeadingFirst)->divide(-1);
             $start = $t->first();
             $root = $t->last();
-            if (static::uriRoot()->isUnfolded("events")) {
+            if (static::rootUri()->isUnfolded("events")) {
                 $eventTitles = static::eventsTitles();
                 $start = $start->start($eventTitles->month ." ". $eventTitles->year);
             }
@@ -181,7 +173,7 @@ abstract class ContentBuilder
             $t = static::titles($checkHeadingFirst)->divide(-1);
             $start = $t->first();
             $root = $t->last();
-            if (static::uriRoot()->isUnfolded("events")) {
+            if (static::rootUri()->isUnfolded("events")) {
                 $eventTitles = static::eventsTitles();
                 $start = $start->start($eventTitles->month, $eventTitles->year);
             }
@@ -277,7 +269,7 @@ abstract class ContentBuilder
 // -> URI
     static public function uri($parts = false) // :ESString|ESArray
     {
-        $base = Shoop::string(request()->path())->start("/");
+        $base = Shoop::uri(request()->path())->tail();
         if ($parts) {
             return $base->divide("/")->noEmpties()->reindex();
         }
@@ -286,8 +278,8 @@ abstract class ContentBuilder
 
     static public function rootUri(): ESString
     {
-        return static::uriParts()->isEmpty(function($result, $array) {
-            return ($result) ? Shoop::string("") : $array->first();
+        return static::uri(true)->isEmpty(function($result, $array) {
+            return ($result->unfold()) ? Shoop::string("") : $array->first();
         });
     }
 
@@ -311,6 +303,57 @@ abstract class ContentBuilder
     static public function eventStore(): ESStore
     {
         return static::rootStore()->plus("events");
+    }
+
+// -> RSS
+    static public function rssStore()
+    {
+        return static::rootStore()->plus("feed", "content.md");
+    }
+
+    static public function rssDescriptionReplacements()
+    {
+        return Shoop::dictionary([
+            "</h1>" => ":",
+            "</h2>" => ":",
+            "</h3>" => ":",
+            "</h4>" => ":",
+            "</h5>" => ":",
+            "</h6>" => ":",
+            "<h1>" => "",
+            "<h2>" => "",
+            "<h3>" => "",
+            "<h4>" => "",
+            "<h5>" => "",
+            "<h6>" => ""
+        ]);
+    }
+
+// -> Markdown
+    static public function markdown($uri = "")
+    {
+        return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
+            function($result, $parts) {
+                $store = static::store();
+                if ($result->unfold()) {
+                    $store = static::store(...$parts);
+                }
+                return $store->plus("content.md")->extensions(
+                    ...static::markdownExtensions()
+                );
+        });
+    }
+
+    static public function markdownExtensions()
+    {
+        return Shoop::array([
+            StrikethroughExtension::class,
+            TableExtension::class,
+            TaskListExtension::class,
+            ExternalLinkExtension::class,
+            SmartPunctExtension::class,
+            AbbreviationExtension::class
+        ]);
     }
 
 // -> Deprecated
@@ -346,7 +389,7 @@ abstract class ContentBuilder
         return UIKit::webView(
             static::uriPageTitle(),
             ...Shoop::array($content)->isEmpty(function($result, $content) {
-                return ($result)
+                return ($result->unfold())
                     ? Shoop::array(static::uriContentMarkdownHtml())
                     : $content;
             })
@@ -365,59 +408,41 @@ abstract class ContentBuilder
         )->meta(...static::meta());
     }
 
-    static public function uriContentMarkdown($uri = "")
-    {
-        return static::uriContentStore($uri)->markdown()->extensions(
-            ...static::uriContentMarkdownExtensions()
-        );
-    }
 
-    static public function uriContentMarkdownExtensions()
-    {
-        return Shoop::array([
-            StrikethroughExtension::class,
-            TableExtension::class,
-            TaskListExtension::class,
-            ExternalLinkExtension::class,
-            SmartPunctExtension::class,
-            // AbbreviationExtension::class,
-            HeadingPermalinkExtension::class
-        ]);
-    }
 
-    static public function uriContentMarkdownDetails()
-    {
-        $markdown = static::uriContentMarkdown();
+    // static public function uriContentMarkdownDetails()
+    // {
+    //     $markdown = static::uriContentMarkdown();
 
-        $modified = ($markdown->meta()->modified === null)
-            ? Shoop::string("")
-            : Shoop::string("Modified on: ")->plus(
-                    Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
-                        ->toFormattedDateString()
-                );
+    //     $modified = ($markdown->meta()->modified === null)
+    //         ? Shoop::string("")
+    //         : Shoop::string("Modified on: ")->plus(
+    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
+    //                     ->toFormattedDateString()
+    //             );
 
-        $created = ($markdown->meta()->created === null)
-            ? Shoop::string("")
-            : Shoop::string("Created on: ")->plus(
-                    Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
-                        ->toFormattedDateString()
-                );
+    //     $created = ($markdown->meta()->created === null)
+    //         ? Shoop::string("")
+    //         : Shoop::string("Created on: ")->plus(
+    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
+    //                     ->toFormattedDateString()
+    //             );
 
-        $moved = ($markdown->meta()->moved === null)
-            ? Shoop::string("")
-            : Shoop::string("Moved on: ")->plus(
-                    Carbon::createFromFormat("Ymd", $markdown->meta()->moved, "America/Chicago")
-                        ->toFormattedDateString()
-                );
+    //     $moved = ($markdown->meta()->moved === null)
+    //         ? Shoop::string("")
+    //         : Shoop::string("Moved on: ")->plus(
+    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->moved, "America/Chicago")
+    //                     ->toFormattedDateString()
+    //             );
 
-        return Shoop::array([$modified, $created, $moved])->noEmpties();
-    }
+    //     return Shoop::array([$modified, $created, $moved])->noEmpties();
+    // }
 
     static public function uriContentMarkdownDetailsParagraph()
     {
         return self::uriContentMarkdownDetails()->count()
             ->is(0, function($result) {
-                return ($result)
+                return ($result->unfold())
                     ? Shoop::string("")
                     : UIKit::p(
                         self::uriContentMarkdownDetails()->join(UIKit::br())->unfold()
@@ -429,12 +454,12 @@ abstract class ContentBuilder
     {
         return Type::sanitizeType($items, ESArray::class)
             ->isEmpty(function($result, $items) {
-                return ($result)
+                return ($result->unfold())
                     ? Shoop::array([])
                     : $items->each(function($uri) {
                         return static::uriContentStore($uri)
                             ->isFile(function($result, $store) use ($uri) {
-                                if (! $result) {
+                                if (! $result->unfold()) {
                                     return "";
                                 }
                                 $title = static::uriTitleForContentStore($store);
@@ -443,11 +468,11 @@ abstract class ContentBuilder
                     });
 
             })->isEmpty(function($result, $links) use ($currentPage) {
-                return ($result)
+                return ($result->unfold())
                     ? Shoop::array([])
                     : $links->count()->isGreaterThan(0,
                         function($result, $totalItems) use ($links, $currentPage) {
-                            return (! $result)
+                            return (! $result->unfold())
                                 ? Shoop::array([])
                                 : Shoop::array([
                                     UIKit::listWith(...$links),
@@ -460,7 +485,7 @@ abstract class ContentBuilder
 // TODO: Test
     static public function uriBreadcrumbs()
     {
-        $store = static::uriContentStore()->parent();
+        $store = static::store("content.md")->parent();
         $uri = static::uriParts();
         return static::uriParts()->each(function($part) use (&$store, &$uri) {
             $title = static::uriTitleForContentStore($store);
@@ -472,7 +497,7 @@ abstract class ContentBuilder
 
             return $anchor;
         })->noEmpties()->dropFirst()->isEmpty(function($result, $paths) {
-            return ($result)
+            return ($result->unfold())
                 ? ""
                 : UIKit::nav(
                     UIKit::listWith(...$paths)
@@ -518,108 +543,5 @@ abstract class ContentBuilder
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;
-    }
-
-// -> RSS
-    static public function rssCompiled()
-    {
-        return Shoop::string(
-            Element::fold("rss",
-                Element::fold("channel",
-                    Element::fold("title", static::rssTitle()),
-                    Element::fold("link", static::rssLink()),
-                    Element::fold("description", static::rssDescription()),
-                    Element::fold("language", "en-us"),
-                    Element::fold("copyright", static::copyright()->unfold()),
-                    ...static::rssItemsStoreItems()->each(function($path) {
-                        $markdown = static::uriContentStore($path)->markdown();
-
-                        $title = $markdown->meta()->title;
-                        $link = Shoop::string(static::rssLink())
-                            ->plus($path)->unfold();
-
-                        $description = ($markdown->meta()->description === null)
-                            ? $markdown->html()
-                            : $markdown->meta()->description();
-                        if ($description->count()->isUnfolded(0)) {
-                            return "";
-                        }
-                        $description = $description->replace(static::rssDescriptionReplacements())
-                            ->dropTags()->divide(" ")->isGreaterThan(50, function($result, $description) {
-                            return ($result)
-                                ? $description->first(50)->join(" ")->plus("...")
-                                : $description->join(" ");
-                        });
-
-                        $timestamp = ($markdown->meta()->created === null)
-                            ? ""
-                            : Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Detroit")
-                                ->hour(12)
-                                ->minute(0)
-                                ->second(0)
-                                ->toRssString();
-                        $t = (strlen($timestamp) > 0)
-                            ? Element::fold("pubDate", $timestamp)
-                            : "";
-
-                        $item = Element::fold(
-                                "item",
-                                    Element::fold("title", htmlspecialchars($title)),
-                                    Element::fold("link", $link),
-                                    Element::fold("guid", $link),
-                                    Element::fold("description", htmlspecialchars($description)),
-                                    $t
-                            );
-                        return $item;
-                    })->noEmpties()
-                )
-            )->attr("version 2.0")->unfold()
-        )->start("<?xml version=\"1.0\"?>\n");
-    }
-
-    static public function rssDescriptionReplacements()
-    {
-        return Shoop::dictionary([
-            "</h1>" => ":",
-            "</h2>" => ":",
-            "</h3>" => ":",
-            "</h4>" => ":",
-            "</h5>" => ":",
-            "</h6>" => ":",
-            "<h1>" => "",
-            "<h2>" => "",
-            "<h3>" => "",
-            "<h4>" => "",
-            "<h5>" => "",
-            "<h6>" => ""
-        ]);
-    }
-
-    static public function rssItemsStore()
-    {
-        return static::contentStore()->plus("feed", "content.md");
-    }
-
-    static public function rssTitle()
-    {
-        return static::rssItemsStore()->markdown()->meta()->rssTitle;
-    }
-
-    static public function rssLink()
-    {
-        return static::rssItemsStore()->markdown()->meta()->rssLink;
-    }
-
-    static public function rssDescription()
-    {
-        return static::rssItemsStore()->markdown()->meta()->rssDescription;
-    }
-
-    static public function rssItemsStoreItems()
-    {
-        if (static::rssItemsStore()->markdown()->meta()->toc === null) {
-            return Shoop::array([]);
-        }
-        return static::rssItemsStore()->markdown()->meta()->toc();
     }
 }
