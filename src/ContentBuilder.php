@@ -269,7 +269,7 @@ abstract class ContentBuilder
 // -> URI
     static public function uri($parts = false) // :ESString|ESArray
     {
-        $base = Shoop::uri(request()->path())->tail();
+        $base = Shoop::uri(request()->url())->tail();
         if ($parts) {
             return $base->divide("/")->noEmpties()->reindex();
         }
