@@ -164,9 +164,12 @@ abstract class ContentBuilder
             );
 
         } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
-            $t = static::titles($checkHeadingFirst)->divide(-1);
+            $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
             $start = $t->first();
-            $root = $t->last();
+            if ($t->countIsGreaterThanUnfolded(1)) {
+                $root = $t->last();
+            }
+
             if (static::rootUri()->isUnfolded("events")) {
                 $eventTitles = static::eventsTitles();
                 $start = $start->start($eventTitles->month ." ". $eventTitles->year);
@@ -292,7 +295,77 @@ abstract class ContentBuilder
         });
     }
 
+    static public function contentDetailsView()
+    {
+        $details = static::contentDetails();
+
+        // Created on Apr 1, 2020 - if created, required
+        $copy = Shoop::string("Created on ")->plus($details->created);
+        if ($details->hasMemberUnfolded("modified")) {
+            // (updated Apr 1, 2020) - if modified
+            $copy = $copy->plus(" (updated ")->plus($details->modified)->plus(")");
+
+        }
+
+        if ($details->hasMemberUnfolded("original")) {
+            // , which was<br> originally posted on <a href="https://8fold.pro">8fold</a> - if original
+            list($href, $title) = $details->original()->divide(" ", true, 2);
+            $copy = $copy->plus(", which was")->plus(UIKit::br())
+                ->plus(" originally posted on ")
+                ->plus(
+                    UIKit::anchor($title, $href)
+                );
+        }
+
+        if ($details->hasMemberUnfolded("moved")) {
+            $copy = $copy->plus(" and moved ")->plus($details->moved);
+
+        }
+
+        return UIKit::p($copy->plus(".")->unfold());
+    }
+
     abstract static public function shareImage(): ESString;
+
+    static public function tocView($currentPage = 1, $path = "/feed")
+    {
+        return UIKit::webView(
+            static::title(),
+            ...static::toc($currentPage, static::store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
+        )->meta(...static::meta());
+    }
+
+    static public function toc($currentPage, $items = [])
+    {
+        return Type::sanitizeType($items, ESArray::class)
+            ->isEmpty(function($result, $items) {
+                return ($result->unfold())
+                    ? Shoop::array([])
+                    : $items->each(function($uri) {
+                        return static::uriContentStore($uri)
+                            ->isFile(function($result, $store) use ($uri) {
+                                if (! $result->unfold()) {
+                                    return "";
+                                }
+                                $title = static::uriTitleForContentStore($store);
+                                return UIKit::anchor($title, $uri);
+                            });
+                    });
+
+            })->isEmpty(function($result, $links) use ($currentPage) {
+                return ($result->unfold())
+                    ? Shoop::array([])
+                    : $links->count()->isEmpty(
+                        function($result, $totalItems) use ($links, $currentPage) {
+                            return ($result->unfold())
+                                ? Shoop::array([])
+                                : Shoop::array([
+                                    UIKit::listWith(...$links),
+                                    UIKit::pagination($currentPage, $totalItems)
+                                ]);
+                        });
+            });
+    }
 
     static public function markdownConfig()
     {
@@ -302,6 +375,53 @@ abstract class ContentBuilder
         ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
         ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
         ->unfold();
+    }
+
+// -> Content
+    static public function contentDetails()
+    {
+        $meta = static::store()->plus("content.md")->markdown()->meta();
+
+        $return = Shoop::dictionary([]);
+        $return = $return->plus(
+            ($meta->modified === null)
+                ? Shoop::string("")
+                : Shoop::string(
+                    Carbon::createFromFormat("Ymd", $meta->modified, "America/Chicago")
+                        ->toFormattedDateString()
+                ),
+            "modified"
+        );
+
+
+        $return = $return->plus(
+            ($meta->created === null)
+                ? Shoop::string("")
+                : Shoop::string(
+                        Carbon::createFromFormat("Ymd", $meta->created, "America/Chicago")
+                            ->toFormattedDateString()
+                ),
+            "created"
+        );
+
+        $return = $return->plus(
+            ($meta->moved === null)
+                ? Shoop::string("")
+                : Shoop::string(
+                        Carbon::createFromFormat("Ymd", $meta->moved, "America/Chicago")
+                            ->toFormattedDateString()
+                    ),
+            "moved"
+        );
+
+        $return = $return->plus(
+            ($meta->original === null)
+                ? Shoop::string("")
+                : Shoop::string($meta->original),
+            "original"
+        );
+
+        return $return->noEmpties();
     }
 
 // -> URI
@@ -434,91 +554,10 @@ abstract class ContentBuilder
         )->meta(...static::meta());
     }
 
-    static public function uriTocView(
-        $currentPage = 1,
-        $path = "/feed"
-    )
-    {
-        return UIKit::webView(
-            static::uriPageTitle(),
-            static::uriContentMarkdownHtml(false, [], [], true, true, [], $path),
-            ...static::uriToc($currentPage, static::uriContentMarkdown($path)->meta()->toc())
-        )->meta(...static::meta());
-    }
 
 
 
-    // static public function uriContentMarkdownDetails()
-    // {
-    //     $markdown = static::uriContentMarkdown();
 
-    //     $modified = ($markdown->meta()->modified === null)
-    //         ? Shoop::string("")
-    //         : Shoop::string("Modified on: ")->plus(
-    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->modified, "America/Chicago")
-    //                     ->toFormattedDateString()
-    //             );
-
-    //     $created = ($markdown->meta()->created === null)
-    //         ? Shoop::string("")
-    //         : Shoop::string("Created on: ")->plus(
-    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Chicago")
-    //                     ->toFormattedDateString()
-    //             );
-
-    //     $moved = ($markdown->meta()->moved === null)
-    //         ? Shoop::string("")
-    //         : Shoop::string("Moved on: ")->plus(
-    //                 Carbon::createFromFormat("Ymd", $markdown->meta()->moved, "America/Chicago")
-    //                     ->toFormattedDateString()
-    //             );
-
-    //     return Shoop::array([$modified, $created, $moved])->noEmpties();
-    // }
-
-    static public function uriContentMarkdownDetailsParagraph()
-    {
-        return self::uriContentMarkdownDetails()->count()
-            ->is(0, function($result) {
-                return ($result->unfold())
-                    ? Shoop::string("")
-                    : UIKit::p(
-                        self::uriContentMarkdownDetails()->join(UIKit::br())->unfold()
-                    );
-            });
-    }
-
-    static public function uriToc($currentPage, $items = [])
-    {
-        return Type::sanitizeType($items, ESArray::class)
-            ->isEmpty(function($result, $items) {
-                return ($result->unfold())
-                    ? Shoop::array([])
-                    : $items->each(function($uri) {
-                        return static::uriContentStore($uri)
-                            ->isFile(function($result, $store) use ($uri) {
-                                if (! $result->unfold()) {
-                                    return "";
-                                }
-                                $title = static::uriTitleForContentStore($store);
-                                return UIKit::anchor($title, $uri);
-                            });
-                    });
-
-            })->isEmpty(function($result, $links) use ($currentPage) {
-                return ($result->unfold())
-                    ? Shoop::array([])
-                    : $links->count()->isGreaterThan(0,
-                        function($result, $totalItems) use ($links, $currentPage) {
-                            return (! $result->unfold())
-                                ? Shoop::array([])
-                                : Shoop::array([
-                                    UIKit::listWith(...$links),
-                                    UIKit::pagination($currentPage, $totalItems)
-                                ]);
-                        });
-            });
-    }
 
 // TODO: Test
     // static public function uriBreadcrumbs()
