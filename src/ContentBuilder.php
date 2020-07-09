@@ -110,10 +110,12 @@ abstract class ContentBuilder
                     }
                     return Shoop::array([$title]);
                 }
+
                 $s = $store->dropLast();
 
                 return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
                     $content = $s->plus("content.md");
+
                     $return = "";
                     if ($checkHeadingFirst and
                         $s->metaMember("heading")->isNotEmpty
@@ -141,6 +143,11 @@ abstract class ContentBuilder
     {
         if (strlen($type) === 0) {
             $type = static::PAGE;
+        }
+
+        $parts = Type::sanitizeType($parts, ESArray::class);
+        if ($parts->isEmpty) {
+            $parts = static::uri(true);
         }
 
         $titles = Shoop::array([]);
@@ -184,6 +191,7 @@ abstract class ContentBuilder
                 $start = $start->start($eventTitles->month, $eventTitles->year);
             }
             $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
+
         }
         return $titles->noEmpties()->join(" | ");
     }
