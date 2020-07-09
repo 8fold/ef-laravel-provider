@@ -260,19 +260,7 @@ abstract class ContentBuilder
         ]);
     }
 
-    abstract static public function shareImage(): ESString;
-
-    static public function markdownConfig()
-    {
-        return Shoop::dictionary([
-            "html_input" => "strip",
-            "allow_unsafe_links" => false
-        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
-        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
-        ->unfold();
-    }
-
-    static public function uriBreadcrumbs()
+    static public function breadcrumbs()
     {
         $uri = static::uri(true)->dropLast();
         return $uri->each(function($part) use (&$uri) {
@@ -293,6 +281,19 @@ abstract class ContentBuilder
                 )->attr("class breadcrumbs");
         });
     }
+
+    abstract static public function shareImage(): ESString;
+
+    static public function markdownConfig()
+    {
+        return Shoop::dictionary([
+            "html_input" => "strip",
+            "allow_unsafe_links" => false
+        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
+        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
+        ->unfold();
+    }
+
 // -> URI
     static public function uri($parts = false) // :ESString|ESArray
     {
