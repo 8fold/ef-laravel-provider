@@ -78,17 +78,23 @@ abstract class ContentBuilder
     public const BOOKEND = "book-end";
 
 // -> Content
-    static public function titles($checkHeadingFirst = true): ESArray
+    static public function titles($checkHeadingFirst = true, $parts = []): ESArray
     {
+        $parts = Type::sanitizeType($parts, ESArray::class);
+
         $store = static::store();
+        if ($parts->isNotEmpty) {
+            $store = static::rootStore()->plus(...$parts);
+
+        }
+
         if (static::rootUri()->isUnfolded("events")) {
             $store = static::eventStore();
         }
-        return $store->plus("content.md")->isFile(
-            function($result, $store) use ($checkHeadingFirst) {
-                if (! $result->unfold()) { return Shoop::array([]); }
+        return $store->plus("content.md")->isNotFile(
+            function($result, $store) use ($checkHeadingFirst, $parts) {
+                if ($result->unfold()) { return Shoop::array([]); }
 
-                $parts = Shoop::path(request()->path())->parts();
                 if ($parts->count()->isUnfolded(1) and
                     $parts->first()->isEmpty
                 ) {
@@ -131,7 +137,7 @@ abstract class ContentBuilder
         });
     }
 
-    static public function title($type = "", $checkHeadingFirst = true): ESString
+    static public function title($type = "", $checkHeadingFirst = true, $parts = []): ESString
     {
         if (strlen($type) === 0) {
             $type = static::PAGE;
@@ -142,12 +148,12 @@ abstract class ContentBuilder
             Shoop::string(static::HEADING)->isUnfolded($type)
         ) {
             $titles = $titles->plus(
-                static::titles($checkHeadingFirst)->first()
+                static::titles($checkHeadingFirst, $parts)->first()
             );
 
         } elseif (Shoop::string(static::TITLE)->isUnfolded($type)) {
             $titles = $titles->plus(
-                static::titles(false)->first()
+                static::titles(false, $parts)->first()
             );
 
         } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
@@ -170,7 +176,7 @@ abstract class ContentBuilder
             ]);
 
         } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
-            $t = static::titles($checkHeadingFirst)->divide(-1);
+            $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
             $start = $t->first();
             $root = $t->last();
             if (static::rootUri()->isUnfolded("events")) {
@@ -266,6 +272,27 @@ abstract class ContentBuilder
         ->unfold();
     }
 
+    static public function uriBreadcrumbs()
+    {
+        $uri = static::uri(true)->dropLast();
+        return $uri->each(function($part) use (&$uri) {
+            $anchor = UIKit::anchor(
+                static::title(static::HEADING, true, $uri),
+                $uri->join("/")->start("/")
+            );
+
+            $uri = $uri->dropLast();
+
+            return $anchor;
+
+        })->noEmpties()->isEmpty(function($result, $anchors) {
+            return ($result->unfold())
+                ? ""
+                : UIKit::nav(
+                    UIKit::listWith(...$anchors)
+                )->attr("class breadcrumbs");
+        });
+    }
 // -> URI
     static public function uri($parts = false) // :ESString|ESArray
     {
@@ -483,27 +510,26 @@ abstract class ContentBuilder
     }
 
 // TODO: Test
-    static public function uriBreadcrumbs()
-    {
-        $store = static::store("content.md")->parent();
-        $uri = static::uriParts();
-        return static::uriParts()->each(function($part) use (&$store, &$uri) {
-            $title = static::uriTitleForContentStore($store);
-            $href = $uri->join("/")->start("/");
-            $anchor = UIKit::anchor($title, $href);
+    // static public function uriBreadcrumbs()
+    // {
+    //     $uri = static::uri(true)->dropLast();
+    //     return $uri->each(function($part) use (&$uri) {
+    //         $title = static::title(static::HEADING, true, $uri);
+    //         $href = $uri->join("/")->start("/");
+    //         $anchor = UIKit::anchor($title, $href);
 
-            $store = $store->parent();
-            $uri = $uri->dropLast();
+    //         $uri = $uri->dropLast();
 
-            return $anchor;
-        })->noEmpties()->dropFirst()->isEmpty(function($result, $paths) {
-            return ($result->unfold())
-                ? ""
-                : UIKit::nav(
-                    UIKit::listWith(...$paths)
-                )->attr("class breadcrumbs");
-        });
-    }
+    //         return $anchor;
+
+    //     })->noEmpties()->isEmpty(function($result, $anchors) {
+    //         return ($result->unfold())
+    //             ? ""
+    //             : UIKit::nav(
+    //                 UIKit::listWith(...$anchors)
+    //             )->attr("class breadcrumbs");
+    //     });
+    // }
 
     static public function uriContentMarkdownHtml(
         $details = true,
