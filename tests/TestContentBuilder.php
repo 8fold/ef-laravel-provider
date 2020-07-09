@@ -22,60 +22,76 @@ use Eightfold\Shoop\{
 
 class TestContentBuilder extends ContentBuilder
 {
-    static public function pageUri(): ESString
-    {
-        return Shoop::string(request()->path())->isEmpty(function($result) {
-            return ($result)
-                ? Shoop::string("/")
-                : Shoop::string(request()->path());
-        });
-    }
-
-    static public function contentStorePath(): ESString
-    {
-        return Shoop::string(__DIR__)->plus("/content");
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     static public function view(...$content)
     {
         return UIKit::webView(
-            static::uriPageTitle()->unfold(),
-            static::contentStore()->markdown()->html()->unfold()
+            static::title()->unfold(),
+            static::store()->markdown()->html()->unfold()
         );
     }
 
-    static public function uriDir($base = __DIR__): ESString
+    static public function shareImage(): ESString
     {
-        return parent::uriDir($base);
+        return Shoop::string("https://8fold.pr/media/og/default-image.png");
     }
 
-    static public function copyright($holder = "")
+    static public function rootStore(): ESStore
     {
-        return parent::copyright("Eightfold");
+        return Shoop::store(__DIR__)->plus("content");
     }
 
-    static public function uriContentMarkdownDetails()
-    {
-        return Shoop::array([])->plus(
-            UIKit::p(parent::uriContentMarkdownDetails()->join(UIKit::br())->unfold())->unfold(),
-            UIKit::p("Hello")->unfold()
-        );
-    }
+
+
+
+
+
+    // static public function pageUri(): ESString
+    // {
+    //     return Shoop::string(request()->path())->isEmpty(function($result) {
+    //         return ($result)
+    //             ? Shoop::string("/")
+    //             : Shoop::string(request()->path());
+    //     });
+    // }
+
+    // static public function contentStorePath(): ESString
+    // {
+    //     return Shoop::string(__DIR__)->plus("/content");
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // static public function uriDir($base = __DIR__): ESString
+    // {
+    //     return parent::uriDir($base);
+    // }
+
+    // static public function copyright($name, $startYear = ""): ESString
+    // {
+    //     return parent::copyright("Eightfold");
+    // }
+
+    // static public function uriContentMarkdownDetails()
+    // {
+    //     return Shoop::array([])->plus(
+    //         UIKit::p(parent::uriContentMarkdownDetails()->join(UIKit::br())->unfold())->unfold(),
+    //         UIKit::p("Hello")->unfold()
+    //     );
+    // }
 }

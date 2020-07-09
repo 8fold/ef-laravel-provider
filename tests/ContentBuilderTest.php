@@ -5,14 +5,9 @@ namespace Eightfold\Site\Tests;
 use Orchestra\Testbench\BrowserKit\TestCase;
 // use Orchestra\Testbench\TestCase;
 
-use Eightfold\Site\Helpers\Uri;
-use Eightfold\Site\Helpers\ContentStore;
-
 use Eightfold\Site\Tests\TestContentBuilder as ContentBuilder;
 
 use Eightfold\ShoopExtras\Shoop;
-
-
 
 class ContentBuilderTest extends TestCase
 {
@@ -24,23 +19,21 @@ class ContentBuilderTest extends TestCase
     public function testUriAndContentStoreSet()
     {
         // TODO: Make these methods private until absolutely necessary.
-        $builder = ContentBuilder::fold();
+        // $builder = ContentBuilder::fold();
 
         $expected = "/";
-        $actual = $builder->pageUri();
+        $actual = ContentBuilder::uri();
         $this->assertEquals($expected, $actual->unfold());
 
         $expected = __DIR__ ."/content";
-        $actual = $builder->store();
+        $actual = ContentBuilder::store();
         $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testCanGetRemoteAssets()
     {
-        $builder = ContentBuilder::fold();
-
         $expected = __DIR__ ."/content/.assets";
-        $actual = $builder->assets();
+        $actual = ContentBuilder::assetsStore();
         $this->assertEquals($expected, $actual->unfold());
     }
 
@@ -68,86 +61,48 @@ class ContentBuilderTest extends TestCase
 
     public function testStore()
     {
-        $builder = ContentBuilder::fold();
-
         $expected = "Root";
-        $actual = $builder->title();
+        $actual = ContentBuilder::title();
         $this->assertSame($expected, $actual->unfold());
 
         $this->visit("/somewhere/else");
         $expected = "Else | Somewhere | Root";
-        $actual = ContentBuilder::fold()->title();
+        $actual = ContentBuilder::title();
         $this->assertSame($expected, $actual->unfold());
 
-        // $expected = "Else";
-        // $actual = ContentBuilder::contentStore()->markdown()->meta()->title;
-        // $this->assertSame($expected, $actual);
+        $expected = "Else";
+        $actual = ContentBuilder::title(ContentBuilder::TITLE);
+        $this->assertSame($expected, $actual->unfold());
     }
 
     public function testPageTitle()
     {
-        // $this->visit("/somewhere/else");
-        // $base = __DIR__;
-        // $expected = "Else | Somewhere | Root";
-        // $actual = ContentBuilder::uriPageTitle();
-        // $this->assertSame($expected, $actual->unfold());
+        $this->visit("/somewhere/else");
+        $base = __DIR__;
+        $expected = "Else | Somewhere | Root";
+        $actual = ContentBuilder::title();
+        $this->assertSame($expected, $actual->unfold());
 
-        // $expected = "Else | Root";
-        // $actual = ContentBuilder::uriShareTitle();
-        // $this->assertSame($expected, $actual->unfold());
-    }
-
-    public function testPageContent()
-    {
-        // $this->visit("/somewhere/else")->see("Hello, World!");
-    }
-
-    public function testRss()
-    {
-        // $expected = __DIR__ ."/content/feed/content.md";
-        // $actual = ContentBuilder::rssItemsStore();
-        // $this->assertEquals($expected, $actual->unfold());
-
-        // $expected = [
-        //     "/somewhere/else",
-        //     "/somewhere",
-        //     "/",
-        //     "/somewhere/else",
-        //     "/somewhere",
-        //     "/",
-        //     "/somewhere/else",
-        //     "/somewhere",
-        //     "/",
-        //     "/fake/else",
-        //     "/somewhere",
-        //     "/"
-        // ];
-        // $actual = ContentBuilder::rssItemsStoreItems();
-        // $this->assertEquals($expected, $actual->unfold());
-
-        // $expected = "Copyright © Eightfold ". date("Y") .". All rights reserved.";
-        // $actual = ContentBuilder::copyright();
-        // $this->assertEquals($expected, $actual);
-/*
-        $expected = '<?xml version="1.0"?>'."\n".'<rss version="2.0"><channel><title>8fold Laravel Service Provider</title><link>https://8fold.dev</link><description>A generic service provider for most 8fold projects.</description><language>en-us</language><copyright>Copyright © Eightfold 2020. All rights reserved.</copyright><item><title>Else</title><link>https://8fold.dev/somewhere/else</link><guid>https://8fold.dev/somewhere/else</guid><description>Hello, World!</description><pubDate>Wed, 01 Apr 2020 12:00:00 -0400</pubDate></item><item><title>Somewhere</title><link>https://8fold.dev/somewhere</link><guid>https://8fold.dev/somewhere</guid><description>External link</description></item><item><title>Else</title><link>https://8fold.dev/somewhere/else</link><guid>https://8fold.dev/somewhere/else</guid><description>Hello, World!</description><pubDate>Wed, 01 Apr 2020 12:00:00 -0400</pubDate></item><item><title>Somewhere</title><link>https://8fold.dev/somewhere</link><guid>https://8fold.dev/somewhere</guid><description>External link</description></item><item><title>Else</title><link>https://8fold.dev/somewhere/else</link><guid>https://8fold.dev/somewhere/else</guid><description>Hello, World!</description><pubDate>Wed, 01 Apr 2020 12:00:00 -0400</pubDate></item><item><title>Somewhere</title><link>https://8fold.dev/somewhere</link><guid>https://8fold.dev/somewhere</guid><description>External link</description></item><item><title>Somewhere</title><link>https://8fold.dev/somewhere</link><guid>https://8fold.dev/somewhere</guid><description>External link</description></item></channel></rss>';
-        $actual = ContentBuilder::rssCompiled();
-        $this->assertEquals($expected, $actual->unfold());
-        */
+        $expected = "Else | Root";
+        $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
+        $this->assertSame($expected, $actual->unfold());
     }
 
     public function testContentDetails()
     {
-        // $this->visit("/somewhere/else");
-        // $expected = Shoop::array([
-        //     "<p>Modified on: Apr 1, 2020<br>Created on: Apr 1, 2020</p>",
-        //     "<p>Hello</p>"
-        // ]);
-        // $actual = ContentBuilder::uriContentMarkdownDetails();
-        // $this->assertSame($expected->unfold(), $actual->unfold());
+        $this->visit("/somewhere/else");
+        $expected = Shoop::dictionary([
+            'modified' => 'Jun 3, 2020',
+            'created' => 'Apr 1, 2020',
+            'moved' => 'May 1, 2020',
+            'original' => 'https://8fold.pro 8fold'
+        ]);
+        $actual = ContentBuilder::contentDetails();
+        $this->assertSame($expected->unfold(), $actual->unfold());
 
-        // $expected = '<p>Modified on: Apr 1, 2020<br>Created on: Apr 1, 2020</p>';
-        // $actual = ContentBuilder::uriContentMarkdownDetailsParagraph();
-        // $this->assertSame($expected, $actual->unfold());
+        $expected = '<p>Created on Apr 1, 2020 (updated Jun 3, 2020), which was<br> originally posted on <a href="https://8fold.pro">8fold</a> and moved May 1, 2020.</p>';
+        $actual = ContentBuilder::contentDetailsView();
+        $this->assertSame($expected, $actual->unfold());
     }
 
     public function testPaginationPages()
@@ -159,7 +114,7 @@ class ContentBuilderTest extends TestCase
     {
         // $this->visit("/toc");
         // $expected = ["/", "/somewhere", "/somewhere/else"];
-        // $actual = ContentBuilder::uriContentMarkdownToc();
+        // $actual = ContentBuilder::toc(1);
         // $this->assertEquals($expected, $actual->unfold());
     }
 

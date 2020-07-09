@@ -8,16 +8,16 @@ use Eightfold\Markup\Element;
 
 Route::prefix("feed")->group(function() use ($contentBuilderClass) {
     Route::get("/", function() use ($contentBuilderClass) {
-        return $contentBuilderClass::uriContentStore("/feed")->isFile(
+        return $contentBuilderClass::store()->plus("content.md")->isFile(
             function($result, $store) use ($contentBuilderClass) {
-                if (! $result) {
+                if (! $result->unfold()) {
                     abort(404);
                 }
 
                 return ($store->markdown()->meta()->hasMemberUnfolded("redirect"))
                     ? redirect($store->markdown()->meta()->redirect)
                     : view("ef::default")
-                        ->with("view", $contentBuilderClass::uriTocView());
+                        ->with("view", $contentBuilderClass::tocView());
             });
     });
 
@@ -35,7 +35,7 @@ Route::prefix("feed")->group(function() use ($contentBuilderClass) {
                 return ($store->markdown()->meta()->hasMemberUnfolded("redirect"))
                     ? redirect($store->markdown()->meta()->redirect)
                     : view("ef::default")
-                        ->with("view", $contentBuilderClass::uriTocView($currentPage));
+                        ->with("view", $contentBuilderClass::tocView($currentPage));
             });
     });
 
