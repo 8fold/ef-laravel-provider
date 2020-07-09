@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b656dd8989deff661f97e8d44641c4c",
+    "content-hash": "edf65fa1126941ea7c4771073fbbcf88",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
-            "version": "dev-master",
+            "version": "0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/commonmark-abbreviations.git",
@@ -111,19 +111,20 @@
         },
         {
             "name": "8fold/php-markup",
-            "version": "0.1.21",
+            "version": "0.1.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
-                "reference": "cfeebcfb254dc3aaf8d92ee001eae2a0c17a3ed1"
+                "reference": "d306a52ae2f8bd35c0e21986765c5d51b778ae15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-markup/zipball/cfeebcfb254dc3aaf8d92ee001eae2a0c17a3ed1",
-                "reference": "cfeebcfb254dc3aaf8d92ee001eae2a0c17a3ed1",
+                "url": "https://api.github.com/repos/8fold/php-markup/zipball/d306a52ae2f8bd35c0e21986765c5d51b778ae15",
+                "reference": "d306a52ae2f8bd35c0e21986765c5d51b778ae15",
                 "shasum": ""
             },
             "require": {
+                "8fold/commonmark-abbreviations": "~0.1",
                 "8fold/php-shoop-extras": "~0.1",
                 "nesbot/carbon": "~2.36",
                 "php": "~7.0"
@@ -158,7 +159,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-06T01:06:12+00:00"
+            "time": "2020-07-09T02:19:49+00:00"
         },
         {
             "name": "8fold/php-shoop",
@@ -6216,8 +6217,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "8fold/php-events": 20,
-        "8fold/commonmark-abbreviations": 20
+        "8fold/php-events": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
