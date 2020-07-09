@@ -261,6 +261,8 @@ abstract class ContentBuilder
 
     static public function shareMeta()
     {
+        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
+        // https://cards-dev.twitter.com/validator
         return Shoop::array([
             UIKit::meta()->attr("property og:title", "content ". static::title(static::BOOKEND)),
             UIKit::meta()->attr("property og:url", "content ". url()->current()),
