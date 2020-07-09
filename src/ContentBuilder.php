@@ -13,9 +13,6 @@ use League\CommonMark\HtmlRenderer;
 
 // available extensions
 use League\CommonMark\Extension\{
-    GithubFlavoredMarkdownExtension,
-    Autolink\AutolinkExtension,
-    DisallowedRawHtml\DisallowedRawHtmlExtension,
     Strikethrough\StrikethroughExtension,
     Table\TableExtension,
     TaskList\TaskListExtension
@@ -23,18 +20,14 @@ use League\CommonMark\Extension\{
 
 use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
-use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkRenderer;
-use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
-use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
 use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
 // end extensions
-//
+
 use Eightfold\ShoopExtras\{
     Shoop,
-    ESStore,
-    ESUri
+    ESStore
 };
 
 use Eightfold\Shoop\Helpers\Type;
@@ -49,21 +42,16 @@ use Eightfold\Shoop\{
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
 
-use Eightfold\Site\Helpers\Uri;
-use Eightfold\Site\Helpers\ContentStore;
-
 abstract class ContentBuilder
 {
-    private $uri;
-    private $contentStore;
-
     /**
      * Title member from YAML front matter.
      */
     public const TITLE = "title";
 
     /**
-     * Heading member from YAML front matter, falls back to title.
+     * Heading member from YAML front matter, falls back to title member,
+     * if heading not set.
      */
     public const HEADING = "heading";
 
@@ -74,6 +62,8 @@ abstract class ContentBuilder
     public const PAGE = "page";
 
     /**
+     * @deprecated
+     *
      * Uses the title member from YAML front matter to build a two-part title,
      * which includes the title for the current URL plus the title of the root
      * page with a separater. ex. Leaf | Root
@@ -81,87 +71,337 @@ abstract class ContentBuilder
     public const SHARE = "share";
 
     /**
-     * The root-relative path (no domain or protocol) to base things on.
-     * ex. /root/trunk/branch/leaf
+     * Uses the title member from YAML front matter to build a two-part title,
+     * which includes the title for the current URL plus the title of the root
+     * page with a separater. ex. Leaf | Root
      */
-    abstract static public function pageUri(): ESString;
+    public const BOOKEND = "book-end";
 
-    /**
-     * The fully-qualified path to the root folder holding the content.
-     * ex. /Users/8fold/site-name/content
-     */
-    abstract static public function contentStorePath(): ESString;
-
-    static public function fold($uri = "", $contentStorePath = "")
+// -> Content
+    static public function titles($checkHeadingFirst = true, $parts = []): ESArray
     {
-        return new static($uri, $contentStorePath);
-    }
+        $parts = Type::sanitizeType($parts, ESArray::class);
 
-    public function __construct($uri = "", $contentStorePath = "")
-    {
-        $uri = Type::sanitizeType($uri, ESString::class)
-            ->isEmpty(function($result) use ($uri) {
-                return ($result)
-                    ? static::pageUri()
-                    : $uri;
-            });
+        $store = static::store();
+        if ($parts->isNotEmpty) {
+            $store = static::rootStore()->plus(...$parts);
 
-        $contentStorePath = Type::sanitizeType($contentStorePath, ESString::class)
-            ->isEmpty(function($result) use ($contentStorePath) {
-                return ($result)
-                    ? static::contentStorePath()
-                    : $contentStorePath;
-            });
-
-        $this->uri          = Shoop::uri($uri);
-        $this->contentStore = Shoop::store($contentStorePath);
-    }
-
-    public function uri()
-    {
-        return $this->uri;
-    }
-
-    public function store()
-    {
-        return $this->contentStore;
-    }
-
-    public function assets()
-    {
-        return $this->store()->plus(".assets");
-    }
-
-    public function title($type = "page")
-    {
-// var_dump($this->uri()->parts());
-// die(var_dump($this->store()));
-        $store = $this->store()->plus(...static::uri()->parts());
-        $titles = $this->uri()->array()->each(
-            function($part) use ($type, &$store) {
-                return $store->isFolder(
-                    function($result) use ($type, &$store) {
-                        return (! $result)
-                            ? ""
-                            : $store->plus("content.md")->isFile(
-                                function($result) use ($type, &$store) {
-                                    if (! $result) { return ""; }
-                                    $return = $store->plus("content.md")
-                                        ->markdown()->meta()->title;
-                                    $store = $store->parent();
-                                    return $return;
-
-                                });
-                    });
-            });
-
-        $rootTitle = $this->store()->plus("content.md")->markdown()->meta()->title;
-        if ($rootTitle !== null) {
-            $titles = $titles->plus($rootTitle);
         }
 
+        if (static::rootUri()->isUnfolded("events")) {
+            $store = static::eventStore();
+        }
+        return $store->plus("content.md")->isNotFile(
+            function($result, $store) use ($checkHeadingFirst, $parts) {
+                if ($result->unfold()) { return Shoop::array([]); }
+
+                if ($parts->count()->isUnfolded(1) and
+                    $parts->first()->isEmpty
+                ) {
+                    if ($checkHeadingFirst and $store->metaMember("heading")->isNotEmpty) {
+                        return Shoop::array([
+                            $store->metaMember("heading")
+                        ]);
+                    }
+
+                    $title = $store->metaMember("title");
+                    if ($title->isEmpty) {
+                        $title = Shoop::string("");
+                    }
+                    return Shoop::array([$title]);
+                }
+
+                $s = $store->dropLast();
+
+                return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
+                    $content = $s->plus("content.md");
+
+                    $return = "";
+                    if ($checkHeadingFirst and
+                        $s->metaMember("heading")->isNotEmpty
+                    ) {
+                        $return = $content->metaMember("heading");
+
+                    } else {
+                        $return = $content->metaMember("title");
+                        if ($return->isEmpty) {
+                            $return = "";
+
+                        }
+                    }
+
+                    $s = $s->dropLast();
+                    return $return;
+
+                })->noEmpties()->plus(
+                    static::rootStore()->plus("content.md")->metaMember("title")->unfold()
+                );
+        });
+    }
+
+    static public function title($type = "", $checkHeadingFirst = true, $parts = []): ESString
+    {
+        if (strlen($type) === 0) {
+            $type = static::PAGE;
+        }
+
+        $parts = Type::sanitizeType($parts, ESArray::class);
+        if ($parts->isEmpty) {
+            $parts = static::uri(true);
+        }
+
+        $titles = Shoop::array([]);
+        if ($checkHeadingFirst and
+            Shoop::string(static::HEADING)->isUnfolded($type)
+        ) {
+            $titles = $titles->plus(
+                static::titles($checkHeadingFirst, $parts)->first()
+            );
+
+        } elseif (Shoop::string(static::TITLE)->isUnfolded($type)) {
+            $titles = $titles->plus(
+                static::titles(false, $parts)->first()
+            );
+
+        } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
+            $t = static::titles($checkHeadingFirst)->divide(-1);
+            $start = $t->first();
+            $root = $t->last();
+            if (static::rootUri()->isUnfolded("events")) {
+                $eventTitles = static::eventsTitles();
+                $start = $start->start($eventTitles->month ." ". $eventTitles->year);
+            }
+
+            if ($root->count()->isGreaterThanUnfolded(1)) {
+                $root = $titles->plus($root->last());
+            }
+
+            $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
+            $titles = Shoop::array([
+                $titles->first(),
+                $titles->last()
+            ]);
+
+        } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
+            $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
+            $start = $t->first();
+            $root = $t->last();
+            if (static::rootUri()->isUnfolded("events")) {
+                $eventTitles = static::eventsTitles();
+                $start = $start->start($eventTitles->month, $eventTitles->year);
+            }
+            $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
+
+        }
         return $titles->noEmpties()->join(" | ");
     }
+
+    static public function eventsTitles($type = "")
+    {
+        $parts = Shoop::string(request()->path())->divide("/");
+        $year = $parts->dropFirst()->first;
+        $month = Carbon::createFromFormat(
+            "m",
+            $parts->dropFirst(2)->first,
+            "America/Chicago"
+        )->format("F");
+
+        return Shoop::dictionary([
+            "year"  => $year,
+            "month" => $month
+        ]);
+    }
+
+    static public function copyright($name, $startYear = ""): ESString
+    {
+        if (strlen($startYear) > 0) {
+            $startYear = $startYear ."&ndash;";
+        }
+        return Shoop::string("Copyright © {$startYear}". date("Y") ." {$name}. All rights reserved.");
+    }
+
+// -> UI
+    static public function meta(): ESArray
+    {
+        return Shoop::array([
+            UIKit::meta()->attr(
+                "name viewport",
+                "content width=device-width,
+                initial-scale=1"
+            )
+        ])->plus(...static::faviconsMeta())
+        ->plus(...static::shareMeta())
+        ->plus(...static::stylesMeta())
+        ->plus(...static::scriptsMeta());
+    }
+
+    static public function faviconsMeta()
+    {
+        return Shoop::array([
+            UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
+            UIKit::link()->attr("rel apple-touch-icon", "href /assets/favicons/apple-touch-icon.png", "sizes 180x180"),
+            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-32x32.png", "sizes 32x32"),
+            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-16x16.png", "sizes 16x16")
+        ]);
+    }
+
+    static public function stylesMeta()
+    {
+        return Shoop::array([
+            UIKit::link()->attr("rel stylesheet", "href /css/main.css")
+        ]);
+    }
+
+    static public function scriptsMeta()
+    {
+        return Shoop::array([
+            UIKit::script()->attr("src /js/main.js")
+        ]);
+    }
+
+    static public function shareMeta()
+    {
+        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
+        // https://cards-dev.twitter.com/validator
+        return Shoop::array([
+            UIKit::meta()->attr("property og:title", "content ". static::title(static::BOOKEND)),
+            UIKit::meta()->attr("property og:url", "content ". url()->current()),
+            UIKit::meta()->attr("property og:image", "content ". static::shareImage())
+        ]);
+    }
+
+    static public function breadcrumbs()
+    {
+        $uri = static::uri(true)->dropLast();
+        return $uri->each(function($part) use (&$uri) {
+            $anchor = UIKit::anchor(
+                static::title(static::HEADING, true, $uri),
+                $uri->join("/")->start("/")
+            );
+
+            $uri = $uri->dropLast();
+
+            return $anchor;
+
+        })->noEmpties()->isEmpty(function($result, $anchors) {
+            return ($result->unfold())
+                ? ""
+                : UIKit::nav(
+                    UIKit::listWith(...$anchors)
+                )->attr("class breadcrumbs");
+        });
+    }
+
+    abstract static public function shareImage(): ESString;
+
+    static public function markdownConfig()
+    {
+        return Shoop::dictionary([
+            "html_input" => "strip",
+            "allow_unsafe_links" => false
+        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
+        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
+        ->unfold();
+    }
+
+// -> URI
+    static public function uri($parts = false) // :ESString|ESArray
+    {
+        $base = Shoop::uri(request()->url())->tail();
+        if ($parts) {
+            return $base->divide("/")->noEmpties()->reindex();
+        }
+        return $base;
+    }
+
+    static public function rootUri(): ESString
+    {
+        return static::uri(true)->isEmpty(function($result, $array) {
+            return ($result->unfold()) ? Shoop::string("") : $array->first();
+        });
+    }
+
+// -> Stores
+    abstract static public function rootStore(): ESStore;
+
+    static public function store(...$plus): ESStore
+    {
+        if (Shoop::string(request()->path())->isUnfolded("/")) {
+            return static::rootStore();
+        }
+        $parts = Shoop::path(request()->path())->parts();
+        return static::rootStore()->plus(...$parts)->plus(...$plus);
+    }
+
+    static public function assetsStore(): ESStore
+    {
+        return static::rootStore()->plus(".assets");
+    }
+
+    static public function eventStore(): ESStore
+    {
+        return static::rootStore()->plus("events");
+    }
+
+// -> RSS
+    static public function rssStore()
+    {
+        return static::rootStore()->plus("feed", "content.md");
+    }
+
+    static public function rssDescriptionReplacements()
+    {
+        return Shoop::dictionary([
+            "</h1>" => ":",
+            "</h2>" => ":",
+            "</h3>" => ":",
+            "</h4>" => ":",
+            "</h5>" => ":",
+            "</h6>" => ":",
+            "<h1>" => "",
+            "<h2>" => "",
+            "<h3>" => "",
+            "<h4>" => "",
+            "<h5>" => "",
+            "<h6>" => ""
+        ]);
+    }
+
+// -> Markdown
+    static public function markdown($uri = "")
+    {
+        return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
+            function($result, $parts) {
+                $store = static::store();
+                if ($result->unfold()) {
+                    $store = static::store(...$parts);
+                }
+                return $store->plus("content.md")->extensions(
+                    ...static::markdownExtensions()
+                );
+        });
+    }
+
+    static public function markdownExtensions()
+    {
+        return Shoop::array([
+            StrikethroughExtension::class,
+            TableExtension::class,
+            TaskListExtension::class,
+            ExternalLinkExtension::class,
+            SmartPunctExtension::class,
+            AbbreviationExtension::class
+        ]);
+    }
+
+// -> Deprecated
+
+
+
+
+
+
+
 
 
 
@@ -187,7 +427,7 @@ abstract class ContentBuilder
         return UIKit::webView(
             static::uriPageTitle(),
             ...Shoop::array($content)->isEmpty(function($result, $content) {
-                return ($result)
+                return ($result->unfold())
                     ? Shoop::array(static::uriContentMarkdownHtml())
                     : $content;
             })
@@ -206,55 +446,7 @@ abstract class ContentBuilder
         )->meta(...static::meta());
     }
 
-    static public function uriContentMarkdown($uri = "")
-    {
-        return static::contentStore($uri)->markdown()->extensions(
-            ...static::uriContentMarkdownExtensions()
-        );
-    }
 
-    static private function uriContentMarkdownMeta($uri = "")
-    {
-        $markdown = static::uriContentMarkdown($uri);
-        if ($markdown->meta === null) {
-            return Shoop::object(new \stdClass());
-        }
-        return static::uriContentMarkdown($uri)->meta();
-    }
-
-    static private function uriContentMarkdownMetaForMember($member = "", $uri = "")
-    {
-        $uri = Shoop::string($uri)->isEmpty(function($result, $uri) {
-            return ($result) ? request()->path() : $uri->unfold();
-        });
-        return static::uriContentMarkdownMeta($uri)->hasMember(
-            $member,
-            function($result, $object) use ($uri, $member) {
-                return ($result) ? $object->{$member} : $object;
-            });
-    }
-
-    static public function uriContentMarkdownExtensions()
-    {
-        return Shoop::array([
-            StrikethroughExtension::class,
-            TableExtension::class,
-            TaskListExtension::class,
-            ExternalLinkExtension::class,
-            SmartPunctExtension::class,
-            // AbbreviationExtension::class,
-            HeadingPermalinkExtension::class
-        ]);
-    }
-
-    // static public function uriContentMarkdownToc(): ESArray
-    // {
-    //     $toc = static::uriContentMarkdownMetaForMember("toc");
-    //     if (is_a($toc, ESArray::class)) {
-    //         return $toc;
-    //     }
-    //     return Shoop::array([]);
-    // }
 
     // static public function uriContentMarkdownDetails()
     // {
@@ -288,7 +480,7 @@ abstract class ContentBuilder
     {
         return self::uriContentMarkdownDetails()->count()
             ->is(0, function($result) {
-                return ($result)
+                return ($result->unfold())
                     ? Shoop::string("")
                     : UIKit::p(
                         self::uriContentMarkdownDetails()->join(UIKit::br())->unfold()
@@ -296,90 +488,59 @@ abstract class ContentBuilder
             });
     }
 
-    static public function uriToc()
+    static public function uriToc($currentPage, $items = [])
     {
-        $toc = static::uriContentMarkdownToc();
-        $copy = static::uriContentMarkdownToc();
-        $anchors = Shoop::array([])->noEmpties()->reindex();
-        $toc->each(function($uri) use (&$anchors) {
-            var_dump($uri);
-            $title = static::uriContentMarkdownMetaForMember("title", $uri);
-            if ($title === null) {
-                $anchors = $anchors->plus("");
-                return;
-            }
-            $href = $uri;
-            $anchors = $anchors->plus(
-                UIKit::anchor($title, $href)
-            );
-        });
+        return Type::sanitizeType($items, ESArray::class)
+            ->isEmpty(function($result, $items) {
+                return ($result->unfold())
+                    ? Shoop::array([])
+                    : $items->each(function($uri) {
+                        return static::uriContentStore($uri)
+                            ->isFile(function($result, $store) use ($uri) {
+                                if (! $result->unfold()) {
+                                    return "";
+                                }
+                                $title = static::uriTitleForContentStore($store);
+                                return UIKit::anchor($title, $uri);
+                            });
+                    });
 
-        return Shoop::object(new \stdClass())->plus(
-            UIKit::nav(UIKit::listWith(...$anchors)), "tocAnchors"
-        );
-        // return Type::sanitizeType($items, ESArray::class)
-        //     ->isEmpty(function($result, $items) {
-        //         return ($result)
-        //             ? Shoop::array([])
-        //             : $items->each(function($uri) {
-        //                 return static::contentStore($uri)
-        //                     ->isFile(function($result, $store) use ($uri) {
-        //                         if (! $result) {
-        //                             return "";
-        //                         }
-        //                         $title = static::uriTitleForContentStore($store);
-        //                         return UIKit::anchor($title, $uri);
-        //                     });
-        //             });
-
-        //     })->isEmpty(function($result, $links) use ($currentPage) {
-        //         return ($result)
-        //             ? Shoop::array([])
-        //             : $links->count()->isGreaterThan(0,
-        //                 function($result, $totalItems) use ($links, $currentPage) {
-        //                     return (! $result)
-        //                         ? Shoop::array([])
-        //                         : Shoop::array([
-        //                             UIKit::listWith(...$links),
-        //                             UIKit::pagination($currentPage, $totalItems)
-        //                         ]);
-        //                 });
-        //     });
+            })->isEmpty(function($result, $links) use ($currentPage) {
+                return ($result->unfold())
+                    ? Shoop::array([])
+                    : $links->count()->isGreaterThan(0,
+                        function($result, $totalItems) use ($links, $currentPage) {
+                            return (! $result->unfold())
+                                ? Shoop::array([])
+                                : Shoop::array([
+                                    UIKit::listWith(...$links),
+                                    UIKit::pagination($currentPage, $totalItems)
+                                ]);
+                        });
+            });
     }
 
 // TODO: Test
-    static public function uriBreadcrumbs()
-    {
-        $store = static::contentStore()->parent();
-        $uri = static::uriParts();
-        return static::uriParts()->each(function($part) use (&$store, &$uri) {
+    // static public function uriBreadcrumbs()
+    // {
+    //     $uri = static::uri(true)->dropLast();
+    //     return $uri->each(function($part) use (&$uri) {
+    //         $title = static::title(static::HEADING, true, $uri);
+    //         $href = $uri->join("/")->start("/");
+    //         $anchor = UIKit::anchor($title, $href);
 
-            $title = static::uriTitleForContentStore($store);
-            $href = $uri->join("/")->start("/");
-            $anchor = UIKit::anchor($title, $href);
+    //         $uri = $uri->dropLast();
 
-            $store = $store->parent();
-            $uri = $uri->dropLast();
+    //         return $anchor;
 
-            return $anchor;
-        })->noEmpties()->dropFirst()->isEmpty(function($result, $paths) {
-            return ($result)
-                ? ""
-                : UIKit::nav(
-                    UIKit::listWith(...$paths)
-                )->attr("class breadcrumbs");
-        });
-    }
-
-    static public function markdownConfig()
-    {
-        return Shoop::dictionary([
-            "html_input" => "strip",
-            "allow_unsafe_links" => false
-        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
-        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
-        ->unfold();
-    }
+    //     })->noEmpties()->isEmpty(function($result, $anchors) {
+    //         return ($result->unfold())
+    //             ? ""
+    //             : UIKit::nav(
+    //                 UIKit::listWith(...$anchors)
+    //             )->attr("class breadcrumbs");
+    //     });
+    // }
 
     static public function uriContentMarkdownHtml(
         $details = true,
@@ -410,7 +571,7 @@ abstract class ContentBuilder
 
 
         if ($details) {
-            $title = UIKit::h1(static::uriTitleForContentStore(static::contentStore($uri)));
+            $title = UIKit::h1(static::uriTitleForContentStore(static::uriContentStore($uri)));
 
             $details = static::uriContentMarkdownDetails();
             if (Type::is($details, ESArray::class)) {
@@ -419,298 +580,5 @@ abstract class ContentBuilder
             return $html->start($title->unfold(), $details->unfold());
         }
         return $html;
-    }
-
-    // static public function uriTitleForContentStore(ESStore $store)
-    // {
-    //     return $store->isFolder(function($result, $store) {
-    //         if ($result) {
-    //             return $store->plus("content.md")->isFile(function($result, $store) {
-    //                 if ($result) {
-    //                     return ($store->markdown()->meta()->heading === null)
-    //                         ? $store->markdown()->meta()->title
-    //                         : $store->markdown()->meta()->heading;
-    //                 }
-    //                 return "";
-    //             });
-    //         }
-    //         return "";
-    //     });
-    // }
-
-    // static public function uriPageTitle(): ESString
-    // {
-    //     $store = static::contentStore()->parent();
-    //     return Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-    //         $title = static::uriTitleForContentStore($store);
-    //         $store = $store->parent();
-    //         return $title;
-    //     })->noEmpties()->join(" | ");
-    // }
-
-    static public function uriShareTitle(): ESString
-    {
-        $store = static::contentStore()->parent();
-        $titles = Shoop::string(static::uri())->divide("/")->each(function($part) use (&$store) {
-            $title = static::uriTitleForContentStore($store);
-            $store = $store->parent();
-            return $title;
-        })->noEmpties();
-        return Shoop::array([$titles->last])->plus($titles->first)
-            ->toggle()->join(" | ");
-    }
-
-    /**
-     * @deprecated
-     */
-    static public function contentList($page = 1, $limit = 10)
-    {
-        if (static::rssItemsStoreItems() === null) {
-            return Shoop::string("");
-        }
-        $items = static::rssItemsStoreItems();
-        $links = $items->divide(($page - 1) * $limit)
-            ->last()->first(10)->isEmpty(function($result, $items) {
-                return ($result)
-                    ? Shoop::string("")
-                    : $items->each(function($uri) {
-                        $title = (static::contentStore($uri)->markdown()
-                            ->meta()->heading === null)
-                            ? static::contentStore($uri)->markdown()
-                                ->meta()->title
-                            : static::contentStore($uri)->markdown()
-                                ->meta()->heading;
-                        return ($title === null)
-                            ? Shoop::string("")
-                            : UIKit::anchor($title, $uri);
-                    });
-            })->noEmpties();
-        $list = UIKit::listWith(...$links);
-        $nav = $items->count()->isGreaterThan($limit, function($result, $count) use ($limit) {
-            $pageLinks = $count->roundUp($limit)->range(1)->each(function($pageNumber) {
-                return UIKit::anchor($pageNumber, "/feed/page/{$pageNumber}");
-            });
-
-            if ($pageLinks->count()->isUnfolded(1)) {
-                return "";
-
-            } elseif ($pageLinks->count()->isGreaterThanUnfolded(2)) {
-                die("build next previous links and first and last pages");
-                return UIKit::listWith(...$pageLinks);
-
-            } else {
-                return UIKit::nav(UIKit::listWith(...$pageLinks));
-            }
-        });
-        return Shoop::array([
-            $list,
-            $nav
-        ]);
-    }
-
-    /**
-     * @return ESStore An ESStore where the path goes to the root of the content folder.
-     */
-    // static public function contentStore(
-    //     $uri = "",
-    //     $folderName = "content",
-    //     $base = __DIR__
-    // ): ESStore
-    // {
-    //     return Uri::fold($uri, $base, $folderName)->content();
-    // }
-
-    static public function meta()
-    {
-        return Shoop::array([
-            UIKit::meta()->attr(
-                "name viewport",
-                "content width=device-width,
-                initial-scale=1"
-            ),
-            UIKit::link()->attr(
-                "type image/x-icon",
-                "rel icon",
-                "href /assets/favicons/favicon.ico"
-            ),
-            UIKit::link()->attr(
-                "rel apple-touch-icon",
-                "href /assets/favicons/apple-touch-icon.png",
-                "sizes 180x180"
-            ),
-            UIKit::link()->attr(
-                "rel image/png",
-                "href /assets/favicons/favicon-32x32.png",
-                "sizes 32x32"
-            ),
-            UIKit::link()->attr(
-                "rel image/png",
-                "href /assets/favicons/favicon-16x16.png",
-                "sizes 16x16"
-            )
-        ]);
-    }
-
-    static public function copyright($holder = "")
-    {
-        return Shoop::string("Copyright © {$holder} ". date("Y") .". All rights reserved.");
-    }
-
-// -> RSS
-    static public function rssCompiled()
-    {
-        return Shoop::string(
-            Element::fold("rss",
-                Element::fold("channel",
-                    Element::fold("title", static::rssTitle()),
-                    Element::fold("link", static::rssLink()),
-                    Element::fold("description", static::rssDescription()),
-                    Element::fold("language", "en-us"),
-                    Element::fold("copyright", static::copyright()->unfold()),
-                    ...static::rssItemsStoreItems()->each(function($path) {
-                        $markdown = static::contentStore($path)->markdown();
-
-                        $title = $markdown->meta()->title;
-                        $link = Shoop::string(static::rssLink())
-                            ->plus($path)->unfold();
-
-                        $description = ($markdown->meta()->description === null)
-                            ? $markdown->html()
-                            : $markdown->meta()->description();
-                        if ($description->count()->isUnfolded(0)) {
-                            return "";
-                        }
-                        $description = $description->replace(static::rssDescriptionReplacements())
-                            ->dropTags()->divide(" ")->isGreaterThan(50, function($result, $description) {
-                            return ($result)
-                                ? $description->first(50)->join(" ")->plus("...")
-                                : $description->join(" ");
-                        });
-
-                        $timestamp = ($markdown->meta()->created === null)
-                            ? ""
-                            : Carbon::createFromFormat("Ymd", $markdown->meta()->created, "America/Detroit")
-                                ->hour(12)
-                                ->minute(0)
-                                ->second(0)
-                                ->toRssString();
-                        $t = (strlen($timestamp) > 0)
-                            ? Element::fold("pubDate", $timestamp)
-                            : "";
-
-                        $item = Element::fold(
-                                "item",
-                                    Element::fold("title", htmlspecialchars($title)),
-                                    Element::fold("link", $link),
-                                    Element::fold("guid", $link),
-                                    Element::fold("description", htmlspecialchars($description)),
-                                    $t
-                            );
-                        return $item;
-                    })->noEmpties()
-                )
-            )->attr("version 2.0")->unfold()
-        )->start("<?xml version=\"1.0\"?>\n");
-    }
-
-    static public function rssDescriptionReplacements()
-    {
-        return Shoop::dictionary([
-            "</h1>" => ":",
-            "</h2>" => ":",
-            "</h3>" => ":",
-            "</h4>" => ":",
-            "</h5>" => ":",
-            "</h6>" => ":",
-            "<h1>" => "",
-            "<h2>" => "",
-            "<h3>" => "",
-            "<h4>" => "",
-            "<h5>" => "",
-            "<h6>" => ""
-        ]);
-    }
-
-    static public function rssItemsStore()
-    {
-        return static::contentStore()->plus("feed", "content.md");
-    }
-
-    static public function rssTitle()
-    {
-        return static::rssItemsStore()->markdown()->meta()->rssTitle;
-    }
-
-    static public function rssLink()
-    {
-        return static::rssItemsStore()->markdown()->meta()->rssLink;
-    }
-
-    static public function rssDescription()
-    {
-        return static::rssItemsStore()->markdown()->meta()->rssDescription;
-    }
-
-    static public function rssItemsStoreItems()
-    {
-        if (static::rssItemsStore()->markdown()->meta()->toc === null) {
-            return Shoop::array([]);
-        }
-        return static::rssItemsStore()->markdown()->meta()->toc();
-    }
-
-// -> URI
-    // static public function uri($uri = ""): ESString
-    // {
-    //     if (strlen($uri) > 0) {
-    //         return Shoop::string($uri);
-    //     }
-    //     return Shoop::string(request()->path())->start("/");
-    // }
-
-    static public function uriDir($base = __DIR__): ESString
-    {
-        return Shoop::string($base);
-    }
-
-    static public function uriFolderName($folderName = "content"): ESString
-    {
-        return Shoop::string($folderName);
-    }
-
-    static public function uriRoot(): ESString
-    {
-        return Uri::fold()->root();
-    }
-
-    static public function uriParts(): ESArray
-    {
-        return Uri::fold()->parts();
-    }
-
-    // static public function contentStore(): ESStore
-    // {
-    //     return Uri::fold(static::uri(), static::uriDir(), static::uriFolderName())
-    //         ->content();
-    // }
-
-    /**
-     * The `/.assets` folder can contain whatever you like, but should contain the favicons if you use the `faviconPack()` method and routes.
-     *
-     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
-     */
-    static public function assetsStore(): ESStore
-    {
-        return Uri::fold()->assets();
-    }
-
-    /**
-     * The `/.media` folder can contain whatever you like, but should contain images if you use the `media` routes.
-     *
-     * @return ESStore An ESStore where the path goes to a hidden subfolder of the root content folder.
-     */
-    static public function mediaStore($uri = "")
-    {
-        return Uri::fold()->media();
     }
 }
