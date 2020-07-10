@@ -578,44 +578,9 @@ abstract class ContentBuilder
 
 
 
-    static public function view(...$content)
-    {
-        return UIKit::webView(
-            static::uriPageTitle(),
-            ...Shoop::array($content)->isEmpty(function($result, $content) {
-                return ($result->unfold())
-                    ? Shoop::array(static::uriContentMarkdownHtml())
-                    : $content;
-            })
-        )->meta(...static::meta());
-    }
 
 
 
-
-
-
-// TODO: Test
-    // static public function uriBreadcrumbs()
-    // {
-    //     $uri = static::uri(true)->dropLast();
-    //     return $uri->each(function($part) use (&$uri) {
-    //         $title = static::title(static::HEADING, true, $uri);
-    //         $href = $uri->join("/")->start("/");
-    //         $anchor = UIKit::anchor($title, $href);
-
-    //         $uri = $uri->dropLast();
-
-    //         return $anchor;
-
-    //     })->noEmpties()->isEmpty(function($result, $anchors) {
-    //         return ($result->unfold())
-    //             ? ""
-    //             : UIKit::nav(
-    //                 UIKit::listWith(...$anchors)
-    //             )->attr("class breadcrumbs");
-    //     });
-    // }
 
     static public function uriContentMarkdownHtml(
         $details = true,
