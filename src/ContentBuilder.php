@@ -164,26 +164,23 @@ abstract class ContentBuilder
             );
 
         } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
-            $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
-            $start = $t->first();
-            if ($t->countIsGreaterThanUnfolded(1)) {
-                $root = $t->last();
-            }
+            if (static::rootUri()->isEmpty) {
+                $titles = $titles->plus(
+                    static::titles($checkHeadingFirst, $parts)->first()
+                );
 
-            if (static::rootUri()->isUnfolded("events")) {
-                $eventTitles = static::eventsTitles();
-                $start = $start->start($eventTitles->month ." ". $eventTitles->year);
-            }
+            } else {
+                $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
+                $start = $t->first()->first();
+                $root = $t->last()->first();
+                if (static::rootUri()->isUnfolded("events")) {
+                    $eventTitles = static::eventsTitles();
+                    $start = $start->start($eventTitles->month ." ". $eventTitles->year);
+                    $root = static::rootStore()->plus("content.md")->markdown()->meta()->title();
+                }
 
-            if ($root->count()->isGreaterThanUnfolded(1)) {
-                $root = $titles->plus($root->last());
+                $titles = $titles->plus($start, $root);
             }
-
-            $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
-            $titles = Shoop::array([
-                $titles->first(),
-                $titles->last()
-            ]);
 
         } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
             $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
@@ -193,9 +190,10 @@ abstract class ContentBuilder
                 $eventTitles = static::eventsTitles();
                 $start = $start->start($eventTitles->month, $eventTitles->year);
             }
-            $titles = $titles->plus(...$start)->plus(...$root)->noEmpties();
+            $titles = $titles->plus(...$start)->plus(...$root);
 
         }
+
         return $titles->noEmpties()->join(" | ");
     }
 
@@ -288,7 +286,7 @@ abstract class ContentBuilder
             UIKit::meta()->attr("property og:image", "content ". static::shareImage()),
 
             // LinkedIn required the description tag
-            UIKit::meta()->attr("property og:description", "content ". static::shareDescription()),
+            UIKit::meta()->attr("property og:description", "content ". static::shareDescription())
 
             // recommended adding the following to you own implementation, and
             // specifying the proper dimensions as these represent the minimum
