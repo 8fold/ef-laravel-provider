@@ -503,7 +503,7 @@ abstract class ContentBuilder
         return UIKit::markdown(
             static::store("content.md")->markdown()->content()->unfold()
         )->prepend("# ". static::title(static::HEADING) ."\n\n". static::contentDetailsView() ."\n\n")
-        ->extensions(...parent::markdownExtensions());
+        ->extensions(...static::markdownExtensions());
     }
 
     // static public function markdown($uri = "")
