@@ -498,7 +498,13 @@ abstract class ContentBuilder
     }
 
 // -> Markdown
-    abstract static public function markdown();
+    static public function markdown()
+    {
+        return UIKit::markdown(
+            static::store("content.md")->markdown()->content()->unfold()
+        )->prepend("# ". static::title(static::HEADING) ."\n\n". static::contentDetailsView() ."\n\n")
+        ->extensions(...parent::markdownExtensions());
+    }
 
     // static public function markdown($uri = "")
     // {
