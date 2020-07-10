@@ -363,7 +363,7 @@ abstract class ContentBuilder
         return static::title(static::BOOKEND);
     }
 
-    static public function shareTwitter(): ESSArray
+    static public function shareTwitter(): ESArray
     {
         return Shoop::array([]);
     }
