@@ -59,10 +59,13 @@ class ContentBuilderTest extends TestCase
         // $this->assertSame($expected, $actual->unfold());
     }
 
-    public function testStore()
+    public function testTitle()
     {
         $expected = "Root";
         $actual = ContentBuilder::title();
+        $this->assertSame($expected, $actual->unfold());
+
+        $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
         $this->assertSame($expected, $actual->unfold());
 
         $this->visit("/somewhere/else");
@@ -78,12 +81,16 @@ class ContentBuilderTest extends TestCase
     public function testPageTitle()
     {
         $this->visit("/somewhere/else");
-        $base = __DIR__;
         $expected = "Else | Somewhere | Root";
         $actual = ContentBuilder::title();
         $this->assertSame($expected, $actual->unfold());
 
         $expected = "Else | Root";
+        $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
+        $this->assertSame($expected, $actual->unfold());
+
+        $this->visit("/events/2020/05");
+        $expected = 'May 2020 | Root';
         $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
         $this->assertSame($expected, $actual->unfold());
     }
@@ -92,8 +99,8 @@ class ContentBuilderTest extends TestCase
     {
         $this->visit("/somewhere/else");
         $expected = Shoop::dictionary([
-            'modified' => 'Jun 3, 2020',
             'created' => 'Apr 1, 2020',
+            'modified' => 'Jun 3, 2020',
             'moved' => 'May 1, 2020',
             'original' => 'https://8fold.pro 8fold'
         ]);
