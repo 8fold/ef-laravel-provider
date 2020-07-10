@@ -327,7 +327,7 @@ abstract class ContentBuilder
         return $copy->isEmpty(function($result, $string) {
             return ($result->unfold())
                 ? ""
-                : UIKit::p($copy->plus(".")->unfold());
+                : UIKit::p($string->plus(".")->unfold());
         });
     }
 
