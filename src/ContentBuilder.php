@@ -493,19 +493,21 @@ abstract class ContentBuilder
     }
 
 // -> Markdown
-    static public function markdown($uri = "")
-    {
-        return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
-            function($result, $parts) {
-                $store = static::store();
-                if ($result->unfold()) {
-                    $store = static::store(...$parts);
-                }
-                return $store->plus("content.md")->extensions(
-                    ...static::markdownExtensions()
-                );
-        });
-    }
+    abstract static public function markdown();
+
+    // static public function markdown($uri = "")
+    // {
+    //     return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
+    //         function($result, $parts) {
+    //             $store = static::store();
+    //             if ($result->unfold()) {
+    //                 $store = static::store(...$parts);
+    //             }
+    //             return $store->plus("content.md")->extensions(
+    //                 ...static::markdownExtensions()
+    //             );
+    //     });
+    // }
 
     static public function markdownExtensions()
     {
