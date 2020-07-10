@@ -224,6 +224,22 @@ abstract class ContentBuilder
     }
 
 // -> UI
+    static public function view(...$extras)
+    {
+        if (static::store("content.md")->isNotFile) {
+            abort(404);
+        }
+
+        return UIKit::webView(
+                static::title(),
+                UIKit::main(
+                    static::markdown(),
+                    ...$extras
+                ),
+                static::footer()
+            )->meta(...static::meta());
+    }
+
     static public function meta(): ESArray
     {
         return Shoop::array([
@@ -269,8 +285,17 @@ abstract class ContentBuilder
         return Shoop::array([
             UIKit::meta()->attr("property og:title", "content ". static::title(static::BOOKEND)),
             UIKit::meta()->attr("property og:url", "content ". url()->current()),
-            UIKit::meta()->attr("property og:image", "content ". static::shareImage())
-        ]);
+            UIKit::meta()->attr("property og:image", "content ". static::shareImage()),
+
+            // LinkedIn required the description tag
+            UIKit::meta()->attr("property og:description", "content ". static::shareDescription()),
+
+            // recommended adding the following to you own implementation, and
+            // specifying the proper dimensions as these represent the minimum
+            // required by Open Graph
+            // UIKit::meta()->attr("property og:image:width", "content 1200+")
+            // UIKit::meta()->attr("property og:image:height", "content 630+")
+        ])->plus(...static::shareTwitter());
     }
 
     static public function breadcrumbs()
@@ -332,6 +357,13 @@ abstract class ContentBuilder
     }
 
     abstract static public function shareImage(): ESString;
+
+    abstract static public function shareDescription(): ESString;
+
+    static public function shareTwitter(): ESSArray
+    {
+        return Shoop::array([]);
+    }
 
     static public function tocView($currentPage = 1, $path = "/feed")
     {
@@ -505,20 +537,6 @@ abstract class ContentBuilder
         )->prepend("# ". static::title(static::HEADING) ."\n\n". static::contentDetailsView() ."\n\n")
         ->extensions(...static::markdownExtensions());
     }
-
-    // static public function markdown($uri = "")
-    // {
-    //     return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
-    //         function($result, $parts) {
-    //             $store = static::store();
-    //             if ($result->unfold()) {
-    //                 $store = static::store(...$parts);
-    //             }
-    //             return $store->plus("content.md")->extensions(
-    //                 ...static::markdownExtensions()
-    //             );
-    //     });
-    // }
 
     static public function markdownExtensions()
     {
