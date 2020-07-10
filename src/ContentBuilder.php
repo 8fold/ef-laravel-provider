@@ -358,7 +358,10 @@ abstract class ContentBuilder
 
     abstract static public function shareImage(): ESString;
 
-    abstract static public function shareDescription(): ESString;
+    static public function shareDescription(): ESString
+    {
+        return static::title(static::BOOKEND);
+    }
 
     static public function shareTwitter(): ESSArray
     {
