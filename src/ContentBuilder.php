@@ -463,6 +463,11 @@ abstract class ContentBuilder
         return static::rootStore()->plus("events");
     }
 
+    static public function mediaStore(): ESStore
+    {
+        return static::rootStore()->plus(".media");
+    }
+
 // -> RSS
     static public function rssStore()
     {
