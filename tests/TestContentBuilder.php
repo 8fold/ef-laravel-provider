@@ -30,6 +30,20 @@ class TestContentBuilder extends ContentBuilder
         );
     }
 
+    static public function markdown($uri = "")
+    {
+        return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
+            function($result, $parts) {
+                $store = static::store();
+                if ($result->unfold()) {
+                    $store = static::store(...$parts);
+                }
+                return $store->plus("content.md")->extensions(
+                    ...static::markdownExtensions()
+                );
+        });
+    }
+
     static public function shareImage(): ESString
     {
         return Shoop::string("https://8fold.pr/media/og/default-image.png");
@@ -40,58 +54,4 @@ class TestContentBuilder extends ContentBuilder
         return Shoop::store(__DIR__)->plus("content");
     }
 
-
-
-
-
-
-    // static public function pageUri(): ESString
-    // {
-    //     return Shoop::string(request()->path())->isEmpty(function($result) {
-    //         return ($result)
-    //             ? Shoop::string("/")
-    //             : Shoop::string(request()->path());
-    //     });
-    // }
-
-    // static public function contentStorePath(): ESString
-    // {
-    //     return Shoop::string(__DIR__)->plus("/content");
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // static public function uriDir($base = __DIR__): ESString
-    // {
-    //     return parent::uriDir($base);
-    // }
-
-    // static public function copyright($name, $startYear = ""): ESString
-    // {
-    //     return parent::copyright("Eightfold");
-    // }
-
-    // static public function uriContentMarkdownDetails()
-    // {
-    //     return Shoop::array([])->plus(
-    //         UIKit::p(parent::uriContentMarkdownDetails()->join(UIKit::br())->unfold())->unfold(),
-    //         UIKit::p("Hello")->unfold()
-    //     );
-    // }
 }
