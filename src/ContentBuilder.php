@@ -299,12 +299,15 @@ abstract class ContentBuilder
     {
         $details = static::contentDetails();
 
-        // Created on Apr 1, 2020 - if created, required
-        $copy = Shoop::string("Created on ")->plus($details->created);
+        $copy = Shoop::string("");
+        if ($details->hasMemberUnfolded("created")) {
+            // Created on Apr 1, 2020 - if created, required
+            $copy = $copy->plus("Created on ")->plus($details->created);
+        }
+
         if ($details->hasMemberUnfolded("modified")) {
             // (updated Apr 1, 2020) - if modified
             $copy = $copy->plus(" (updated ")->plus($details->modified)->plus(")");
-
         }
 
         if ($details->hasMemberUnfolded("original")) {
@@ -319,10 +322,13 @@ abstract class ContentBuilder
 
         if ($details->hasMemberUnfolded("moved")) {
             $copy = $copy->plus(" and moved ")->plus($details->moved);
-
         }
 
-        return UIKit::p($copy->plus(".")->unfold());
+        return $copy->isEmpty(function($result, $string) {
+            return ($result->unfold())
+                ? ""
+                : UIKit::p($copy->plus(".")->unfold());
+        });
     }
 
     abstract static public function shareImage(): ESString;
@@ -384,17 +390,6 @@ abstract class ContentBuilder
 
         $return = Shoop::dictionary([]);
         $return = $return->plus(
-            ($meta->modified === null)
-                ? Shoop::string("")
-                : Shoop::string(
-                    Carbon::createFromFormat("Ymd", $meta->modified, "America/Chicago")
-                        ->toFormattedDateString()
-                ),
-            "modified"
-        );
-
-
-        $return = $return->plus(
             ($meta->created === null)
                 ? Shoop::string("")
                 : Shoop::string(
@@ -402,6 +397,16 @@ abstract class ContentBuilder
                             ->toFormattedDateString()
                 ),
             "created"
+        );
+
+        $return = $return->plus(
+            ($meta->modified === null)
+                ? Shoop::string("")
+                : Shoop::string(
+                    Carbon::createFromFormat("Ymd", $meta->modified, "America/Chicago")
+                        ->toFormattedDateString()
+                ),
+            "modified"
         );
 
         $return = $return->plus(
