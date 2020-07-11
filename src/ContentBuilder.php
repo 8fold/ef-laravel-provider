@@ -281,29 +281,36 @@ abstract class ContentBuilder
         // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
         // https://cards-dev.twitter.com/validator
         return Shoop::array([
-            // twitter:title
-            UIKit::meta()->attr("property twitter:title", "content ". static::title(static::BOOKEND)),
-            UIKit::meta()->attr("property og:title", "content ". static::title(static::BOOKEND)),
+                UIKit::meta()->attr("property og:type", "content ". static::shareType())
+            ])->plus(
+                // twitter:title
+                // UIKit::meta()->attr("property twitter:title", "content ". static::title(static::BOOKEND)),
+                UIKit::meta()->attr("property og:title", "content ". static::title(static::BOOKEND)),
 
-            UIKit::meta()->attr("property og:url", "content ". url()->current()),
+                UIKit::meta()->attr("property og:url", "content ". url()->current()),
 
-            // twittier:image
-            UIKit::meta()->attr("property twitter:image", "content ". static::shareImage()),
-            UIKit::meta()->attr("property og:image", "content ". static::shareImage()),
+                // twittier:image
+                // UIKit::meta()->attr("property twitter:image", "content ". static::shareImage()),
+                UIKit::meta()->attr("property og:image", "content ". static::shareImage()),
 
-            // LinkedIn requires the description tag
-            // twitter:description
-            UIKit::meta()->attr("name twitter:description", "content ". static::shareDescription()),
-            UIKit::meta()->attr("property og:description", "content ". static::shareDescription()),
+                // LinkedIn requires the description tag and it should be at least 100 characters long
+                // twitter:description
+                // UIKit::meta()->attr("name twitter:description", "content ". static::shareDescription()),
+                UIKit::meta()->attr("property og:description", "content ". static::shareDescription()),
 
-            // recommended adding the following to you own implementation, and
-            // specifying the proper dimensions (1200x630 are the minimums)
-            // required by Open Graph
-            UIKit::meta()->attr("property og:image:width", "content 1280"),
-            UIKit::meta()->attr("property og:image:height", "content 720")
+                // recommended adding the following to you own implementation, and
+                // specifying the proper dimensions (1200x630 are the minimums)
+                // required by Open Graph
+                UIKit::meta()->attr("property og:image:width", "content 1280"),
+                UIKit::meta()->attr("property og:image:height", "content 720")
 
-            // twitter:card and twitter:site handled by shareTwitter()
-        ])->plus(...static::shareTwitter());
+                // twitter:card and twitter:site handled by shareTwitter()
+            )->plus(...static::shareTwitter());
+    }
+
+    static public function shareType()
+    {
+        return "website";
     }
 
     static public function breadcrumbs()
