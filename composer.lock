@@ -111,16 +111,16 @@
         },
         {
             "name": "8fold/php-markup",
-            "version": "0.1.23",
+            "version": "0.1.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
-                "reference": "d306a52ae2f8bd35c0e21986765c5d51b778ae15"
+                "reference": "9c012ad7ac23782b929c4252abbd89149ad515fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-markup/zipball/d306a52ae2f8bd35c0e21986765c5d51b778ae15",
-                "reference": "d306a52ae2f8bd35c0e21986765c5d51b778ae15",
+                "url": "https://api.github.com/repos/8fold/php-markup/zipball/9c012ad7ac23782b929c4252abbd89149ad515fd",
+                "reference": "9c012ad7ac23782b929c4252abbd89149ad515fd",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-09T02:19:49+00:00"
+            "time": "2020-07-11T21:36:12+00:00"
         },
         {
             "name": "8fold/php-shoop",
@@ -2758,16 +2758,16 @@
         },
         {
             "name": "phpunit/php-file-iterator",
-            "version": "3.0.3",
+            "version": "3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-file-iterator.git",
-                "reference": "8e282e5f5e2db5fb2271b3962ad69875c34a6f41"
+                "reference": "25fefc5b19835ca653877fe081644a3f8c1d915e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/8e282e5f5e2db5fb2271b3962ad69875c34a6f41",
-                "reference": "8e282e5f5e2db5fb2271b3962ad69875c34a6f41",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/25fefc5b19835ca653877fe081644a3f8c1d915e",
+                "reference": "25fefc5b19835ca653877fe081644a3f8c1d915e",
                 "shasum": ""
             },
             "require": {
@@ -2810,7 +2810,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-06-26T11:50:37+00:00"
+            "time": "2020-07-11T05:18:21+00:00"
         },
         {
             "name": "phpunit/php-invoker",
