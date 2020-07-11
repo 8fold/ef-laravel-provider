@@ -247,7 +247,7 @@ abstract class ContentBuilder
                 initial-scale=1"
             )
         ])->plus(...static::faviconsMeta())
-        ->plus(...static::shareMeta())
+        ->plus(static::shareMeta())
         ->plus(...static::stylesMeta())
         ->plus(...static::scriptsMeta());
     }
