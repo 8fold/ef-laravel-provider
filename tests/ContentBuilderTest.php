@@ -112,6 +112,14 @@ class ContentBuilderTest extends TestCase
         $this->assertSame($expected, $actual->unfold());
     }
 
+    public function testShare()
+    {
+        $this->visit("/");
+        $expected = '<meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="https://8fold.pr/media/og/default-image.png" property="og:image"><meta name="twitter:card" content="summary_large_image">';
+        $actual = ContentBuilder::shareMeta();
+        $this->assertEquals($expected, $actual->unfold());
+    }
+
     public function testPaginationPages()
     {
         // $this->visit("/feed/page/1")->seePageIs("/feed");
