@@ -299,7 +299,30 @@ abstract class ContentBuilder
 
     static public function shareDescription(): ESString
     {
-        return static::title(static::BOOKEND);
+        $description = static::store()->plus("content.md")
+            ->markdown()->meta()->description;
+
+        if ($description === null) {
+            $description = Shoop::string("");
+
+        } else {
+            $description = Shoop::string($description);
+
+        }
+
+        return $description->isNotEmpty(function($result, $description) {
+            if ($result->unfold()) {
+                return Shoop::string($description);
+            }
+
+            return static::shareDescriptionImmediateFallback()->isNotEmpty(
+                function($result, $description) {
+                    if ($result->unfold()) {
+                        return $description;
+                    }
+                    return static::title(static::BOOKEND);
+            });
+        });
     }
 
     static public function shareTwitter(): ESArray
