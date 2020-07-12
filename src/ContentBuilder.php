@@ -335,9 +335,12 @@ abstract class ContentBuilder
         return Shoop::array([]);
     }
 
-    static public function breadcrumbs()
+    static public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
     {
-        $uri = static::uri(true)->dropLast();
+        $uri = static::uri(true);
+        if (! $includeCurrent) {
+            $uri = $uri->dropLast();
+        }
         return $uri->each(function($part) use (&$uri) {
             $anchor = UIKit::anchor(
                 static::title(static::HEADING, true, $uri),
@@ -348,13 +351,23 @@ abstract class ContentBuilder
 
             return $anchor;
 
-        })->noEmpties()->isEmpty(function($result, $anchors) {
-            return ($result->unfold())
-                ? ""
-                : UIKit::nav(
-                    UIKit::listWith(...$anchors)
-                )->attr("class breadcrumbs");
-        });
+        })->noEmpties()->isEmpty(
+            function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
+                // die(var_dump($anchors));
+                $anchors = Shoop::string($homeLinkContent)->isEmpty(
+                    function($result, $homeLinkContent) use ($anchors) {
+                        return ($result->unfold())
+                            ? $anchors
+                            : $anchors->plus(
+                                UIKit::anchor($homeLinkContent, "/")
+                            );
+                    });
+                return ($result->unfold())
+                    ? ""
+                    : UIKit::nav(
+                        UIKit::listWith(...$anchors)
+                    )->attr("class breadcrumbs");
+            });
     }
 
     static public function contentDetailsView()

@@ -120,6 +120,22 @@ class ContentBuilderTest extends TestCase
         $this->assertEquals($expected, $actual->unfold());
     }
 
+    public function testBreadcrumbs()
+    {
+        $this->visit("/somewhere/else");
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
+        $actual = ContentBuilder::breadcrumbs();
+        $this->assertSame($expected, $actual->unfold());
+
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Home</a></li></ul></nav>';
+        $actual = ContentBuilder::breadcrumbs("Home");
+        $this->assertSame($expected, $actual->unfold());
+
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
+        $actual = ContentBuilder::breadcrumbs("", true);
+        $this->assertSame($expected, $actual->unfold());
+    }
+
     public function testPaginationPages()
     {
         // $this->visit("/feed/page/1")->seePageIs("/feed");
