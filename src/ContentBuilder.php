@@ -325,6 +325,11 @@ abstract class ContentBuilder
         });
     }
 
+    static public function shareDescriptionImmediateFallback()
+    {
+        return Shoop::string("");
+    }
+
     static public function shareTwitter(): ESArray
     {
         return Shoop::array([]);
