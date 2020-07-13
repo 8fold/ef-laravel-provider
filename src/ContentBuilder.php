@@ -577,7 +577,7 @@ abstract class ContentBuilder
             static::store("content.md")->markdown()->content()->unfold(),
             [
                 "html_input" => "allow",
-                "allow_unsafe_links" => false
+                "allow_unsafe_links" => false,
                 "external_link" => [
                     "open_in_new_window" => true
                 ]
