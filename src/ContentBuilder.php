@@ -574,7 +574,14 @@ abstract class ContentBuilder
     static public function markdown()
     {
         return UIKit::markdown(
-            static::store("content.md")->markdown()->content()->unfold()
+            static::store("content.md")->markdown()->content()->unfold(),
+            [
+                "html_input" => "allow",
+                "allow_unsafe_links" => false
+                "external_link" => [
+                    "open_in_new_window" => true
+                ]
+            ]
         )->prepend("# ". static::title(static::HEADING) ."\n\n". static::contentDetailsView() ."\n\n")
         ->extensions(...static::markdownExtensions());
     }
