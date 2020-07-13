@@ -421,12 +421,13 @@ abstract class ContentBuilder
                 return ($result->unfold())
                     ? Shoop::array([])
                     : $items->each(function($uri) {
-                        return static::uriContentStore($uri)
-                            ->isFile(function($result, $store) use ($uri) {
+                        $parts = Shoop::string($uri)->divide("/", false);
+                        return static::rootStore()->plus(...$parts)->plus("content.md")
+                            ->isFile(function($result, $store) use ($uri, $parts) {
                                 if (! $result->unfold()) {
                                     return "";
                                 }
-                                $title = static::uriTitleForContentStore($store);
+                                $title = static::title(static::HEADING, true, $parts);
                                 return UIKit::anchor($title, $uri);
                             });
                     });
