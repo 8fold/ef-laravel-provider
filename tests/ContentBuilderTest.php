@@ -5,6 +5,8 @@ namespace Eightfold\Site\Tests;
 use Orchestra\Testbench\BrowserKit\TestCase;
 // use Orchestra\Testbench\TestCase;
 
+use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
+
 use Eightfold\Site\Tests\TestContentBuilder as ContentBuilder;
 
 use Eightfold\ShoopExtras\Shoop;
@@ -14,6 +16,16 @@ class ContentBuilderTest extends TestCase
     protected function getPackageProviders($app)
     {
         return ['Eightfold\Site\Tests\TestProvider'];
+    }
+
+    protected function getEnvironmentSetUp($app)
+    {
+        if (file_exists(__DIR__ ."/.env")) {
+            // make sure, our .env file is loaded
+            $app->useEnvironmentPath(__DIR__);
+            $app->bootstrapWith([LoadEnvironmentVariables::class]);
+            parent::getEnvironmentSetUp($app);
+        }
     }
 
     public function testUriAndContentStoreSet()
@@ -162,5 +174,27 @@ class ContentBuilderTest extends TestCase
         $actual = ContentBuilder::uriToc()->tocAnchors();
         $this->assertEquals($expected, $actual->unfold());
         */
+    }
+
+    public function testGitHubIntegration()
+    {
+        if (file_exists(__DIR__ ."/.env")) {
+            $githubClient = ContentBuilder::githubClient();
+            $actual = Shoop::dictionary($githubClient->me()->show())->login;
+            $this->assertNotNull($actual);
+
+            die(var_dump(
+                $githubClient
+                    ->api("repo")
+                    ->contents()
+                    ->download("8fold", "laravel-provider", "README.md")
+            ));
+
+        } else {
+            // Create a .env file in the root tests folder with
+            // GITHUB_APIKEY defined with the personal access token
+            // you wish to use.
+            $this->assertFalse(false);
+        }
     }
 }
