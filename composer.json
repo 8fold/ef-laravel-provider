@@ -5,10 +5,12 @@
 	"license": "MIT",
 	"require": {
 		"php": "7.*",
-    "8fold/php-shoop-extras": "~0.1",
+		"8fold/commonmark-abbreviations": "~0.1",
+		"8fold/php-events": "dev-master",
 		"8fold/php-markup": "~0.1",
-    "8fold/php-events": "dev-master",
-    "8fold/commonmark-abbreviations": "~0.1"
+		"8fold/php-shoop-extras": "~0.1",
+		"graham-campbell/github": "^9.2",
+		"php-http/guzzle6-adapter": "^2.0"
 	},
 	"require-dev": {
 		"orchestra/testbench": "~5.3",
