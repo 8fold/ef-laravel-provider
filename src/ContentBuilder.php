@@ -4,6 +4,11 @@ namespace Eightfold\Site;
 
 use Carbon\Carbon;
 
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem;
+use Cache\Adapter\Filesystem\FilesystemCachePool;
+use Github\Client;
+
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 
 use League\CommonMark\CommonMarkConverter;
@@ -522,6 +527,21 @@ abstract class ContentBuilder
 
 // -> Stores
     abstract static public function rootStore(): ESStore;
+
+    static public function githubClient()
+    {
+        $adapter = new Local(static::rootStore());
+        $filesystem = new Filesystem($adapter);
+        $pool = new FilesystemCachePool($filesystem);
+
+        $githubKey = env("GITHUB_PERSONAL_TOKEN");
+
+        $client = new Client();
+        $client->addCache($pool);
+        $client->authenticate(env("GITHUB_PERSONAL_TOKEN"), null, Client::AUTH_ACCESS_TOKEN);
+
+        return $client;
+    }
 
     static public function store(...$plus): ESStore
     {
