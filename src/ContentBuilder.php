@@ -152,12 +152,11 @@ abstract class ContentBuilder
     public function markdown()
     {
         return UIKit::markdown(
-            $this->handler()->store("content.md")->markdown()->content()->unfold(),
+            $this->handler()->contentStore()->markdown()->content()->unfold(),
             static::markdownConfig()
         )->prepend(
             "# ". $this->handler()->title(ContentHandler::HEADING) ."\n\n". $this->detailsView() ."\n\n"
-        );
-        // ->extensions(...static::markdownExtensions());
+        )->extensions(...static::markdownExtensions());
     }
 
     public function detailsView()
@@ -189,10 +188,10 @@ abstract class ContentBuilder
             $copy = $copy->plus(" and moved ")->plus($details->moved);
         }
 
-        return $copy->isEmpty(function($result, $string) {
+        return $copy->isNotEmpty(function($result, $string) {
             return ($result->unfold())
-                ? ""
-                : UIKit::p($string->plus(".")->unfold());
+                ? UIKit::p($string->plus(".")->unfold())
+                : "";
         });
     }
 
@@ -259,7 +258,6 @@ abstract class ContentBuilder
             });
     }
 
-// - TOC
 
 
 
@@ -270,61 +268,6 @@ abstract class ContentBuilder
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    static public function tocView($currentPage = 1, $path = "/feed")
-    {
-        return UIKit::webView(
-            static::title(),
-            ...static::toc($currentPage, static::store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
-        )->meta(...static::meta());
-    }
-
-    // TODO: Move to UIKit
-    static public function toc($currentPage, $items = [])
-    {
-        return Type::sanitizeType($items, ESArray::class)
-            ->isEmpty(function($result, $items) {
-                return ($result->unfold())
-                    ? Shoop::array([])
-                    : $items->each(function($uri) {
-                        $parts = Shoop::string($uri)->divide("/", false);
-                        return static::rootStore()->plus(...$parts)->plus("content.md")
-                            ->isFile(function($result, $store) use ($uri, $parts) {
-                                if (! $result->unfold()) {
-                                    return "";
-                                }
-                                $title = static::title(static::HEADING, true, $parts);
-                                return UIKit::anchor($title, $uri);
-                            });
-                    });
-
-            })->isEmpty(function($result, $links) use ($currentPage) {
-                return ($result->unfold())
-                    ? Shoop::array([])
-                    : $links->count()->isEmpty(
-                        function($result, $totalItems) use ($links, $currentPage) {
-                            return ($result->unfold())
-                                ? Shoop::array([])
-                                : Shoop::array([
-                                    UIKit::listWith(...$links),
-                                    UIKit::pagination($currentPage, $totalItems)
-                                ]);
-                        });
-            });
-    }
 
 // -> RSS
     // TODO: Move to ContentHandler
@@ -350,80 +293,5 @@ abstract class ContentBuilder
             "<h5>" => "",
             "<h6>" => ""
         ]);
-    }
-
-// -> Markdown
-
-
-// -> Deprecated
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    static public function uriContentMarkdownHtml(
-        $details = true,
-        $markdownReplacements = [],
-        $htmlReplacements = [],
-        $caseSensitive = true,
-        $minified = true,
-        $config = [],
-        $uri = ""
-    )
-    {
-        $details = Type::sanitizeType($details, ESBool::class)->unfold();
-
-        $config = (empty($config)) ? static::markdownConfig() : $config;
-
-        $markdown = static::uriContentMarkdown($uri);
-        if ($markdown->isEmpty) {
-            abort(404);
-        }
-
-        $html = $markdown->html(
-            $markdownReplacements,
-            $htmlReplacements,
-            $caseSensitive,
-            $minified,
-            $config
-        );
-
-
-        if ($details) {
-            $title = UIKit::h1(static::uriTitleForContentStore(static::uriContentStore($uri)));
-
-            $details = static::uriContentMarkdownDetails();
-            if (Type::is($details, ESArray::class)) {
-                return $html->start($title->unfold(), ...$details);
-            }
-            return $html->start($title->unfold(), $details->unfold());
-        }
-        return $html;
     }
 }
