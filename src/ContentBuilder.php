@@ -49,219 +49,37 @@ use Eightfold\Shoop\{
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
 
+use Eightfold\Site\ContentHandler;
+
 abstract class ContentBuilder
 {
-    /**
-     * Title member from YAML front matter.
-     */
-    public const TITLE = "title";
+    abstract public function socialImage(): ESString;
 
-    /**
-     * Heading member from YAML front matter, falls back to title member,
-     * if heading not set.
-     */
-    public const HEADING = "heading";
-
-    /**
-     * Recursively uses title member from YAML front matter to build a fully-
-     * qualified title string with separator. ex. Leaf | Branch | Trunk | Root
-     */
-    public const PAGE = "page";
-
-    /**
-     * @deprecated
-     *
-     * Uses the title member from YAML front matter to build a two-part title,
-     * which includes the title for the current URL plus the title of the root
-     * page with a separater. ex. Leaf | Root
-     */
-    public const SHARE = "share";
-
-    /**
-     * Uses the title member from YAML front matter to build a two-part title,
-     * which includes the title for the current URL plus the title of the root
-     * page with a separater. ex. Leaf | Root
-     */
-    public const BOOKEND = "book-end";
-
-// -> Content
-    // static public function titles($checkHeadingFirst = true, $parts = []): ESArray
-    // {
-    //     $parts = Type::sanitizeType($parts, ESArray::class);
-
-    //     $store = static::store();
-    //     if ($parts->isNotEmpty) {
-    //         $store = static::rootStore()->plus(...$parts);
-
-    //     }
-
-    //     if (static::rootUri()->isUnfolded("events")) {
-    //         $store = static::eventStore();
-    //     }
-
-    //     return $store->plus("content.md")->isNotFile(
-    //         function($result, $store) use ($checkHeadingFirst, $parts) {
-    //             if ($result->unfold()) { return Shoop::array([]); }
-
-    //             if ($parts->count()->isUnfolded(1) and
-    //                 $parts->first()->isEmpty
-    //             ) {
-    //                 if ($checkHeadingFirst and $store->metaMember("heading")->isNotEmpty) {
-    //                     return Shoop::array([
-    //                         $store->metaMember("heading")
-    //                     ]);
-    //                 }
-
-    //                 $title = $store->metaMember("title");
-    //                 if ($title->isEmpty) {
-    //                     $title = Shoop::string("");
-    //                 }
-    //                 return Shoop::array([$title]);
-    //             }
-
-    //             $s = $store->dropLast();
-
-    //             return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
-    //                 $content = $s->plus("content.md");
-
-    //                 $return = "";
-    //                 if ($checkHeadingFirst and
-    //                     $s->metaMember("heading")->isNotEmpty
-    //                 ) {
-    //                     $return = $content->metaMember("heading");
-
-    //                 } else {
-    //                     $return = $content->metaMember("title");
-    //                     if ($return->isEmpty) {
-    //                         $return = "";
-
-    //                     }
-    //                 }
-
-    //                 $s = $s->dropLast();
-    //                 return $return;
-
-    //             })->noEmpties()->plus(
-    //                 (static::useLocal())
-    //                     ? static::rootStore()->plus("content.md")
-    //                         ->metaMember("title")->unfold()
-    //                     : static::githubClient(true)->plus("content.md")
-    //                         ->metaMember("title")->unfold()
-    //             );
-    //     });
-    // }
-
-    static public function title($type = "", $checkHeadingFirst = true, $parts = []): ESString
+    static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
     {
-        if (strlen($type) === 0) {
-            $type = static::PAGE;
-        }
-
-        $parts = Type::sanitizeType($parts, ESArray::class);
-        if ($parts->isEmpty) {
-            $parts = static::uri(true);
-        }
-
-        $titles = Shoop::array([]);
-        if ($checkHeadingFirst and
-            Shoop::string(static::HEADING)->isUnfolded($type)
-        ) {
-            $titles = $titles->plus(
-                static::titles($checkHeadingFirst, $parts)->first()
-            );
-
-        } elseif (Shoop::string(static::TITLE)->isUnfolded($type)) {
-            $titles = $titles->plus(
-                static::titles(false, $parts)->first()
-            );
-
-        } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
-            if (static::rootUri()->isEmpty) {
-                $titles = $titles->plus(
-                    static::titles($checkHeadingFirst, $parts)->first()
-                );
-
-            } else {
-                $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
-                $start = $t->first()->first();
-                $root = $t->last()->first();
-                if (static::rootUri()->isUnfolded("events")) {
-                    $eventTitles = static::eventsTitles();
-                    $start = $start->start($eventTitles->month ." ". $eventTitles->year);
-                    $root = static::rootStore()->plus("content.md")->markdown()->meta()->title();
-                }
-
-                $titles = $titles->plus($start, $root);
-            }
-
-        } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
-            $t = static::titles($checkHeadingFirst, $parts)->divide(-1);
-            $start = $t->first();
-            $root = $t->last();
-            if (static::rootUri()->isUnfolded("events")) {
-                $eventTitles = static::eventsTitles();
-                $start = $start->start($eventTitles->month, $eventTitles->year);
-            }
-            $titles = $titles->plus(...$start)->plus(...$root);
-
-        }
-
-        return $titles->noEmpties()->join(" | ");
+        return new static($localRootPath, $remoteRootPath);
     }
 
-    static public function eventsTitles($type = "")
+    static public function markdownConfig()
     {
-        $parts = Shoop::string(request()->path())->divide("/");
-        $year = $parts->dropFirst()->first;
-        $month = Carbon::createFromFormat(
-            "m",
-            $parts->dropFirst(2)->first,
-            "America/Chicago"
-        )->format("F");
-
         return Shoop::dictionary([
-            "year"  => $year,
-            "month" => $month
-        ]);
+            "html_input" => "strip",
+            "allow_unsafe_links" => false
+        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
+        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
+        ->unfold();
     }
 
-    static public function copyright($name, $startYear = ""): ESString
-    {
-        if (strlen($startYear) > 0) {
-            $startYear = $startYear ."&ndash;";
-        }
-        return Shoop::string("Copyright © {$startYear}". date("Y") ." {$name}. All rights reserved.");
-    }
-
-// -> UI
-    static public function view(...$extras)
-    {
-        if (static::store("content.md")->isNotFile) {
-            abort(404);
-        }
-
-        return UIKit::webView(
-                static::title(),
-                UIKit::main(
-                    static::markdown(),
-                    ...$extras
-                ),
-                static::footer()
-            )->meta(...static::meta());
-    }
-
-    static public function meta(): ESArray
+    static public function markdownExtensions()
     {
         return Shoop::array([
-            UIKit::meta()->attr(
-                "name viewport",
-                "content width=device-width,
-                initial-scale=1"
-            )
-        ])->plus(...static::faviconsMeta())
-        ->plus(static::shareMeta())
-        ->plus(...static::stylesMeta())
-        ->plus(...static::scriptsMeta());
+            StrikethroughExtension::class,
+            TableExtension::class,
+            TaskListExtension::class,
+            ExternalLinkExtension::class,
+            SmartPunctExtension::class,
+            AbbreviationExtension::class
+        ]);
     }
 
     static public function faviconsMeta()
@@ -288,111 +106,63 @@ abstract class ContentBuilder
         ]);
     }
 
-    // TODO: rename social*
-    //      move to ContentHandler
-    static public function shareMeta()
-    {
-        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
-        // https://cards-dev.twitter.com/validator
-        return UIKit::socialMeta(
-            static::shareType(),
-            static::title(static::BOOKEND),
-            url()->current(),
-            static::shareDescription(),
-            static::shareImage()
-        )->twitter(...static::shareTwitter());
-    }
-
-    // TODO: Move to ContentHandler
-    static public function shareType()
+    static public function socialType()
     {
         return "website";
     }
 
-    // TODO: Move to ContentHandler
-    abstract static public function shareImage(): ESString;
-
-    // TODO: Move to ContentHandler
-    static public function shareDescription(): ESString
-    {
-        $description = static::store()->plus("content.md")
-            ->markdown()->meta()->description;
-
-        if ($description === null) {
-            $description = Shoop::string("");
-
-        } else {
-            $description = Shoop::string($description);
-
-        }
-
-        return $description->isNotEmpty(function($result, $description) {
-            if ($result->unfold()) {
-                return Shoop::string($description);
-            }
-
-            return static::shareDescriptionImmediateFallback()->isNotEmpty(
-                function($result, $description) {
-                    if ($result->unfold()) {
-                        return $description;
-                    }
-                    return static::title(static::BOOKEND);
-            });
-        });
-    }
-
-    // TODO: Move to ContentHandler
-    static public function shareDescriptionImmediateFallback()
-    {
-        return Shoop::string("");
-    }
-
-    // TODO: Move to ContentHandler
-    static public function shareTwitter(): ESArray
+    static public function socialTwitter(): ESArray
     {
         return Shoop::array([]);
     }
 
-    // TODO: Move to ContentHandler
-    static public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
+    private $handler;
+
+    public function __construct(
+        ESPath $localRootPath,
+        ESPath $remoteRootPath = null
+    )
     {
-        $uri = static::uri(true);
-        if (! $includeCurrent) {
-            $uri = $uri->dropLast();
-        }
-        return $uri->each(function($part) use (&$uri) {
-            $anchor = UIKit::anchor(
-                static::title(static::HEADING, true, $uri),
-                $uri->join("/")->start("/")
-            );
-
-            $uri = $uri->dropLast();
-
-            return $anchor;
-
-        })->noEmpties()->isEmpty(
-            function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
-                // die(var_dump($anchors));
-                $anchors = Shoop::string($homeLinkContent)->isEmpty(
-                    function($result, $homeLinkContent) use ($anchors) {
-                        return ($result->unfold())
-                            ? $anchors
-                            : $anchors->plus(
-                                UIKit::anchor($homeLinkContent, "/")
-                            );
-                    });
-                return ($result->unfold())
-                    ? ""
-                    : UIKit::nav(
-                        UIKit::listWith(...$anchors)
-                    )->attr("class breadcrumbs");
-            });
+        $this->handler = ContentHandler::fold($localRootPath, $remoteRootPath);
     }
 
-    // TODO: Extend ESMarkdown
-    static public function contentDetailsView()
+    public function handler()
     {
-        $details = static::contentDetails();
+        return $this->handler;
+    }
+
+    public function contentStore(bool $useRoot = false, ...$plus)
+    {
+        return $this->handler()->contentStore($useRoot, ...$plus);
+    }
+
+    public function view(...$extras)
+    {
+        if ($this->contentStore()->isNotFile) {
+            abort(404);
+        }
+
+        return UIKit::webView(
+                $this->handler()->title(),
+                UIKit::main($this->markdown(), ...$extras)
+            )->meta(...$this->meta());
+    }
+
+// - Extra UI
+    public function markdown()
+    {
+        return UIKit::markdown(
+            $this->handler()->store("content.md")->markdown()->content()->unfold(),
+            static::markdownConfig()
+        )->prepend(
+            "# ". $this->handler()->title(ContentHandler::HEADING) ."\n\n". $this->detailsView() ."\n\n"
+        );
+        // ->extensions(...static::markdownExtensions());
+    }
+
+    public function detailsView()
+    {
+        $details = $this->handler()->details();
 
         $copy = Shoop::string("");
         if ($details->hasMemberUnfolded("created")) {
@@ -425,6 +195,94 @@ abstract class ContentBuilder
                 : UIKit::p($string->plus(".")->unfold());
         });
     }
+
+    public function meta(): ESArray
+    {
+        return Shoop::array([
+            UIKit::meta()->attr(
+                "name viewport",
+                "content width=device-width,
+                initial-scale=1"
+            )
+        ])->plus(...static::faviconsMeta())
+        ->plus(static::socialMeta())
+        ->plus(...static::stylesMeta())
+        ->plus(...static::scriptsMeta());
+    }
+
+    public function socialMeta()
+    {
+        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
+        // https://cards-dev.twitter.com/validator
+        return UIKit::socialMeta(
+            static::socialType(),
+            $this->handler()->title(ContentHandler::BOOKEND),
+            url()->current(),
+            $this->handler()->description(),
+            $this->socialImage()
+        )->twitter(...static::socialTwitter());
+    }
+
+    public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
+    {
+        $parts = ContentHandler::uri(true);
+        if (! $includeCurrent) {
+            $parts = $parts->dropLast();
+        }
+
+        return $parts->each(function() use (&$parts) {
+            $anchor = UIKit::anchor(
+                $this->handler()->title(ContentHandler::HEADING, true, $parts),
+                $parts->join("/")->start("/")
+            );
+
+            $parts = $parts->dropLast();
+
+            return $anchor;
+
+        })->noEmpties()->isEmpty(
+            function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
+                // die(var_dump($anchors));
+                $anchors = Shoop::string($homeLinkContent)->isEmpty(
+                    function($result, $homeLinkContent) use ($anchors) {
+                        return ($result->unfold())
+                            ? $anchors
+                            : $anchors->plus(
+                                UIKit::anchor($homeLinkContent, "/")
+                            );
+                    });
+                return ($result->unfold())
+                    ? ""
+                    : UIKit::nav(
+                        UIKit::listWith(...$anchors)
+                    )->attr("class breadcrumbs");
+            });
+    }
+
+// - TOC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     static public function tocView($currentPage = 1, $path = "/feed")
     {
@@ -468,100 +326,6 @@ abstract class ContentBuilder
             });
     }
 
-    // Move to ContentHandler
-    // static public function markdownConfig()
-    // {
-    //     return Shoop::dictionary([
-    //         "html_input" => "strip",
-    //         "allow_unsafe_links" => false
-    //     ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
-    //     ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
-    //     ->unfold();
-    // }
-
-// -> Content
-    // TODO: Move to ContentHandler
-    static public function contentDetails()
-    {
-        $meta = static::store()->plus("content.md")->markdown()->meta();
-
-        $return = Shoop::dictionary([]);
-        $return = $return->plus(
-            ($meta->created === null)
-                ? Shoop::string("")
-                : Shoop::string(
-                        Carbon::createFromFormat("Ymd", $meta->created, "America/Chicago")
-                            ->toFormattedDateString()
-                ),
-            "created"
-        );
-
-        $return = $return->plus(
-            ($meta->modified === null)
-                ? Shoop::string("")
-                : Shoop::string(
-                    Carbon::createFromFormat("Ymd", $meta->modified, "America/Chicago")
-                        ->toFormattedDateString()
-                ),
-            "modified"
-        );
-
-        $return = $return->plus(
-            ($meta->moved === null)
-                ? Shoop::string("")
-                : Shoop::string(
-                        Carbon::createFromFormat("Ymd", $meta->moved, "America/Chicago")
-                            ->toFormattedDateString()
-                    ),
-            "moved"
-        );
-
-        $return = $return->plus(
-            ($meta->original === null)
-                ? Shoop::string("")
-                : Shoop::string($meta->original),
-            "original"
-        );
-
-        return $return->noEmpties();
-    }
-
-// -> URI
-    static public function uri($parts = false) // :ESString|ESArray
-    {
-        $base = Shoop::uri(request()->url())->tail();
-        if ($parts) {
-            return $base->divide("/")->noEmpties()->reindex();
-        }
-        return $base;
-    }
-
-    static public function rootUri(): ESString
-    {
-        return static::uri(true)->isEmpty(function($result, $array) {
-            return ($result->unfold()) ? Shoop::string("") : $array->first();
-        });
-    }
-
-// -> Stores
-    // TODO: Move to ContentHandler
-    static public function assetsStore(): ESPath
-    {
-        return static::rootStore()->plus(".assets");
-    }
-
-    // TODO: Move to ContentHandler
-    static public function eventStore(): ESPath
-    {
-        return static::rootStore()->plus("events");
-    }
-
-    // TODO: Move to ContentHandler
-    static public function mediaStore(): ESPath
-    {
-        return static::rootStore()->plus(".media");
-    }
-
 // -> RSS
     // TODO: Move to ContentHandler
     static public function rssStore()
@@ -589,32 +353,7 @@ abstract class ContentBuilder
     }
 
 // -> Markdown
-    static public function markdown()
-    {
-        return UIKit::markdown(
-            static::store("content.md")->markdown()->content()->unfold(),
-            [
-                "html_input" => "allow",
-                "allow_unsafe_links" => false,
-                "external_link" => [
-                    "open_in_new_window" => true
-                ]
-            ]
-        )->prepend("# ". static::title(static::HEADING) ."\n\n". static::contentDetailsView() ."\n\n")
-        ->extensions(...static::markdownExtensions());
-    }
 
-    static public function markdownExtensions()
-    {
-        return Shoop::array([
-            StrikethroughExtension::class,
-            TableExtension::class,
-            TaskListExtension::class,
-            ExternalLinkExtension::class,
-            SmartPunctExtension::class,
-            AbbreviationExtension::class
-        ]);
-    }
 
 // -> Deprecated
 

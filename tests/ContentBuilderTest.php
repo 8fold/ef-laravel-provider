@@ -28,107 +28,32 @@ class ContentBuilderTest extends TestCase
         }
     }
 
-    public function testUriAndContentStoreSet()
+    private function localBuilder()
     {
-        // TODO: Make these methods private until absolutely necessary.
-        // $builder = ContentBuilder::fold();
-
-        $expected = "/";
-        $actual = ContentBuilder::uri();
-        $this->assertEquals($expected, $actual->unfold());
-
-        // $expected = __DIR__ ."/content";
-        // $actual = ContentBuilder::store();
-        // $this->assertEquals($expected, $actual->unfold());
+        return new TestContentBuilder(
+            Shoop::path(__DIR__)->plus("content"),
+            // Shoop::path("tests")->plus("content")
+        );
     }
 
-    public function testCanGetRemoteAssets()
+    private function remoteBuilder()
     {
-        $expected = __DIR__ ."/content/.assets";
-        $actual = ContentBuilder::assetsStore();
-        $this->assertEquals($expected, $actual->unfold());
+        return new TestContentBuilder(
+            Shoop::path(__DIR__)->plus("content"),
+            Shoop::path("tests")->plus("content")
+        );
     }
 
-    public function testUri()
+    public function testCanReachURL()
     {
-        // $this->visit("/somewhere");
-        // $expected = "/somewhere";
-        // $actual = ContentBuilder::uri();
-        // $this->assertSame($expected, $actual->unfold());
-
-        // $this->visit("/somewhere/else");
-        // $expected = ["somewhere", "else"];
-        // $actual = ContentBuilder::uriParts();
-        // $this->assertSame($expected, $actual->unfold());
-
-        // $expected = "/somewhere";
-        // $actual = ContentBuilder::uriRoot();
-        // $this->assertSame($expected, $actual->unfold());
-
-        // $this->visit("/");
-        // $expected = "/";
-        // $actual = ContentBuilder::uriRoot();
-        // $this->assertSame($expected, $actual->unfold());
+        $this->visit("/")->see("Root");
     }
 
-    public function testTitle()
-    {
-        $expected = "Root";
-        $actual = ContentBuilder::title();
-        $this->assertSame($expected, $actual->unfold());
-
-        $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
-        $this->assertSame($expected, $actual->unfold());
-
-        $this->visit("/somewhere/else");
-        $expected = "Else | Somewhere | Root";
-        $actual = ContentBuilder::title();
-        $this->assertSame($expected, $actual->unfold());
-
-        $expected = "Else";
-        $actual = ContentBuilder::title(ContentBuilder::TITLE);
-        $this->assertSame($expected, $actual->unfold());
-    }
-
-    public function testPageTitle()
-    {
-        $this->visit("/somewhere/else");
-        $expected = "Else | Somewhere | Root";
-        $actual = ContentBuilder::title();
-        $this->assertSame($expected, $actual->unfold());
-
-        $expected = "Else | Root";
-        $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
-        $this->assertSame($expected, $actual->unfold());
-
-        $this->visit("/events/2020/05");
-        $expected = 'May 2020 | Root';
-        $actual = ContentBuilder::title(ContentBuilder::BOOKEND);
-        $this->assertSame($expected, $actual->unfold());
-    }
-
-    public function testContentDetails()
-    {
-        $this->visit("/somewhere/else");
-        $expected = Shoop::dictionary([
-            'created' => 'Apr 1, 2020',
-            'modified' => 'Jun 3, 2020',
-            'moved' => 'May 1, 2020',
-            'original' => 'https://8fold.pro 8fold'
-        ]);
-        $actual = ContentBuilder::contentDetails();
-        $this->assertSame($expected->unfold(), $actual->unfold());
-
-        $expected = '<p>Created on Apr 1, 2020 (updated Jun 3, 2020), which was<br> originally posted on <a href="https://8fold.pro">8fold</a> and moved May 1, 2020.</p>';
-        $actual = ContentBuilder::contentDetailsView();
-        $this->assertSame($expected, $actual->unfold());
-    }
-
-    public function testShare()
+    public function testSocial()
     {
         $this->visit("/");
-        $expected = '<meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="https://8fold.pr/media/og/default-image.png" property="og:image"><meta name="twitter:card" content="summary_large_image">';
-        $actual = ContentBuilder::shareMeta();
+        $expected = '<meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="https://8fold.pro/media/og/default-image.png" property="og:image"><meta name="twitter:card" content="summary_large_image">';
+        $actual = $this->localBuilder()->socialMeta();
         $this->assertEquals($expected, $actual->unfold());
     }
 
@@ -136,15 +61,15 @@ class ContentBuilderTest extends TestCase
     {
         $this->visit("/somewhere/else");
         $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
-        $actual = ContentBuilder::breadcrumbs();
+        $actual = $this->localBuilder()->breadcrumbs();
         $this->assertSame($expected, $actual->unfold());
 
         $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Home</a></li></ul></nav>';
-        $actual = ContentBuilder::breadcrumbs("Home");
+        $actual = $this->localBuilder()->breadcrumbs("Home");
         $this->assertSame($expected, $actual->unfold());
 
-        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
-        $actual = ContentBuilder::breadcrumbs("", true);
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere/else">Else heading</a></li><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
+        $actual = $this->localBuilder()->breadcrumbs("", true);
         $this->assertSame($expected, $actual->unfold());
     }
 
@@ -174,34 +99,5 @@ class ContentBuilderTest extends TestCase
         $actual = ContentBuilder::uriToc()->tocAnchors();
         $this->assertEquals($expected, $actual->unfold());
         */
-    }
-
-    public function testGitHubIntegration()
-    {
-        if (file_exists(__DIR__ ."/.env")) {
-            $token = env("GITHUB_PERSONAL_TOKEN");
-            $githubClient = ContentBuilder::githubClient($token);
-            $actual = Shoop::dictionary($githubClient->me()->show())->login;
-            $this->assertNotNull($actual);
-
-            $actual = $githubClient->plus("README.md")->markdown();
-die(var_dump($actual));
-            // Shoop::markdown(
-            //     $githubClient
-            //         ->api("repo")
-            //         ->contents()
-            //         ->download("8fold", "laravel-provider", "README.md")
-            // )->string()->startsWith("# 8fold Laravel Provider");
-            $this->assertTrue($actual->unfold());
-
-            $actual = ContentBuilder::store();
-            die(var_dump($actual));
-
-        } else {
-            // Create a .env file in the root tests folder with
-            // GITHUB_APIKEY defined with the personal access token
-            // you wish to use.
-            $this->assertFalse(false);
-        }
     }
 }
