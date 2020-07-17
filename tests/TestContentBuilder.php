@@ -23,40 +23,40 @@ use Eightfold\Shoop\{
 
 class TestContentBuilder extends ContentBuilder
 {
-    static public function view(...$content)
+    // static public function view(...$content)
+    // {
+    //     return UIKit::webView(
+    //         static::title()->unfold(),
+    //         static::store()->markdown()->html()->unfold()
+    //     );
+    // }
+
+    // static public function markdown($uri = "")
+    // {
+    //     return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
+    //         function($result, $parts) {
+    //             $store = static::store();
+    //             if ($result->unfold()) {
+    //                 $store = static::store(...$parts);
+    //             }
+    //             return $store->plus("content.md")->extensions(
+    //                 ...static::markdownExtensions()
+    //             );
+    //     });
+    // }
+
+    static public function socialImage(): ESString
     {
-        return UIKit::webView(
-            static::title()->unfold(),
-            static::store()->markdown()->html()->unfold()
-        );
+        return Shoop::string("https://8fold.pro/media/og/default-image.png");
     }
 
-    static public function markdown($uri = "")
-    {
-        return Shoop::string($uri)->divide("/", false)->countIsGreaterThan(0,
-            function($result, $parts) {
-                $store = static::store();
-                if ($result->unfold()) {
-                    $store = static::store(...$parts);
-                }
-                return $store->plus("content.md")->extensions(
-                    ...static::markdownExtensions()
-                );
-        });
-    }
+    // static public function rootStore(): ESStore
+    // {
+    //     return Shoop::store(__DIR__)->plus("content");
+    // }
 
-    static public function shareImage(): ESString
-    {
-        return Shoop::string("https://8fold.pr/media/og/default-image.png");
-    }
-
-    static public function rootStore(): ESStore
-    {
-        return Shoop::store(__DIR__)->plus("content");
-    }
-
-    static public function remoteRoot(): ESPath
-    {
-        return Shoop::path("tests")->plus("content");
-    }
+    // static public function remoteRoot(): ESPath
+    // {
+    //     return Shoop::path("tests")->plus("content");
+    // }
 }
