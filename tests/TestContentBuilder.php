@@ -10,7 +10,8 @@ use Eightfold\Markup\UIKit;
 
 use Eightfold\ShoopExtras\{
     Shoop,
-    ESStore
+    ESStore,
+    ESPath
 };
 
 use Eightfold\Shoop\Helpers\Type;
@@ -54,4 +55,8 @@ class TestContentBuilder extends ContentBuilder
         return Shoop::store(__DIR__)->plus("content");
     }
 
+    static public function remoteRoot(): ESPath
+    {
+        return Shoop::path("tests")->plus("content");
+    }
 }

@@ -4,10 +4,11 @@ namespace Eightfold\Site;
 
 use Carbon\Carbon;
 
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
-use Cache\Adapter\Filesystem\FilesystemCachePool;
-use Github\Client;
+// use Github\Client;
+// use League\Flysystem\Adapter\Local;
+// use League\Flysystem\Filesystem;
+// use Cache\Adapter\Filesystem\FilesystemCachePool;
+
 
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 
@@ -32,7 +33,8 @@ use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
 
 use Eightfold\ShoopExtras\{
     Shoop,
-    ESStore
+    ESStore,
+    ESPath
 };
 
 use Eightfold\Shoop\Helpers\Type;
@@ -83,66 +85,71 @@ abstract class ContentBuilder
     public const BOOKEND = "book-end";
 
 // -> Content
-    static public function titles($checkHeadingFirst = true, $parts = []): ESArray
-    {
-        $parts = Type::sanitizeType($parts, ESArray::class);
+    // static public function titles($checkHeadingFirst = true, $parts = []): ESArray
+    // {
+    //     $parts = Type::sanitizeType($parts, ESArray::class);
 
-        $store = static::store();
-        if ($parts->isNotEmpty) {
-            $store = static::rootStore()->plus(...$parts);
+    //     $store = static::store();
+    //     if ($parts->isNotEmpty) {
+    //         $store = static::rootStore()->plus(...$parts);
 
-        }
+    //     }
 
-        if (static::rootUri()->isUnfolded("events")) {
-            $store = static::eventStore();
-        }
-        return $store->plus("content.md")->isNotFile(
-            function($result, $store) use ($checkHeadingFirst, $parts) {
-                if ($result->unfold()) { return Shoop::array([]); }
+    //     if (static::rootUri()->isUnfolded("events")) {
+    //         $store = static::eventStore();
+    //     }
 
-                if ($parts->count()->isUnfolded(1) and
-                    $parts->first()->isEmpty
-                ) {
-                    if ($checkHeadingFirst and $store->metaMember("heading")->isNotEmpty) {
-                        return Shoop::array([
-                            $store->metaMember("heading")
-                        ]);
-                    }
+    //     return $store->plus("content.md")->isNotFile(
+    //         function($result, $store) use ($checkHeadingFirst, $parts) {
+    //             if ($result->unfold()) { return Shoop::array([]); }
 
-                    $title = $store->metaMember("title");
-                    if ($title->isEmpty) {
-                        $title = Shoop::string("");
-                    }
-                    return Shoop::array([$title]);
-                }
+    //             if ($parts->count()->isUnfolded(1) and
+    //                 $parts->first()->isEmpty
+    //             ) {
+    //                 if ($checkHeadingFirst and $store->metaMember("heading")->isNotEmpty) {
+    //                     return Shoop::array([
+    //                         $store->metaMember("heading")
+    //                     ]);
+    //                 }
 
-                $s = $store->dropLast();
+    //                 $title = $store->metaMember("title");
+    //                 if ($title->isEmpty) {
+    //                     $title = Shoop::string("");
+    //                 }
+    //                 return Shoop::array([$title]);
+    //             }
 
-                return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
-                    $content = $s->plus("content.md");
+    //             $s = $store->dropLast();
 
-                    $return = "";
-                    if ($checkHeadingFirst and
-                        $s->metaMember("heading")->isNotEmpty
-                    ) {
-                        $return = $content->metaMember("heading");
+    //             return $parts->each(function($part) use (&$s, $checkHeadingFirst) {
+    //                 $content = $s->plus("content.md");
 
-                    } else {
-                        $return = $content->metaMember("title");
-                        if ($return->isEmpty) {
-                            $return = "";
+    //                 $return = "";
+    //                 if ($checkHeadingFirst and
+    //                     $s->metaMember("heading")->isNotEmpty
+    //                 ) {
+    //                     $return = $content->metaMember("heading");
 
-                        }
-                    }
+    //                 } else {
+    //                     $return = $content->metaMember("title");
+    //                     if ($return->isEmpty) {
+    //                         $return = "";
 
-                    $s = $s->dropLast();
-                    return $return;
+    //                     }
+    //                 }
 
-                })->noEmpties()->plus(
-                    static::rootStore()->plus("content.md")->metaMember("title")->unfold()
-                );
-        });
-    }
+    //                 $s = $s->dropLast();
+    //                 return $return;
+
+    //             })->noEmpties()->plus(
+    //                 (static::useLocal())
+    //                     ? static::rootStore()->plus("content.md")
+    //                         ->metaMember("title")->unfold()
+    //                     : static::githubClient(true)->plus("content.md")
+    //                         ->metaMember("title")->unfold()
+    //             );
+    //     });
+    // }
 
     static public function title($type = "", $checkHeadingFirst = true, $parts = []): ESString
     {
@@ -282,6 +289,7 @@ abstract class ContentBuilder
     }
 
     // TODO: rename social*
+    //      move to ContentHandler
     static public function shareMeta()
     {
         // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
@@ -295,13 +303,16 @@ abstract class ContentBuilder
         )->twitter(...static::shareTwitter());
     }
 
+    // TODO: Move to ContentHandler
     static public function shareType()
     {
         return "website";
     }
 
+    // TODO: Move to ContentHandler
     abstract static public function shareImage(): ESString;
 
+    // TODO: Move to ContentHandler
     static public function shareDescription(): ESString
     {
         $description = static::store()->plus("content.md")
@@ -330,16 +341,19 @@ abstract class ContentBuilder
         });
     }
 
+    // TODO: Move to ContentHandler
     static public function shareDescriptionImmediateFallback()
     {
         return Shoop::string("");
     }
 
+    // TODO: Move to ContentHandler
     static public function shareTwitter(): ESArray
     {
         return Shoop::array([]);
     }
 
+    // TODO: Move to ContentHandler
     static public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
     {
         $uri = static::uri(true);
@@ -375,6 +389,7 @@ abstract class ContentBuilder
             });
     }
 
+    // TODO: Extend ESMarkdown
     static public function contentDetailsView()
     {
         $details = static::contentDetails();
@@ -419,6 +434,7 @@ abstract class ContentBuilder
         )->meta(...static::meta());
     }
 
+    // TODO: Move to UIKit
     static public function toc($currentPage, $items = [])
     {
         return Type::sanitizeType($items, ESArray::class)
@@ -452,17 +468,19 @@ abstract class ContentBuilder
             });
     }
 
-    static public function markdownConfig()
-    {
-        return Shoop::dictionary([
-            "html_input" => "strip",
-            "allow_unsafe_links" => false
-        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
-        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
-        ->unfold();
-    }
+    // Move to ContentHandler
+    // static public function markdownConfig()
+    // {
+    //     return Shoop::dictionary([
+    //         "html_input" => "strip",
+    //         "allow_unsafe_links" => false
+    //     ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
+    //     ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
+    //     ->unfold();
+    // }
 
 // -> Content
+    // TODO: Move to ContentHandler
     static public function contentDetails()
     {
         $meta = static::store()->plus("content.md")->markdown()->meta();
@@ -526,53 +544,32 @@ abstract class ContentBuilder
     }
 
 // -> Stores
-    abstract static public function rootStore(): ESStore;
-
-    static public function githubClient()
-    {
-        $adapter = new Local(static::rootStore());
-        $filesystem = new Filesystem($adapter);
-        $pool = new FilesystemCachePool($filesystem);
-
-        $githubKey = env("GITHUB_PERSONAL_TOKEN");
-
-        $client = new Client();
-        $client->addCache($pool);
-        $client->authenticate(env("GITHUB_PERSONAL_TOKEN"), null, Client::AUTH_ACCESS_TOKEN);
-
-        return $client;
-    }
-
-    static public function store(...$plus): ESStore
-    {
-        if (Shoop::string(request()->path())->isUnfolded("/")) {
-            return static::rootStore();
-        }
-        $parts = Shoop::path(request()->path())->parts();
-        return static::rootStore()->plus(...$parts)->plus(...$plus);
-    }
-
-    static public function assetsStore(): ESStore
+    // TODO: Move to ContentHandler
+    static public function assetsStore(): ESPath
     {
         return static::rootStore()->plus(".assets");
     }
 
-    static public function eventStore(): ESStore
+    // TODO: Move to ContentHandler
+    static public function eventStore(): ESPath
     {
         return static::rootStore()->plus("events");
     }
 
-    static public function mediaStore(): ESStore
+    // TODO: Move to ContentHandler
+    static public function mediaStore(): ESPath
     {
         return static::rootStore()->plus(".media");
     }
 
 // -> RSS
+    // TODO: Move to ContentHandler
     static public function rssStore()
     {
         return static::rootStore()->plus("feed", "content.md");
     }
 
+    // TODO: Move to ContentHandler
     static public function rssDescriptionReplacements()
     {
         return Shoop::dictionary([
