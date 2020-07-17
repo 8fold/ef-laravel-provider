@@ -6,9 +6,9 @@ use Eightfold\Events\Events;
 use Eightfold\Events\Grid;
 use Eightfold\Markup\UIKit;
 
-Route::prefix("events")->group(function() use ($contentBuilderClass) {
-    Route::get("/", function() use ($contentBuilderClass) {
-        $eventStore = $contentBuilderClass::eventStore()->unfold();
+Route::prefix("events")->group(function() use ($builder) {
+    Route::get("/", function() use ($builder) {
+        $eventStore = $builder->handler()->eventStore()->unfold();
 
         $month = Carbon::now()->month;
         $year  = Carbon::now()->year;
@@ -16,7 +16,7 @@ Route::prefix("events")->group(function() use ($contentBuilderClass) {
             ->nearestMonthWithEvents($year, $month)->uri();
 
         $redirect = Shoop::string("{$eventStore}{$uri}")
-            ->replace([$contentBuilderClass::rootStore()->unfold() => ""]);
+            ->replace([$builder->store(true)->unfold() => ""]);
 
         return redirect("{$redirect}");
     });

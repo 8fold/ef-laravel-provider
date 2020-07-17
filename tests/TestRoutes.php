@@ -15,5 +15,6 @@ $builder = new TestContentBuilder(
 //     return view("welcome");
 // });
 // include(Shoop::store(__DIR__)->dropLast()->plus("src", "Routes", "feed.php")->unfold());
+include(Shoop::store(__DIR__)->dropLast()->plus("src", "Routes", "media.php")->unfold());
 include(Shoop::store(__DIR__)->dropLast()->plus("src", "Routes", "any.php")->unfold());
 
