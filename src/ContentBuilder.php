@@ -155,7 +155,7 @@ abstract class ContentBuilder
             $this->handler()->contentStore()->markdown()->content()->unfold(),
             static::markdownConfig()
         )->prepend(
-            UIKit::h1($this->handler()->title(ContentHandler::HEADING)) ."\n\n". $this->detailsView() ."\n\n"
+            UIKit::h1($this->handler()->title(ContentHandler::HEADING))->unfold() ."\n\n". $this->detailsView() ."\n\n"
         )->extensions(...static::markdownExtensions());
     }
 
