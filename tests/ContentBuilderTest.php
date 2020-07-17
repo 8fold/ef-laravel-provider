@@ -49,6 +49,22 @@ class ContentBuilderTest extends TestCase
         $this->visit("/")->see("Root");
     }
 
+    public function testRoutes()
+    {
+        // any
+        $this->visit("/somewhere")->see("Somewhere | Root");
+
+        // feed
+        // events
+
+        // favicons
+
+        // media
+
+
+        // ui
+    }
+
     public function testSocial()
     {
         $this->visit("/");

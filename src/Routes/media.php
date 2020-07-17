@@ -4,15 +4,15 @@ use Eightfold\Site\ContentBuilder;
 
 use Eightfold\Shoop\Shoop;
 
-Route::prefix("media")->group(function() use ($contentBuilderClass) {
+Route::prefix("media")->group(function() use ($builder) {
     Route::get("/", function() { abort(404); });
 
-    Route::get("/{any}", function($any) use ($contentBuilderClass) {
+    Route::get("/{any}", function($any) use ($builder) {
         Route::get("/", function() { abort(404); });
 
         $extension = Shoop::string($any)->divide(".")->last;
         $parts = Shoop::string($any)->divide("/");
-        $path = $contentBuilderClass::mediaStore()->plus(...$parts);
+        $path = $builder->handler()->mediaStore()->plus(...$parts);
         return response()->file(
             $path->unfold(),
             ["Content-Type: image/{$extension}"]

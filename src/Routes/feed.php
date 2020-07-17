@@ -6,41 +6,37 @@ use Eightfold\ShoopExtras\Shoop;
 
 use Eightfold\Markup\Element;
 
-Route::prefix("feed")->group(function() use ($contentBuilderClass) {
-    Route::get("/", function() use ($contentBuilderClass) {
-        return $contentBuilderClass::store()->plus("content.md")->isFile(
-            function($result, $store) use ($contentBuilderClass) {
-                if (! $result->unfold()) {
-                    abort(404);
-                }
+Route::prefix("feed")->group(function() use ($builder) {
+    Route::get("/", function() use ($builder) {
+        return $builder->contentStore()->plus("content.md")->isFile(
+            function($result, $store) use ($builder) {
+                if (! $result->unfold()) { abort(404); }
 
                 return ($store->markdown()->meta()->hasMemberUnfolded("redirect"))
                     ? redirect($store->markdown()->meta()->redirect)
                     : view("ef::default")
-                        ->with("view", $contentBuilderClass::tocView());
+                        ->with("view", $builder->tocView());
             });
     });
 
-    Route::get("/page/1", function() use ($contentBuilderClass) {
+    Route::get("/page/1", function() {
         return redirect("/feed");
     });
 
-    Route::get("/page/{currentPage}", function($currentPage) use ($contentBuilderClass) {
-        return $contentBuilderClass::uriContentStore("/feed")->isFile(
-            function($result, $store) use ($contentBuilderClass, $currentPage) {
-                if (! $result) {
-                    abort(404);
-                }
+    Route::get("/page/{currentPage}", function($currentPage) use ($builder) {
+        return $builder->handler()->contentStore("/feed")->isFile(
+            function($result, $store) use ($builder, $currentPage) {
+                if (! $result) { abort(404); }
 
                 return ($store->markdown()->meta()->hasMemberUnfolded("redirect"))
                     ? redirect($store->markdown()->meta()->redirect)
                     : view("ef::default")
-                        ->with("view", $contentBuilderClass::tocView($currentPage));
+                        ->with("view", $builder->tocView($currentPage));
             });
     });
 
-    Route::get("/rss", function() use ($contentBuilderClass) {
-        return response($contentBuilderClass::rssCompiled()->unfold())
+    Route::get("/rss", function() use ($builder) {
+        return response($builder->rss()->unfold())
             ->header("Content-Type", "application/xml");
     });
 });
