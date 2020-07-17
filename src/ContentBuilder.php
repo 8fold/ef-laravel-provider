@@ -53,7 +53,7 @@ use Eightfold\Site\ContentHandler;
 
 abstract class ContentBuilder
 {
-    abstract static public function socialImage(): ESString;
+    abstract public function socialImage(): ESString;
 
     static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
     {
@@ -80,6 +80,40 @@ abstract class ContentBuilder
             SmartPunctExtension::class,
             AbbreviationExtension::class
         ]);
+    }
+
+    static public function faviconsMeta()
+    {
+        return Shoop::array([
+            UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
+            UIKit::link()->attr("rel apple-touch-icon", "href /assets/favicons/apple-touch-icon.png", "sizes 180x180"),
+            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-32x32.png", "sizes 32x32"),
+            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-16x16.png", "sizes 16x16")
+        ]);
+    }
+
+    static public function stylesMeta()
+    {
+        return Shoop::array([
+            UIKit::link()->attr("rel stylesheet", "href /css/main.css")
+        ]);
+    }
+
+    static public function scriptsMeta()
+    {
+        return Shoop::array([
+            UIKit::script()->attr("src /js/main.js")
+        ]);
+    }
+
+    static public function socialType()
+    {
+        return "website";
+    }
+
+    static public function socialTwitter(): ESArray
+    {
+        return Shoop::array([]);
     }
 
     private $handler;
@@ -110,9 +144,8 @@ abstract class ContentBuilder
 
         return UIKit::webView(
                 $this->handler()->title(),
-                UIKit::main($this->markdown(), ...$extras),
-                $this->footer()
-            )->meta(...static::meta());
+                UIKit::main($this->markdown(), ...$extras)
+            )->meta(...$this->meta());
     }
 
 // - Extra UI
@@ -121,171 +154,15 @@ abstract class ContentBuilder
         return UIKit::markdown(
             $this->handler()->store("content.md")->markdown()->content()->unfold(),
             static::markdownConfig()
-        ); //->prepend("# ". static::title(static::HEADING) ."\n\n". static::contentDetailsView() ."\n\n")
+        )->prepend(
+            "# ". $this->handler()->title(ContentHandler::HEADING) ."\n\n". $this->detailsView() ."\n\n"
+        );
         // ->extensions(...static::markdownExtensions());
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    static public function meta(): ESArray
+    public function detailsView()
     {
-        return Shoop::array([
-            UIKit::meta()->attr(
-                "name viewport",
-                "content width=device-width,
-                initial-scale=1"
-            )
-        ])->plus(...static::faviconsMeta())
-        ->plus(static::shareMeta())
-        ->plus(...static::stylesMeta())
-        ->plus(...static::scriptsMeta());
-    }
-
-    static public function faviconsMeta()
-    {
-        return Shoop::array([
-            UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
-            UIKit::link()->attr("rel apple-touch-icon", "href /assets/favicons/apple-touch-icon.png", "sizes 180x180"),
-            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-32x32.png", "sizes 32x32"),
-            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-16x16.png", "sizes 16x16")
-        ]);
-    }
-
-    static public function stylesMeta()
-    {
-        return Shoop::array([
-            UIKit::link()->attr("rel stylesheet", "href /css/main.css")
-        ]);
-    }
-
-    static public function scriptsMeta()
-    {
-        return Shoop::array([
-            UIKit::script()->attr("src /js/main.js")
-        ]);
-    }
-
-    // TODO: rename social*
-    //      move to ContentHandler
-    static public function shareMeta()
-    {
-        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
-        // https://cards-dev.twitter.com/validator
-        return UIKit::socialMeta(
-            static::shareType(),
-            static::title(static::BOOKEND),
-            url()->current(),
-            static::shareDescription(),
-            static::shareImage()
-        )->twitter(...static::shareTwitter());
-    }
-
-    // TODO: Move to ContentHandler
-    static public function shareType()
-    {
-        return "website";
-    }
-
-    // TODO: Move to ContentHandler
-
-
-    // TODO: Move to ContentHandler
-    static public function shareDescription(): ESString
-    {
-        $description = static::store()->plus("content.md")
-            ->markdown()->meta()->description;
-
-        if ($description === null) {
-            $description = Shoop::string("");
-
-        } else {
-            $description = Shoop::string($description);
-
-        }
-
-        return $description->isNotEmpty(function($result, $description) {
-            if ($result->unfold()) {
-                return Shoop::string($description);
-            }
-
-            return static::shareDescriptionImmediateFallback()->isNotEmpty(
-                function($result, $description) {
-                    if ($result->unfold()) {
-                        return $description;
-                    }
-                    return static::title(static::BOOKEND);
-            });
-        });
-    }
-
-    // TODO: Move to ContentHandler
-    static public function shareDescriptionImmediateFallback()
-    {
-        return Shoop::string("");
-    }
-
-    // TODO: Move to ContentHandler
-    static public function shareTwitter(): ESArray
-    {
-        return Shoop::array([]);
-    }
-
-    static public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
-    {
-        $uri = static::uri(true);
-        if (! $includeCurrent) {
-            $uri = $uri->dropLast();
-        }
-        return $uri->each(function($part) use (&$uri) {
-            $anchor = UIKit::anchor(
-                static::title(static::HEADING, true, $uri),
-                $uri->join("/")->start("/")
-            );
-
-            $uri = $uri->dropLast();
-
-            return $anchor;
-
-        })->noEmpties()->isEmpty(
-            function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
-                // die(var_dump($anchors));
-                $anchors = Shoop::string($homeLinkContent)->isEmpty(
-                    function($result, $homeLinkContent) use ($anchors) {
-                        return ($result->unfold())
-                            ? $anchors
-                            : $anchors->plus(
-                                UIKit::anchor($homeLinkContent, "/")
-                            );
-                    });
-                return ($result->unfold())
-                    ? ""
-                    : UIKit::nav(
-                        UIKit::listWith(...$anchors)
-                    )->attr("class breadcrumbs");
-            });
-    }
-
-    // TODO: Extend ESMarkdown
-    static public function contentDetailsView()
-    {
-        $details = static::contentDetails();
+        $details = $this->handler()->details();
 
         $copy = Shoop::string("");
         if ($details->hasMemberUnfolded("created")) {
@@ -318,6 +195,94 @@ abstract class ContentBuilder
                 : UIKit::p($string->plus(".")->unfold());
         });
     }
+
+    public function meta(): ESArray
+    {
+        return Shoop::array([
+            UIKit::meta()->attr(
+                "name viewport",
+                "content width=device-width,
+                initial-scale=1"
+            )
+        ])->plus(...static::faviconsMeta())
+        ->plus(static::socialMeta())
+        ->plus(...static::stylesMeta())
+        ->plus(...static::scriptsMeta());
+    }
+
+    public function socialMeta()
+    {
+        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
+        // https://cards-dev.twitter.com/validator
+        return UIKit::socialMeta(
+            static::socialType(),
+            $this->handler()->title(ContentHandler::BOOKEND),
+            url()->current(),
+            $this->handler()->description(),
+            $this->socialImage()
+        )->twitter(...static::socialTwitter());
+    }
+
+    public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
+    {
+        $parts = ContentHandler::uri(true);
+        if (! $includeCurrent) {
+            $parts = $parts->dropLast();
+        }
+
+        return $parts->each(function() use (&$parts) {
+            $anchor = UIKit::anchor(
+                $this->handler()->title(ContentHandler::HEADING, true, $parts),
+                $parts->join("/")->start("/")
+            );
+
+            $parts = $parts->dropLast();
+
+            return $anchor;
+
+        })->noEmpties()->isEmpty(
+            function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
+                // die(var_dump($anchors));
+                $anchors = Shoop::string($homeLinkContent)->isEmpty(
+                    function($result, $homeLinkContent) use ($anchors) {
+                        return ($result->unfold())
+                            ? $anchors
+                            : $anchors->plus(
+                                UIKit::anchor($homeLinkContent, "/")
+                            );
+                    });
+                return ($result->unfold())
+                    ? ""
+                    : UIKit::nav(
+                        UIKit::listWith(...$anchors)
+                    )->attr("class breadcrumbs");
+            });
+    }
+
+// - TOC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     static public function tocView($currentPage = 1, $path = "/feed")
     {

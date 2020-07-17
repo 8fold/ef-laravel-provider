@@ -45,7 +45,7 @@ class TestContentBuilder extends ContentBuilder
     //     });
     // }
 
-    static public function socialImage(): ESString
+    public function socialImage(): ESString
     {
         return Shoop::string("https://8fold.pro/media/og/default-image.png");
     }

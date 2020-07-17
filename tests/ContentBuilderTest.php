@@ -28,33 +28,49 @@ class ContentBuilderTest extends TestCase
         }
     }
 
-    public function testCanReachURL()
+    private function localBuilder()
     {
-        $this->visit("/");
+        return new TestContentBuilder(
+            Shoop::path(__DIR__)->plus("content"),
+            // Shoop::path("tests")->plus("content")
+        );
     }
 
-    public function testShare()
+    private function remoteBuilder()
     {
-        // $this->visit("/");
-        // $expected = '<meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="https://8fold.pr/media/og/default-image.png" property="og:image"><meta name="twitter:card" content="summary_large_image">';
-        // $actual = ContentBuilder::shareMeta();
-        // $this->assertEquals($expected, $actual->unfold());
+        return new TestContentBuilder(
+            Shoop::path(__DIR__)->plus("content"),
+            Shoop::path("tests")->plus("content")
+        );
+    }
+
+    public function testCanReachURL()
+    {
+        $this->visit("/")->see("Root");
+    }
+
+    public function testSocial()
+    {
+        $this->visit("/");
+        $expected = '<meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="https://8fold.pro/media/og/default-image.png" property="og:image"><meta name="twitter:card" content="summary_large_image">';
+        $actual = $this->localBuilder()->socialMeta();
+        $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testBreadcrumbs()
     {
-        // $this->visit("/somewhere/else");
-        // $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
-        // $actual = ContentBuilder::breadcrumbs();
-        // $this->assertSame($expected, $actual->unfold());
+        $this->visit("/somewhere/else");
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
+        $actual = $this->localBuilder()->breadcrumbs();
+        $this->assertSame($expected, $actual->unfold());
 
-        // $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Home</a></li></ul></nav>';
-        // $actual = ContentBuilder::breadcrumbs("Home");
-        // $this->assertSame($expected, $actual->unfold());
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere">Somewhere</a></li><li><a href="/">Home</a></li></ul></nav>';
+        $actual = $this->localBuilder()->breadcrumbs("Home");
+        $this->assertSame($expected, $actual->unfold());
 
-        // $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere/else">Else</a></li><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
-        // $actual = ContentBuilder::breadcrumbs("", true);
-        // $this->assertSame($expected, $actual->unfold());
+        $expected = '<nav class="breadcrumbs"><ul><li><a href="/somewhere/else">Else heading</a></li><li><a href="/somewhere">Somewhere</a></li></ul></nav>';
+        $actual = $this->localBuilder()->breadcrumbs("", true);
+        $this->assertSame($expected, $actual->unfold());
     }
 
     public function testPaginationPages()

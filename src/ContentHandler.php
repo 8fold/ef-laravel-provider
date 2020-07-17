@@ -233,9 +233,9 @@ class ContentHandler
     {
         $parts = Type::sanitizeType($parts, ESArray::class);
 
-        $useRoot = $parts->countIsLessThanUnfolded(1);
+        // $useRoot = $parts->countIsLessThanUnfolded(1);
 
-        $store = $this->store($useRoot, ...$parts);
+        $store = $this->store(true, ...$parts);
 
         return $parts->each(function($part) use (&$store, $checkHeadingFirst) {
             $s = $store->plus("content.md");
@@ -270,7 +270,7 @@ class ContentHandler
         ]);
     }
 
-    public function contentDetails()
+    public function details()
     {
         $meta = $this->contentStore()->markdown()->meta();
 
@@ -330,5 +330,32 @@ class ContentHandler
             Carbon::createFromFormat($startFormat, $yyyymmdd, "America/Chicago")
                 ->format($endFormat)
         );
+    }
+
+    public function description(): ESString
+    {
+        $description = static::store()->plus("content.md")
+            ->markdown()->meta()->description;
+        $description = ($description === null)
+            ? Shoop::string("")
+            : Shoop::string($description);
+
+        return $description->isNotEmpty(function($result, $description) {
+            if ($result->unfold()) {
+                return Shoop::string($description);
+            }
+
+            return $this->descriptionImmediateFallback()->isNotEmpty(
+                function($result, $description) {
+                    return ($result->unfold())
+                        ? $description
+                        : $this->title(static::BOOKEND);
+            });
+        });
+    }
+
+    public function descriptionImmediateFallback(): ESString
+    {
+        return Shoop::string("");
     }
 }
