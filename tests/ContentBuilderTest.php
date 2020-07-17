@@ -37,9 +37,9 @@ class ContentBuilderTest extends TestCase
         $actual = ContentBuilder::uri();
         $this->assertEquals($expected, $actual->unfold());
 
-        $expected = __DIR__ ."/content";
-        $actual = ContentBuilder::store();
-        $this->assertEquals($expected, $actual->unfold());
+        // $expected = __DIR__ ."/content";
+        // $actual = ContentBuilder::store();
+        // $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testCanGetRemoteAssets()
@@ -179,16 +179,23 @@ class ContentBuilderTest extends TestCase
     public function testGitHubIntegration()
     {
         if (file_exists(__DIR__ ."/.env")) {
-            $githubClient = ContentBuilder::githubClient();
+            $token = env("GITHUB_PERSONAL_TOKEN");
+            $githubClient = ContentBuilder::githubClient($token);
             $actual = Shoop::dictionary($githubClient->me()->show())->login;
             $this->assertNotNull($actual);
 
-            die(var_dump(
-                $githubClient
-                    ->api("repo")
-                    ->contents()
-                    ->download("8fold", "laravel-provider", "README.md")
-            ));
+            $actual = $githubClient->plus("README.md")->markdown();
+die(var_dump($actual));
+            // Shoop::markdown(
+            //     $githubClient
+            //         ->api("repo")
+            //         ->contents()
+            //         ->download("8fold", "laravel-provider", "README.md")
+            // )->string()->startsWith("# 8fold Laravel Provider");
+            $this->assertTrue($actual->unfold());
+
+            $actual = ContentBuilder::store();
+            die(var_dump($actual));
 
         } else {
             // Create a .env file in the root tests folder with
