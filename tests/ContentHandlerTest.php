@@ -182,10 +182,10 @@ class ContentHandlerTest extends TestCase
             'moved' => 'May 1, 2020',
             'original' => 'https://8fold.pro 8fold'
         ]);
-        $actual = $this->localHandler()->contentDetails();
+        $actual = $this->localHandler()->details();
         $this->assertSame($expected->unfold(), $actual->unfold());
 
-        $actual = $this->remoteHandler()->contentDetails();
+        $actual = $this->remoteHandler()->details();
         $this->assertSame($expected->unfold(), $actual->unfold());
     }
 }
