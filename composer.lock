@@ -212,16 +212,16 @@
         },
         {
             "name": "8fold/php-shoop-extras",
-            "version": "0.1.41",
+            "version": "0.1.43",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-extras.git",
-                "reference": "e7628760e9055b8acf88c0aad5165b07dcc997f9"
+                "reference": "10fccc25706a5f9f608329ede8774a995abc4b57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/e7628760e9055b8acf88c0aad5165b07dcc997f9",
-                "reference": "e7628760e9055b8acf88c0aad5165b07dcc997f9",
+                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/10fccc25706a5f9f608329ede8774a995abc4b57",
+                "reference": "10fccc25706a5f9f608329ede8774a995abc4b57",
                 "shasum": ""
             },
             "require": {
@@ -264,7 +264,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-16T17:09:14+00:00"
+            "time": "2020-07-18T18:16:33+00:00"
         },
         {
             "name": "cache/adapter-common",
