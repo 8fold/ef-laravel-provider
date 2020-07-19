@@ -111,16 +111,16 @@
         },
         {
             "name": "8fold/php-markup",
-            "version": "0.1.25",
+            "version": "0.1.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
-                "reference": "9c012ad7ac23782b929c4252abbd89149ad515fd"
+                "reference": "fcbd3eadcf18f04ae3dc98e58b5e02e2cfb9064a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-markup/zipball/9c012ad7ac23782b929c4252abbd89149ad515fd",
-                "reference": "9c012ad7ac23782b929c4252abbd89149ad515fd",
+                "url": "https://api.github.com/repos/8fold/php-markup/zipball/fcbd3eadcf18f04ae3dc98e58b5e02e2cfb9064a",
+                "reference": "fcbd3eadcf18f04ae3dc98e58b5e02e2cfb9064a",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-11T21:36:12+00:00"
+            "time": "2020-07-19T19:43:42+00:00"
         },
         {
             "name": "8fold/php-shoop",
@@ -212,16 +212,16 @@
         },
         {
             "name": "8fold/php-shoop-extras",
-            "version": "0.1.44",
+            "version": "0.1.45",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-extras.git",
-                "reference": "c9acb63fd5f80e09a701cafd17c94e0ae30dd3e0"
+                "reference": "befd17f1d420af8b5ca4ba03834ca3e9146d5a22"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/c9acb63fd5f80e09a701cafd17c94e0ae30dd3e0",
-                "reference": "c9acb63fd5f80e09a701cafd17c94e0ae30dd3e0",
+                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/befd17f1d420af8b5ca4ba03834ca3e9146d5a22",
+                "reference": "befd17f1d420af8b5ca4ba03834ca3e9146d5a22",
                 "shasum": ""
             },
             "require": {
@@ -264,7 +264,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-18T20:26:23+00:00"
+            "time": "2020-07-18T23:27:05+00:00"
         },
         {
             "name": "cache/adapter-common",

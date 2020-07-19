@@ -48,6 +48,7 @@ use Eightfold\Shoop\{
 
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
+use Eightfold\Markup\UIKit\Elements\Compound\WebHead;
 
 use Eightfold\Site\ContentHandler;
 
@@ -80,40 +81,6 @@ abstract class ContentBuilder
         ]);
     }
 
-    static public function faviconsMeta()
-    {
-        return Shoop::array([
-            UIKit::link()->attr("type image/x-icon", "rel icon", "href /assets/favicons/favicon.ico"),
-            UIKit::link()->attr("rel apple-touch-icon", "href /assets/favicons/apple-touch-icon.png", "sizes 180x180"),
-            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-32x32.png", "sizes 32x32"),
-            UIKit::link()->attr("rel image/png", "href /assets/favicons/favicon-16x16.png", "sizes 16x16")
-        ]);
-    }
-
-    static public function stylesMeta()
-    {
-        return Shoop::array([
-            UIKit::link()->attr("rel stylesheet", "href /css/main.css")
-        ]);
-    }
-
-    static public function scriptsMeta()
-    {
-        return Shoop::array([
-            UIKit::script()->attr("src /js/main.js")
-        ]);
-    }
-
-    static public function socialType()
-    {
-        return "website";
-    }
-
-    static public function socialTwitter(): ESArray
-    {
-        return Shoop::array([]);
-    }
-
     private $handler;
 
     public function __construct(
@@ -142,37 +109,14 @@ abstract class ContentBuilder
         return UIKit::webView(
                 $this->handler()->title(),
                 UIKit::main($this->markdown(), ...$extras)
-            )->meta(...$this->meta());
-    }
-
-    public function socialImage(): ESString
-    {
-        $parts = $this->handler()->uri(true);
-        $store = $this->handler()->mediaStore()->plus(...$parts);
-        return $parts->each(function($part, $index, &$break) use (&$store) {
-            $poster = $store->plus("poster.jpg");
-            if ($poster->isFile) {
-                $break = true;
-                return Shoop::string($store)->minus(static::mediaStore())
-                        ->start(request()->root(), "/media")->plus("/poster.jpg");
-
-            } else {
-                $store = $store->dropLast();
-                return "";
-
-            }
-        })->noEmpties()->isEmpty(function($result, $array) {
-            return ($result->unfold())
-                ? Shoop::string(request()->root())->plus("/media/poster.jpg")
-                : $array->first();
-        });
+            )->meta($this->meta());
     }
 
 // - Extra UI
     public function markdown()
     {
         return UIKit::markdown(
-            $this->handler()->contentStore()->markdown()->content()->unfold(),
+            $this->contentStore()->markdown()->content()->unfold(),
             static::markdownConfig()
         )->prepend(
             UIKit::h1(
@@ -220,42 +164,37 @@ abstract class ContentBuilder
         });
     }
 
-    public function meta(): ESArray
+    public function meta(string $type = "website"): WebHead
     {
-        return Shoop::array([
-            UIKit::meta()->attr(
-                "name viewport",
-                "content width=device-width,
-                initial-scale=1"
-            )
-        ])->plus(...static::faviconsMeta())
-        ->plus(static::socialMeta(
-            static::socialType(), // delegate override
-            ...static::socialTwitter() // delegate override
-        ))
-        ->plus(...static::stylesMeta())
-        ->plus(...static::scriptsMeta());
-    }
-
-    public function socialMeta(
-        string $socialType = "website",
-        string $twitterHandle = "",
-        string $twitterCardType = "summary_large_image"
-    )
-    {
-        $twitter = Shoop::array([]);
-        if (strlen($twitterHandle) > 0) {
-            $twitter = $twitter->plus($twitterHandle, $twitterCardType);
-        }
-        // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
-        // https://cards-dev.twitter.com/validator
-        return UIKit::socialMeta(
-            $socialType,
+        return UIKit::webHead()->favicons(
+            "/assets/favicons/favicon.ico",
+            "/assets/favicons/apple-touch-icon.png",
+            "/assets/favicons/favicon-32x32.png",
+            "/assets/favicons/favicon-16x16.png"
+        )->social(
             $this->handler()->title(ContentHandler::BOOKEND),
             url()->current(),
             $this->handler()->description(),
-            $this->socialImage()
-        )->twitter(...$twitter);
+            $this->handler()->socialImage(),
+            $type
+        )->socialTwitter(...$this->socialTwitter())
+        ->styles(...$this->styles())
+        ->scripts(...$this->scripts());
+    }
+
+    public function socialTwitter(): ESArray
+    {
+        return Shoop::array([]);
+    }
+
+    public function styles()
+    {
+        return Shoop::array(["/css/main.css"]);
+    }
+
+    static public function scripts()
+    {
+        return Shoop::array(["/js/main.js"]);
     }
 
     public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
