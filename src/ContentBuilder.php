@@ -53,8 +53,6 @@ use Eightfold\Site\ContentHandler;
 
 abstract class ContentBuilder
 {
-    abstract public function socialImage(): ESString;
-
     static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
     {
         return new static($localRootPath, $remoteRootPath);
