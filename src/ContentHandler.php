@@ -193,7 +193,7 @@ class ContentHandler
             );
 
         } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
-            if (static::rootUri()->isEmpty) {
+            if ($this->uri(true)->isEmpty) {
                 $titles = $titles->plus(
                     $this->titles($checkHeadingFirst, $parts)->first()
                 );
@@ -202,10 +202,10 @@ class ContentHandler
                 $t = $this->titles($checkHeadingFirst, $parts)->divide(-1);
                 $start = $t->first()->first();
                 $root = $t->last()->first();
-                if (static::rootUri()->isUnfolded("events")) {
-                    $eventTitles = static::eventsTitles();
+                if ($this->uri(true)->isUnfolded("events")) {
+                    $eventTitles = $this->eventsTitles();
                     $start = $start->start($eventTitles->month ." ". $eventTitles->year);
-                    $root = static::rootStore()->plus("content.md")->markdown()->meta()->title();
+                    $root = $this->contentStore(true)->markdown()->meta()->title();
                 }
 
                 $titles = $titles->plus($start, $root);
@@ -215,7 +215,8 @@ class ContentHandler
             $t = $this->titles($checkHeadingFirst, $parts)->divide(-1);
             $start = $t->first();
             $root = $t->last();
-            if (static::rootUri()->isUnfolded("events")) {
+            if ($this->uri(true)->isUnfolded("events")) {
+                die("here");
                 $eventTitles = $this->eventsTitles(
                     $type = "",
                     $checkHeadingFirst = true,
