@@ -16,7 +16,7 @@ Route::prefix("events")->group(function() use ($builder) {
             ->nearestMonthWithEvents($year, $month)->uri();
 
         $redirect = Shoop::string("{$eventStore}{$uri}")
-            ->replace([$builder->store(true)->unfold() => ""]);
+            ->replace([$builder->handler()->eventStore()->unfold() => ""]);
 
         return redirect("{$redirect}");
     });
