@@ -21,21 +21,21 @@ Route::prefix("events")->group(function() use ($builder) {
         return redirect("{$redirect}");
     });
 
-    Route::get("/{year}", function($year) use ($contentBuilderClass) {
-        $eventStore = $contentBuilderClass::eventStore()->unfold();
+    Route::get("/{year}", function($year) use ($builder) {
+        $eventStore = $builder->handler()->eventStore()->unfold();
 
         $path = "{$eventStore}/{$year}";
-        return $contentBuilderClass::view(
+        return $builder->view(
             UIKit::h1("Events"),
             Grid::forYear($path)->render()
         );
     });
 
-    Route::get("/{year}/{month}", function(string $year, string $month) use ($contentBuilderClass) {
-        $eventStore = $contentBuilderClass::eventStore()->unfold();
+    Route::get("/{year}/{month}", function(string $year, string $month) use ($builder) {
+        $eventStore = $builder->handler()->eventStore()->unfold();
 
         $path = "/{$eventStore}/{$year}/{$month}";
-        return $contentBuilderClass::view(
+        return $builder->view(
             UIKit::h1("Events"),
             Grid::forMonth($path)->render()
         );
