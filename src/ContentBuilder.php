@@ -187,12 +187,12 @@ abstract class ContentBuilder
         return Shoop::array([]);
     }
 
-    public function styles()
+    public function styles(): ESArray
     {
         return Shoop::array(["/css/main.css"]);
     }
 
-    static public function scripts()
+    public function scripts(): ESArray
     {
         return Shoop::array(["/js/main.js"]);
     }
