@@ -36,13 +36,13 @@ class ContentBuilderTest extends TestCase
         );
     }
 
-    private function remoteBuilder()
-    {
-        return new TestContentBuilder(
-            Shoop::path(__DIR__)->plus("content"),
-            Shoop::path("tests")->plus("content")
-        );
-    }
+    // private function remoteBuilder()
+    // {
+    //     return new TestContentBuilder(
+    //         Shoop::path(__DIR__)->plus("content"),
+    //         Shoop::path("tests")->plus("content")
+    //     );
+    // }
 
     public function testCanReachURL()
     {
@@ -65,11 +65,11 @@ class ContentBuilderTest extends TestCase
         // ui
     }
 
-    public function testSocial()
+    public function testMeta()
     {
         $this->visit("/");
-        $expected = '<meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="https://8fold.pro/media/og/default-image.png" property="og:image"><meta name="twitter:card" content="summary_large_image">';
-        $actual = $this->localBuilder()->socialMeta();
+        $expected = '<meta name="viewport" content="width=device-width,initial-scale=1"><link type="image/x-icon" rel="icon" href="/assets/favicons/favicon.ico"><link rel="apple-touch-icon" href="/assets/favicons/apple-touch-icon.png" sizes="180x180"><link rel="image/png" href="/assets/favicons/favicon-32x32.png" sizes="32x32"><link rel="image/png" href="/assets/favicons/favicon-16x16.png" sizes="16x16"><meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost" property="og:url"><meta content="Root" property="og:description"><meta content="http://localhost/media/poster.jpg" property="og:image"><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/css/main.css"><script src="/js/main.js"></script>';
+        $actual = $this->localBuilder()->meta();
         $this->assertEquals($expected, $actual->unfold());
     }
 
