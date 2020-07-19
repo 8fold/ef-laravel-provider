@@ -58,7 +58,7 @@ class ContentHandler
 
     static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
     {
-        return new ContentHandler($localRootPath, $remoteRootPath);
+        return new static($localRootPath, $remoteRootPath);
     }
 
     static public function uri($parts = false) // :ESString|ESArray
@@ -345,7 +345,8 @@ class ContentHandler
             if ($result->unfold()) {
                 return Shoop::string($description);
             }
-
+dump(get_class($this));
+dd($this->descriptionImmediateFallback());
             return $this->descriptionImmediateFallback()->isNotEmpty(
                 function($result, $description) {
                     return ($result->unfold())

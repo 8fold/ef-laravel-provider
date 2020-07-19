@@ -81,11 +81,9 @@ abstract class ContentBuilder
         ]);
     }
 
-    private $handler;
+    protected $handler;
 
-    public function __construct(
-        ESPath $localRootPath
-    )
+    public function __construct(ESPath $localRootPath)
     {
         $this->handler = ContentHandler::fold($localRootPath);
     }
