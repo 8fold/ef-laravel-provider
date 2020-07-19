@@ -53,9 +53,9 @@ use Eightfold\Site\ContentHandler;
 
 abstract class ContentBuilder
 {
-    static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
+    static public function fold(ESPath $localRootPath)
     {
-        return new static($localRootPath, $remoteRootPath);
+        return new static($localRootPath);
     }
 
     static public function markdownConfig()
@@ -117,11 +117,10 @@ abstract class ContentBuilder
     private $handler;
 
     public function __construct(
-        ESPath $localRootPath,
-        ESPath $remoteRootPath = null
+        ESPath $localRootPath
     )
     {
-        $this->handler = ContentHandler::fold($localRootPath, $remoteRootPath);
+        $this->handler = ContentHandler::fold($localRootPath);
     }
 
     public function handler()
@@ -230,22 +229,33 @@ abstract class ContentBuilder
                 initial-scale=1"
             )
         ])->plus(...static::faviconsMeta())
-        ->plus(static::socialMeta())
+        ->plus(static::socialMeta(
+            static::socialType(), // delegate override
+            ...static::socialTwitter() // delegate override
+        ))
         ->plus(...static::stylesMeta())
         ->plus(...static::scriptsMeta());
     }
 
-    public function socialMeta()
+    public function socialMeta(
+        string $socialType = "website",
+        string $twitterHandle = "",
+        string $twitterCardType = "summary_large_image"
+    )
     {
+        $twitter = Shoop::array([]);
+        if (strlen($twitterHandle) > 0) {
+            $twitter = $twitter->plus($twitterHandle, $twitterCardType);
+        }
         // https://developers.facebook.com/tools/debug/?q=https%3A%2F%2Fliberatedelephant.com%2F
         // https://cards-dev.twitter.com/validator
         return UIKit::socialMeta(
-            static::socialType(),
+            $socialType,
             $this->handler()->title(ContentHandler::BOOKEND),
             url()->current(),
             $this->handler()->description(),
             $this->socialImage()
-        )->twitter(...static::socialTwitter());
+        )->twitter(...$twitter);
     }
 
     public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
