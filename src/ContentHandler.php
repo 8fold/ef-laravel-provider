@@ -345,8 +345,6 @@ class ContentHandler
             if ($result->unfold()) {
                 return Shoop::string($description);
             }
-dump(get_class($this));
-dd($this->descriptionImmediateFallback());
             return $this->descriptionImmediateFallback()->isNotEmpty(
                 function($result, $description) {
                     return ($result->unfold())
