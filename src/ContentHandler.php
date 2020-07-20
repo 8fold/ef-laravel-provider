@@ -333,9 +333,9 @@ class ContentHandler
         );
     }
 
-    public function description(): ESString
+    public function description(bool $useRoot = false, ...$plus): ESString
     {
-        $description = static::store()->plus("content.md")
+        $description = $this->contentStore($useRoot, ...$plus)
             ->markdown()->meta()->description;
         $description = ($description === null)
             ? Shoop::string("")
