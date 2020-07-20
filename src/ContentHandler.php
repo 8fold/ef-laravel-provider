@@ -364,11 +364,11 @@ class ContentHandler
         $parts = $this->uri(true);
         $store = $this->mediaStore()->plus(...$parts);
         return $parts->each(function($part, $index, &$break) use (&$store) {
-            $poster = $store->plus("poster.jpg");
+            $poster = $store->plus("poster.png");
             if ($poster->isFile) {
                 $break = true;
                 return Shoop::string($store)->minus($this->mediaStore())
-                        ->start(request()->root(), "/media")->plus("/poster.jpg");
+                        ->start(request()->root(), "/media")->plus("/poster.png");
 
             } else {
                 $store = $store->dropLast();
@@ -377,7 +377,7 @@ class ContentHandler
             }
         })->noEmpties()->isEmpty(function($result, $array) {
             return ($result->unfold())
-                ? Shoop::string(request()->root())->plus("/media/poster.jpg")
+                ? Shoop::string(request()->root())->plus("/media/poster.png")
                 : $array->first();
         });
     }
