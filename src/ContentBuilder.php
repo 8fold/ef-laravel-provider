@@ -4,267 +4,394 @@ namespace Eightfold\Site;
 
 use Carbon\Carbon;
 
-// use Github\Client;
-// use League\Flysystem\Adapter\Local;
-// use League\Flysystem\Filesystem;
-// use Cache\Adapter\Filesystem\FilesystemCachePool;
-
-
-use Spatie\YamlFrontMatter\YamlFrontMatter;
-
-use League\CommonMark\CommonMarkConverter;
-use League\CommonMark\DocParser;
-use League\CommonMark\Environment;
-use League\CommonMark\HtmlRenderer;
-
-// available extensions
-use League\CommonMark\Extension\{
-    Strikethrough\StrikethroughExtension,
-    Table\TableExtension,
-    TaskList\TaskListExtension
+use Eightfold\Shoop\{
+    Helpers\Type,
+    ESArray,
+    ESString
 };
-
-use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
-use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
-use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
-
-use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
-// end extensions
 
 use Eightfold\ShoopExtras\{
     Shoop,
-    ESStore,
-    ESPath
+    ESPath,
+    ESStore
 };
 
-use Eightfold\Shoop\Helpers\Type;
-
-use Eightfold\Shoop\{
-    ESArray,
-    ESBool,
-    ESString,
-    ESInt
-};
-
-use Eightfold\Markup\UIKit;
-use Eightfold\Markup\Element;
-use Eightfold\Markup\UIKit\Elements\Compound\WebHead;
-
-use Eightfold\Site\ContentHandler;
-
-abstract class ContentBuilder
+class ContentHandler
 {
-    static public function fold(ESPath $localRootPath)
+    /**
+     * Title member from YAML front matter.
+     */
+    public const TITLE = "title";
+
+    /**
+     * Heading member from YAML front matter, falls back to title member,
+     * if heading not set.
+     */
+    public const HEADING = "heading";
+
+    /**
+     * Recursively uses title member from YAML front matter to build a fully-
+     * qualified title string with separator. ex. Leaf | Branch | Trunk | Root
+     */
+    public const PAGE = "page";
+
+    /**
+     * @deprecated
+     *
+     * Uses the title member from YAML front matter to build a two-part title,
+     * which includes the title for the current URL plus the title of the root
+     * page with a separater. ex. Leaf | Root
+     */
+    public const SHARE = "share";
+
+    /**
+     * Uses the title member from YAML front matter to build a two-part title,
+     * which includes the title for the current URL plus the title of the root
+     * page with a separater. ex. Leaf | Root
+     */
+    public const BOOKEND = "book-end";
+
+    private $useLocal = true;
+    private $localRootPath;
+    private $remoteRootPath = "";
+    private $githubClient = null;
+
+    static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
     {
-        return new static($localRootPath);
+        return new static($localRootPath, $remoteRootPath);
     }
 
-    static public function markdownConfig()
+    static public function uri($parts = false) // :ESString|ESArray
     {
-        return Shoop::dictionary([
-            "html_input" => "strip",
-            "allow_unsafe_links" => false
-        ])->plus(Shoop::dictionary(["open_in_new_window" => true]), "external_link")
-        ->plus(Shoop::dictionary(["symbol" => "#"]), "heading_permalink")
-        ->unfold();
+        $base = Shoop::uri(request()->url())->tail();
+        return ($parts) ? $base->divide("/")->noEmpties()->reindex() : $base;
     }
 
-    static public function markdownExtensions()
+    static public function rootUri(): ESString
     {
-        return Shoop::array([
-            StrikethroughExtension::class,
-            TableExtension::class,
-            TaskListExtension::class,
-            ExternalLinkExtension::class,
-            SmartPunctExtension::class,
-            AbbreviationExtension::class
-        ]);
-    }
-
-    protected $handler;
-
-    public function __construct(ESPath $localRootPath)
-    {
-        $this->handler = ContentHandler::fold($localRootPath);
-    }
-
-    public function handler()
-    {
-        return $this->handler;
-    }
-
-    public function contentStore(bool $useRoot = false, ...$plus)
-    {
-        return $this->handler()->contentStore($useRoot, ...$plus);
-    }
-
-    public function view(...$extras)
-    {
-        if ($this->contentStore()->isNotFile) {
-            abort(404);
-        }
-
-        return UIKit::webView(
-                $this->handler()->title(),
-                UIKit::main($this->markdown(), ...$extras)
-            )->meta($this->meta());
-    }
-
-// - Extra UI
-    public function markdown()
-    {
-        return UIKit::markdown(
-            $this->contentStore()->markdown()->content()->unfold(),
-            static::markdownConfig()
-        )->prepend(
-            UIKit::h1(
-                $this->handler()->title(
-                    ContentHandler::HEADING
-                )->unfold()
-            )->unfold() ."\n\n".
-            $this->detailsView() ."\n\n"
-        )->extensions(...static::markdownExtensions());
-    }
-
-    public function detailsView()
-    {
-        $details = $this->handler()->details();
-
-        $copy = Shoop::string("");
-        if ($details->hasMemberUnfolded("created")) {
-            // Created on Apr 1, 2020 - if created, required
-            $copy = $copy->plus("Created on ")->plus($details->created);
-        }
-
-        if ($details->hasMemberUnfolded("modified")) {
-            // (updated Apr 1, 2020) - if modified
-            $copy = $copy->plus(" (updated ")->plus($details->modified)->plus(")");
-        }
-
-        if ($details->hasMemberUnfolded("original")) {
-            // , which was<br> originally posted on <a href="https://8fold.pro">8fold</a> - if original
-            list($href, $title) = $details->original()->divide(" ", true, 2);
-            $copy = $copy->plus(", which was")->plus(UIKit::br())
-                ->plus(" originally posted on ")
-                ->plus(
-                    UIKit::anchor($title, $href)
-                );
-        }
-
-        if ($details->hasMemberUnfolded("moved")) {
-            $copy = $copy->plus(" and moved ")->plus($details->moved);
-        }
-
-        return $copy->isNotEmpty(function($result, $string) {
-            return ($result->unfold())
-                ? UIKit::p($string->plus(".")->unfold())
-                : "";
+        return static::uri(true)->isEmpty(function($result, $array) {
+            return ($result->unfold()) ? Shoop::string("") : $array->first();
         });
     }
 
-    public function meta(string $type = "website"): WebHead
+    public function __construct(ESPath $localRootPath, ESPath $remoteRootPath = null)
     {
-        return UIKit::webHead()->favicons(
-            "/assets/favicons/favicon.ico",
-            "/assets/favicons/apple-touch-icon.png",
-            "/assets/favicons/favicon-32x32.png",
-            "/assets/favicons/favicon-16x16.png"
-        )->social(
-            $this->handler()->title(ContentHandler::BOOKEND),
-            url()->current(),
-            $this->handler()->description(),
-            $this->handler()->socialImage(),
-            $type
-        )->socialTwitter(...$this->socialTwitter())
-        ->styles(...$this->styles())
-        ->scripts(...$this->scripts());
+        $this->localRootPath = $localRootPath;
+
+        if ($this->remoteRootPath !== null) {
+            $this->remoteRootPath = $remoteRootPath;
+            $ghToken = env("GITHUB_PERSONAL_TOKEN");
+            $ghUsername = env("GITHUB_USERNAME");
+            $ghRepo = env("GITHUB_REPO");
+            if (
+                $ghToken !== null and
+                $ghUsername !== null and
+                $ghRepo !== null and
+                $remoteRootPath !== null
+            )
+            {
+                $this->useLocal = false;
+                $this->githubClient = Shoop::github(
+                    $remoteRootPath,
+                    $ghToken,
+                    $ghUsername,
+                    $ghRepo,
+                    $localRootPath,
+                    ".cache"
+                );
+            }
+
+        } else {
+            $this->remoteRootPath = Shoop::path("");
+
+        }
     }
 
-    public function socialTwitter(): ESArray
+    public function useLocal()
     {
-        return Shoop::array([]);
+        return $this->useLocal;
     }
 
-    public function styles(): ESArray
+    public function localRoot(): ESPath
     {
-        return Shoop::array(["/css/main.css"]);
+        return $this->localRootPath;
     }
 
-    public function scripts(): ESArray
+    public function remoteRoot(): ESPath
     {
-        return Shoop::array(["/js/main.js"]);
+        return $this->remoteRoot;
     }
 
-    public function breadcrumbs($homeLinkContent = "", $includeCurrent = false)
+    public function githubClient()
     {
-        $parts = ContentHandler::uri(true);
-        if (! $includeCurrent) {
-            $parts = $parts->dropLast();
+        return $this->githubClient;
+    }
+
+    public function store(bool $useRoot = false, ...$plus): ESPath
+    {
+        $store = ($this->useLocal())
+            ? Shoop::store($this->localRoot())
+            : $this->githubClient();
+
+        if (! $useRoot) {
+            $parts = Shoop::path(request()->path())->parts();
+            if ($parts->countIsGreaterThanUnfolded(0)) {
+                $store = $store->plus(...$parts);
+            }
         }
 
-        return $parts->each(function() use (&$parts) {
-            $anchor = UIKit::anchor(
-                $this->handler()->title(ContentHandler::HEADING, true, $parts),
-                $parts->join("/")->start("/")
+        if ($useRoot or count($plus) > 0) {
+            if (Shoop::array($plus)->countIsGreaterThanUnfolded(0)) {
+                $store = $store->plus(...$plus);
+            }
+        }
+        return $store;
+    }
+
+    public function contentStore(bool $useRoot = false, ...$plus): ESPath // ESStore|ESGitHubClient
+    {
+        return $this->store($useRoot, ...$plus)->plus("content.md");
+    }
+
+    public function assetsStore(...$plus): ESPath
+    {
+        return $this->store(true, ".assets")->plus(...$plus);
+    }
+
+    public function mediaStore(...$plus): ESPath
+    {
+        return static::store(true, ".media")->plus(...$plus);
+    }
+
+    public function eventStore(...$plus): ESPath
+    {
+        return static::store(true, "events")->plus(...$plus);
+    }
+
+    public function title($type = "", $checkHeadingFirst = true, $parts = []): ESString
+    {
+        if (strlen($type) === 0) {
+            $type = static::PAGE;
+        }
+
+        $parts = Type::sanitizeType($parts, ESArray::class);
+        if ($parts->isEmpty) {
+            $parts = static::uri(true);
+        }
+
+        $titles = Shoop::array([]);
+        if ($checkHeadingFirst and
+            Shoop::string(static::HEADING)->isUnfolded($type)
+        ) {
+            $titles = $titles->plus(
+                $this->titles($checkHeadingFirst, $parts)->first()
             );
 
-            $parts = $parts->dropLast();
+        } elseif (Shoop::string(static::TITLE)->isUnfolded($type)) {
+            $titles = $titles->plus(
+                $this->titles(false, $parts)->first()
+            );
 
-            return $anchor;
+        } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
+            if ($this->uri(true)->isEmpty) {
+                $titles = $titles->plus(
+                    $this->titles($checkHeadingFirst, $parts)->first()
+                );
 
-        })->noEmpties()->isEmpty(
-            function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
-                // die(var_dump($anchors));
-                $anchors = Shoop::string($homeLinkContent)->isEmpty(
-                    function($result, $homeLinkContent) use ($anchors) {
+            } else {
+                $t = $this->titles($checkHeadingFirst, $parts)->divide(-1);
+                $start = $t->first()->first();
+                $root = $t->last()->first();
+                if ($this->uri(true)->isUnfolded("events")) {
+                    $eventTitles = $this->eventsTitles();
+                    $start = $start->start($eventTitles->month ." ". $eventTitles->year);
+                    $root = $this->contentStore(true)->markdown()->meta()->title();
+                }
+
+                $titles = $titles->plus($start, $root);
+            }
+
+        } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
+            $t = $this->titles($checkHeadingFirst, $parts)->divide(-1);
+            $start = $t->first();
+            $root = $t->last();
+            if ($this->uri(true)->isUnfolded("events")) {
+                die("here");
+                $eventTitles = $this->eventsTitles(
+                    $type = "",
+                    $checkHeadingFirst = true,
+                    $parts = []
+                );
+                $start = $start->start($eventTitles->month, $eventTitles->year);
+            }
+            $titles = $titles->plus(...$start)->plus(...$root);
+
+        }
+        return $titles->noEmpties()->join(" | ");
+    }
+
+    public function titles($checkHeadingFirst = true, $parts = []): ESArray
+    {
+        $parts = Type::sanitizeType($parts, ESArray::class);
+
+        // $useRoot = $parts->countIsLessThanUnfolded(1);
+
+        $store = $this->store(true, ...$parts);
+
+        return $parts->each(function($part) use (&$store, $checkHeadingFirst) {
+            $s = $store->plus("content.md");
+            $title = (! $checkHeadingFirst)
+                ? $s->metaMember("title")
+                : $s->metaMember("heading")->countIsGreaterThan(0,
+                    function($result, $title) use ($s) {
                         return ($result->unfold())
-                            ? $anchors
-                            : $anchors->plus(
-                                UIKit::anchor($homeLinkContent, "/")
-                            );
+                            ? $title
+                            : $s->metaMember("title");
                     });
-                return ($result->unfold())
-                    ? ""
-                    : UIKit::nav(
-                        UIKit::listWith(...$anchors)
-                    )->attr("class breadcrumbs");
-            });
+
+            if ($store->parts()->countIsGreaterThanUnfolded(0)) {
+                $store = $store->dropLast();
+            }
+            return $title;
+
+        })->noEmpties()->plus(
+            $this->contentStore(true)->metaMember("title")
+        );
     }
 
-
-
-
-
-
-
-
-
-
-
-
-// -> RSS
-    // TODO: Move to ContentHandler
-    static public function rssStore()
+   public function eventsTitles($checkHeadingFirst = true, $parts = [])
     {
-        return static::rootStore()->plus("feed", "content.md");
-    }
+        $parts = static::uri();
+        $year  = $parts->dropFirst()->first;
+        $month = $this->dateString($parts->dropFirst(2)->first, "m", "F");
 
-    // TODO: Move to ContentHandler
-    static public function rssDescriptionReplacements()
-    {
         return Shoop::dictionary([
-            "</h1>" => ":",
-            "</h2>" => ":",
-            "</h3>" => ":",
-            "</h4>" => ":",
-            "</h5>" => ":",
-            "</h6>" => ":",
-            "<h1>" => "",
-            "<h2>" => "",
-            "<h3>" => "",
-            "<h4>" => "",
-            "<h5>" => "",
-            "<h6>" => ""
+            "year"  => $year,
+            "month" => $month
         ]);
+    }
+
+    public function details()
+    {
+        $meta = $this->contentStore()->markdown()->meta();
+
+        $return = Shoop::dictionary([]);
+        $return = $return->plus(
+            ($meta->created === null)
+                ? Shoop::string("")
+                : $this->dateString($meta->created),
+            "created"
+        );
+
+        $return = $return->plus(
+            ($meta->modified === null)
+                ? Shoop::string("")
+                : $this->dateString($meta->modified),
+            "modified"
+        );
+
+        $return = $return->plus(
+            ($meta->moved === null)
+                ? Shoop::string("")
+                : $this->dateString($meta->moved),
+            "moved"
+        );
+
+        $return = $return->plus(
+            ($meta->original === null)
+                ? Shoop::string("")
+                : Shoop::string($meta->original),
+            "original"
+        );
+
+        return $return->noEmpties();
+    }
+
+    public function copyright($name, $startYear = ""): ESString
+    {
+        if (strlen($startYear) > 0) {
+            $startYear = $startYear ."&ndash;";
+        }
+        return Shoop::string("Copyright © {$startYear}". date("Y") ." {$name}. All rights reserved.");
+    }
+
+    private function dateString(
+        string $yyyymmdd,
+        string $startFormat = "Ymd",
+        string $endFormat = ""
+    ): ESString
+    {
+        if (empty($endFormat)) {
+            return Shoop::string(
+                Carbon::createFromFormat("Ymd", $yyyymmdd, "America/Chicago")
+                    ->toFormattedDateString()
+            );
+        }
+        return Shoop::string(
+            Carbon::createFromFormat($startFormat, $yyyymmdd, "America/Chicago")
+                ->format($endFormat)
+        );
+    }
+
+    public function description(bool $useRoot = false, ...$plus): ESString
+    {
+        $description = $this->contentStore($useRoot, ...$plus)
+            ->markdown()->meta()->description;
+        $description = ($description === null)
+            ? Shoop::string("")
+            : Shoop::string($description);
+
+        return $description->isNotEmpty(function($result, $description) {
+            if ($result->unfold()) {
+                return Shoop::string($description);
+            }
+            return $this->descriptionImmediateFallback()->isNotEmpty(
+                function($result, $description) {
+                    return ($result->unfold())
+                        ? $description
+                        : $this->title(static::BOOKEND);
+            });
+        });
+    }
+
+    public function descriptionImmediateFallback(): ESString
+    {
+        return Shoop::string("");
+    }
+
+    public function socialImage(): ESString
+    {
+        $parts = $this->uri(true);
+        $store = $this->mediaStore()->plus(...$parts);
+        return $parts->each(function($part, $index, &$break) use (&$store) {
+            $poster = $store->plus("poster.png");
+            $posterAlt = $store->plus("poster.jpg");
+            if ($poster->isFile) {
+                $break = true;
+                return Shoop::string($store)->minus($this->mediaStore())
+                        ->start(request()->root(), "/media")->plus("/poster.png");
+
+            } elseif ($posterAlt->isFile) {
+                return Shoop::string($store)->minus($this->mediaStore())
+                        ->start(request()->root(), "/media")->plus("/poster.jpg");
+
+            } else {
+                $store = $store->dropLast();
+                return "";
+
+            }
+        })->noEmpties()->isEmpty(function($result, $array) use (&$store) {
+            return $store->plus("poster.png")->isFile(function($result, $store) {
+                if ($result->unfold()) {
+                    return Shoop::string(request()->root())->plus("/media/poster.png");
+                }
+                return $store->dropLast()->plus("poster.jpg")->isFile(function($result, $store) {
+                    if ($result->unfold()) {
+                        return Shoop::string(request()->root())->plus("/media/poster.jpg");
+                    }
+                    return Shoop::string("");
+                });
+            });
+        });
     }
 }
