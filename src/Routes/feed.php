@@ -8,7 +8,7 @@ use Eightfold\Markup\Element;
 
 Route::prefix("feed")->group(function() use ($builder) {
     Route::get("/", function() use ($builder) {
-        return $builder->contentStore()->plus("content.md")->isFile(
+        return $builder->contentStore()->isFile(
             function($result, $store) use ($builder) {
                 if (! $result->unfold()) { abort(404); }
 
