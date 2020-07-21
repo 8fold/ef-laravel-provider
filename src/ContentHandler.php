@@ -365,10 +365,15 @@ class ContentHandler
         $store = $this->mediaStore()->plus(...$parts);
         return $parts->each(function($part, $index, &$break) use (&$store) {
             $poster = $store->plus("poster.png");
+            $posterAlt = $store->plus("poster.jpg");
             if ($poster->isFile) {
                 $break = true;
                 return Shoop::string($store)->minus($this->mediaStore())
                         ->start(request()->root(), "/media")->plus("/poster.png");
+
+            } elseif ($posterAlt->isFile) {
+                return Shoop::string($store)->minus($this->mediaStore())
+                        ->start(request()->root(), "/media")->plus("/poster.jpg");
 
             } else {
                 $store = $store->dropLast();
