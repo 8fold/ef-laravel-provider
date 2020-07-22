@@ -144,7 +144,6 @@ class ContentHandlerTest extends TestCase
         $actual = $this->localHandler()->title(ContentHandler::BOOKEND);
         $this->assertSame($expected, $actual->unfold());
 
-        // $this->visit("/somewhere/else");
         $expected = "Else heading | Somewhere | Root";
         $actual = $this->localHandler()->title("", true, ["somewhere", "else"]);
         $this->assertSame($expected, $actual->unfold());
@@ -152,6 +151,11 @@ class ContentHandlerTest extends TestCase
         $expected = "Else";
         $actual = $this->localHandler()
             ->title(ContentHandler::TITLE, true, ["somewhere", "else"]);
+        $this->assertSame($expected, $actual->unfold());
+
+        $expected = "Else heading";
+        $actual = $this->localHandler()
+            ->title(ContentHandler::HEADING, true, ["somewhere", "else"]);
         $this->assertSame($expected, $actual->unfold());
     }
 
