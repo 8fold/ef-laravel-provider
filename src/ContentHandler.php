@@ -178,13 +178,11 @@ class ContentHandler
         if ($parts->isEmpty) {
             $parts = static::uri(true);
         }
-dump($type);
+
         $titles = Shoop::array([]);
         if ($checkHeadingFirst and
             Shoop::string(static::HEADING)->isUnfolded($type)
         ) {
-            dump($this->titles($checkHeadingFirst, $parts));
-            dd("here");
             $titles = $titles->plus(
                 $this->titles($checkHeadingFirst, $parts)->first()
             );
