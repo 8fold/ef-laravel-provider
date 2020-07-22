@@ -212,7 +212,7 @@ class ContentHandler
             }
 
         } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
-            $t = $this->titles($checkHeadingFirst, $parts)->divide(-1);
+            $t = $this->titles(false, $parts)->divide(-1);
             $start = $t->first();
             $root = $t->last();
             if ($this->uri(true)->isUnfolded("events")) {
