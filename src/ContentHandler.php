@@ -178,11 +178,13 @@ class ContentHandler
         if ($parts->isEmpty) {
             $parts = static::uri(true);
         }
-
+dump($type);
         $titles = Shoop::array([]);
         if ($checkHeadingFirst and
             Shoop::string(static::HEADING)->isUnfolded($type)
         ) {
+            dump($this->titles($checkHeadingFirst, $parts));
+            dd("here");
             $titles = $titles->plus(
                 $this->titles($checkHeadingFirst, $parts)->first()
             );
@@ -255,7 +257,14 @@ class ContentHandler
             return $title;
 
         })->noEmpties()->plus(
-            $this->contentStore(true)->metaMember("title")
+            (! $checkHeadingFirst)
+                ? $this->contentStore(true)->metaMember("title")
+                : $this->contentStore(true)->metaMember("heading")
+                    ->countIsGreaterThan(0, function($result, $title) {
+                        return ($result->unfold())
+                            ? $title
+                            : $this->contentStore(true)->metaMember("title");
+                    })
         );
     }
 
