@@ -1,6 +1,6 @@
 <?php
 
-namespace Eightfold\Handbook;
+namespace Eightfold\Site;
 
 use Illuminate\Support\Facades\Route;
 

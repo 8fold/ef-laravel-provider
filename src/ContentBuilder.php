@@ -51,6 +51,7 @@ use Eightfold\Markup\Element;
 use Eightfold\Markup\UIKit\Elements\Compound\WebHead;
 
 use Eightfold\Site\ContentHandler;
+use Eightfold\Site\SiteTracker;
 
 abstract class ContentBuilder
 {
@@ -104,6 +105,14 @@ abstract class ContentBuilder
     {
         if ($this->contentStore()->isNotFile) {
             abort(404);
+        }
+
+        if ($this->useSiteTracker) {
+            SiteTracker::saveTransaction(
+                $this->handler()->trackerStore(),
+                session()->getId(),
+                hrtime(true)
+            );
         }
 
         return UIKit::webView(
