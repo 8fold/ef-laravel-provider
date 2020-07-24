@@ -70,7 +70,7 @@ class SiteTracker
 
     private function saveSession()
     {
-        $store   = $this->store->plus("sessions", $sessionId, $hrtime);
+        $store   = $this->store->plus("sessions", $this->sessionId, $this->time);
         $content = Shoop::dictionary([])->plus(
             // store date and time for page view
             Carbon::now("America/Chicago")->format("YmdHisv"), "timestamp",
