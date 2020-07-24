@@ -55,7 +55,7 @@ use Eightfold\Site\SiteTracker;
 
 abstract class ContentBuilder
 {
-    protected $useSiteTracker = false;
+    private $useSiteTracker = false;
 
     static public function fold(ESPath $localRootPath)
     {
