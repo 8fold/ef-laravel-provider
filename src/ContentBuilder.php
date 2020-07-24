@@ -54,6 +54,8 @@ use Eightfold\Site\ContentHandler;
 
 abstract class ContentBuilder
 {
+    private $useSiteTracker = false;
+
     static public function fold(ESPath $localRootPath)
     {
         return new static($localRootPath);
@@ -108,6 +110,26 @@ abstract class ContentBuilder
                 $this->handler()->title(),
                 UIKit::main($this->markdown(), ...$extras)
             )->meta($this->meta());
+    }
+
+    /**
+     * Allows site tracking to be turned on and off within routes.
+     */
+    public function useSiteTracker(bool $use = false)
+    {
+        $this->useSiteTracker = $use;
+        return $this;
+    }
+
+    /**
+     * Allows optional middleware application.
+     *
+     * Note: Not sure if there is an alternative method to accomplish the same result,
+     *     and not setting the middleware did not create a consistent session.
+     */
+    public function isUsingSiteTracker()
+    {
+        return $this->useSiteTracker;
     }
 
 // - Extra UI

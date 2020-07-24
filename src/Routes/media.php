@@ -21,5 +21,5 @@ Route::prefix("media")->group(function() use ($builder) {
             $path->unfold(),
             ["Content-Type: image/{$extension}"]
         );
-    })->where("any", ".*");
+    })->name("media")->where("any", ".*");
 });
