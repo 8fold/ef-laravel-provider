@@ -1,6 +1,8 @@
 <?php
 
-namespace Eightfold\Handbook;
+namespace Eightfold\Site;
+
+use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +22,9 @@ class SiteTracker
 {
     static public function saveTransaction(ESStore $store, $sessionId, $hrtime)
     {
+        // web crawler or bot, bail early
+        if ((new CrawlerDetect)->isCrawler()) { return; }
+
         $sessionId = Type::sanitizeType($sessionId, ESString::class);
         $hrtime = Type::sanitizeType($hrtime, ESString::class);
 
