@@ -21,47 +21,76 @@ use Eightfold\ShoopExtras\{
 
 class SiteTracker
 {
-    static public function saveTransaction(ESStore $store, $sessionId, $hrtime): void
+    private $store;
+    private $sessionId;
+    private $time;
+
+    public function __construct(ESStore $store, $sessionId, $time)
     {
-        $hrtime = Type::sanitizeType($hrtime, ESString::class);
+        $this->store     = $store;
+        $this->sessionId = Type::sanitizeType($sessionId, ESString::class);
+        $this->time      = Type::sanitizeType($time, ESString::class);
+    }
 
-
+    /**
+     * @todo be able to specify saving combinations
+     * - crawlers-only
+     * - sessions-only
+     * - sessions and urls-only: urls depend on sessions
+     */
+    public function saveTransaction(): void
+    {
+        // detect if and what action is needed
         $detect = new CrawlerDetect;
         if ($detect->isCrawler()) {
-            // presumed web crawler or bot, get name
-            $crawler = $detect->matches();
-            if ($crawler !== null) {
-                $store   = $store->plus("crawlers", Hash::make($crawler), $hrtime);
-                $content = Shoop::dictionary([])->plus(
-                    // store name of crawler
-                    $crawler, "crawler"
-                )->json();
-                $store->storeContent($content);
-            }
+            // presumed web crawler or bot
+            $this->saveCrawler();
 
         } elseif (! $detect->isCrawler()) {
             // presumed human
-            $sessionId = Type::sanitizeType($sessionId, ESString::class);
+            $this->saveSession();
 
-            $store   = $store->plus("sessions", $sessionId, $hrtime);
-            $content = Shoop::dictionary([])->plus(
-                // store date and time for page view
-                Carbon::now("America/Chicago")->format("YmdHisv"), "timestamp",
-                // store the page the user came from
-                Shoop::string(url()->previous())->minus(request()->root())->unfold(), "previous",
-                // store the page the user came to
-                Shoop::string(url()->current())->minus(request()->root())->unfold(), "current"
-            )->json();
-            $store->saveContent($content);
-
-            $store   = $store->plus("urls", Hash::make(url()->current()), $hrtime);
-            $content = Shoop::dictionary([])->plus(
-                // link session
-                $sessionId, "session",
-                // link time
-                $hrtime, "timestamp"
-            )->json();
-            $store->saveContent($content);
+            $this->saveUrl();
         }
+    }
+
+    private function saveCrawler()
+    {
+        $detect = new CrawlerDetect;
+        $crawler = $detect->matches();
+        if ($crawler !== null) {
+            $store   = $this->store->plus("crawlers", Hash::make($crawler), $hrtime);
+            $content = Shoop::dictionary([])->plus(
+                // store name of crawler
+                $crawler, "crawler"
+            )->json();
+            $store->storeContent($content);
+        }
+    }
+
+    private function saveSession()
+    {
+        $store   = $this->store->plus("sessions", $sessionId, $hrtime);
+        $content = Shoop::dictionary([])->plus(
+            // store date and time for page view
+            Carbon::now("America/Chicago")->format("YmdHisv"), "timestamp",
+            // store the page the user came from
+            Shoop::string(url()->previous())->minus(request()->root())->unfold(), "previous",
+            // store the page the user came to
+            Shoop::string(url()->current())->minus(request()->root())->unfold(), "current"
+        )->json();
+        $store->saveContent($content);
+    }
+
+    private function saveUrl()
+    {
+        $store   = $this->store->plus("urls", Hash::make(url()->current()), $this->time);
+        $content = Shoop::dictionary([])->plus(
+            // link session
+            $this->sessionId, "session",
+            // link time
+            $this->time, "timestamp"
+        )->json();
+        $store->saveContent($content);
     }
 }
