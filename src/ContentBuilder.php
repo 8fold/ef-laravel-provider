@@ -245,7 +245,6 @@ abstract class ContentBuilder
 
         })->noEmpties()->isEmpty(
             function($result, $anchors) use ($homeLinkContent, $includeCurrent) {
-                // die(var_dump($anchors));
                 $anchors = Shoop::string($homeLinkContent)->isEmpty(
                     function($result, $homeLinkContent) use ($anchors) {
                         return ($result->unfold())
