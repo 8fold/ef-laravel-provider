@@ -6,10 +6,9 @@ use Illuminate\Support\Facades\Route;
 
 use Eightfold\ShoopExtras\Shoop;
 
-$builder = new TestContentBuilder(
-    Shoop::path(__DIR__)->plus("content"),
-    // Shoop::path("tests")->plus("content")
-);
+$builder = TestContentBuilder::fold(
+    Shoop::path(__DIR__)->plus("content")
+)->useSiteTracker(true);
 
 // Route::get("/somewhere/else", function() {
 //     return view("welcome");

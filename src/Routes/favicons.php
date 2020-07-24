@@ -18,5 +18,5 @@ Route::prefix("assets/favicons")->group(function() use ($builder) {
             $path->unfold(),
             ["Content-Type: image/{$extension}"]
         );
-    });
+    })->name("favicons");
 });

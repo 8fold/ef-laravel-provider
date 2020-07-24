@@ -15,5 +15,5 @@ Route::prefix("assets/ui")->group(function() use ($builder) {
             $path->unfold(),
             ["Content-Type: image/{$extension}"]
         );
-    });
+    })->name("assets");
 });
