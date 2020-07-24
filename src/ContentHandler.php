@@ -163,6 +163,11 @@ class ContentHandler
         return static::store(true, ".media")->plus(...$plus);
     }
 
+    public function mediaStore(...$plus): ESPath
+    {
+        return static::store(true, ".tracker")->plus(...$plus);
+    }
+
     public function eventStore(...$plus): ESPath
     {
         return static::store(true, "events")->plus(...$plus);
