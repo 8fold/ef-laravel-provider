@@ -23,13 +23,13 @@ class SiteTracker
 {
     private $store;
     private $sessionId;
-    private $time;
+    private $timestamp;
 
-    public function __construct(ESStore $store, $sessionId, $time)
+    public function __construct(ESStore $store, $sessionId)
     {
         $this->store     = $store;
         $this->sessionId = Type::sanitizeType($sessionId, ESString::class);
-        $this->time      = Type::sanitizeType($time, ESString::class);
+        $this->timestamp = Carbon::now("America/Chicago")->format("YmdGis-v");
     }
 
     /**
@@ -59,7 +59,11 @@ class SiteTracker
         $detect = new CrawlerDetect;
         $crawler = $detect->matches();
         if ($crawler !== null) {
-            $store   = $this->store->plus("crawlers", Hash::make($crawler), $hrtime);
+            $store   = $this->store->plus(
+                "crawlers",
+                Hash::make($crawler),
+                $this->timestamp
+            );
             $content = Shoop::dictionary([])->plus(
                 // store name of crawler
                 $crawler, "crawler"
@@ -70,11 +74,18 @@ class SiteTracker
 
     private function saveSession()
     {
-        $store   = $this->store->plus("sessions", $this->sessionId, $this->time);
+        $store = $this->store->plus(
+            "sessions",
+            $this->sessionId,
+            $this->timestamp .".pageview"
+        );
 
         $content = Shoop::dictionary([])->plus(
             // store date and time for page view
-            Carbon::now("America/Chicago")->format("YmdHisv"), "timestamp",
+            // 4-digit year, 2-digit month, 2-digit day,
+            // 2-digit 24 hour, 2-digit minute, 2-digit second,
+            // hyphen, milliseconds
+            Carbon::now("America/Chicago")->format("YmdGis-v"), "timestamp",
             // store the page the user came from
             Shoop::string(url()->previous())->minus(request()->root())->unfold(), "previous",
             // store the page the user came to
@@ -89,7 +100,8 @@ class SiteTracker
                     if ($result->unfold()) { return; }
                     $divided->last()->divide("&", false)->each(
                         function($memberValue) use (&$params) {
-                            list($member, $value) = Shoop::string($memberValue)->divide("=", false, 2);
+                            list($member, $value) = Shoop::string($memberValue)
+                                ->divide("=", false, 2);
                             $params = $params->plus($value, $member);
                         });
                 });
@@ -116,13 +128,13 @@ class SiteTracker
                                 : $string;
                         });
                 }),
-            $this->time
+            $this->timestamp
         );
         $content = Shoop::dictionary([])->plus(
             // link session
             $this->sessionId, "session",
             // link time
-            $this->time, "timestamp"
+            $this->timestamp, "timestamp"
         )->json();
         $store->saveContent($content);
     }

@@ -110,8 +110,7 @@ abstract class ContentBuilder
         if ($this->useSiteTracker) {
             SiteTracker::saveTransaction(
                 $this->handler()->trackerStore(),
-                session()->getId(),
-                hrtime(true)
+                session()->getId()
             );
         }
 
