@@ -23,17 +23,46 @@ class SiteTracker
 {
     private $store;
     private $sessionId;
+    private $time;
     private $timestamp;
 
-    private $sessionStore;
+    private $timestampFormat = "YmdGis-v";
+    private $datePathFormat = "/Y/m/d/Gis-v";
 
-    public function __construct(ESStore $store, $sessionId, $timestampFormat = "YmdGis-v")
+    private $sessionStore;
+    private $sessionPath;
+
+    private $baseContent;
+
+    public function __construct(
+        ESStore $store,
+        $sessionId,
+        $timestampFormat = "YmdGis-v",
+        $datePathFormat  = "/Y/m/d/Gis-v"
+    )
     {
         $this->store     = $store;
         $this->sessionId = Type::sanitizeType($sessionId, ESString::class);
-        $this->timestamp = Carbon::now("America/Chicago")->format($timestampFormat);
+        $this->time      = Carbon::now("UTC");
+        $this->timestamp = $this->time->format($timestampFormat);
 
-        $this->sessionStore = Shoop::store($)
+        $this->timestampFormat = $timestampFormat;
+        $this->datePathFormat  = $datePathFormat;
+
+        $this->sessionStore = $this->store->plus(
+            "sessions",
+            $this->sessionId,
+            $this->timestamp .".pageview"
+        );
+
+        $this->sessionPath = $this->sessionStore->string()->minus($this->store);
+
+        $this->baseContent = Shoop::dictionary([])->plus(
+            // link session
+            $this->sessionPath->unfold(), "session",
+            // link time
+            $this->timestamp, "timestamp"
+        )->json();
     }
 
     /**
@@ -51,10 +80,12 @@ class SiteTracker
             $this->saveCrawler();
 
         } elseif (! $detect->isCrawler()) {
-            // presumed human
+            // presumed human - always required
             $this->saveSession();
 
             $this->saveUrl();
+
+            $this->saveDate();
         }
     }
 
@@ -78,18 +109,7 @@ class SiteTracker
 
     private function saveSession()
     {
-        $store = $this->store->plus(
-            "sessions",
-            $this->sessionId,
-            $this->timestamp .".pageview"
-        );
-
-        $content = Shoop::dictionary([])->plus(
-            // store date and time for page view
-            // 4-digit year, 2-digit month, 2-digit day,
-            // 2-digit 24 hour, 2-digit minute, 2-digit second,
-            // hyphen, milliseconds
-            Carbon::now("America/Chicago")->format("YmdGis-v"), "timestamp",
+        $content = $this->baseContent->plus(
             // store the page the user came from
             Shoop::string(url()->previous())->minus(request()->root())->unfold(), "previous",
             // store the page the user came to
@@ -115,7 +135,7 @@ class SiteTracker
             $content = $content->plus($params->object, "params");
         }
 
-        $store->saveContent($content->json());
+        $this->sessionStore->saveContent($content->json());
     }
 
     private function saveUrl()
@@ -134,12 +154,16 @@ class SiteTracker
                 }),
             $this->timestamp
         );
-        $content = Shoop::dictionary([])->plus(
-            // link session
-            $this->sessionId, "session",
-            // link time
-            $this->timestamp, "timestamp"
-        )->json();
-        $store->saveContent($content);
+
+        $store->saveContent($this->baseContent);
+    }
+
+    private function saveDate()
+    {
+        $parts = Shoop::string($this->time->format($this->datePathFormat))->divide("/", false);
+        $store = $this->store->plus("dates", ...$parts->dropLast())
+            ->plus($parts->last()->plus(".pageview"));
+
+        $store->saveContent($this->baseContent);
     }
 }
