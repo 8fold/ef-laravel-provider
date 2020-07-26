@@ -263,7 +263,7 @@ abstract class ContentBuilder
     // TODO: Obviously this needs tests of some kind
     public function tocView($currentPage = 1, $path = "/feed")
     {
-        $toc = Shoop::string($path)->divide("/", true))->meta()->toc;
+        $toc = Shoop::store($path)->divide("/", true)->meta()->toc;
         if ($toc === null) {
             $toc = [];
         }
