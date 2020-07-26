@@ -94,12 +94,18 @@ class ContentBuilderTest extends TestCase
         // $this->visit("/feed/page/1")->seePageIs("/feed");
     }
 
-    public function testUriContentMarkdownToc()
+    public function testToc()
     {
-        // $this->visit("/toc");
-        // $expected = ["/", "/somewhere", "/somewhere/else"];
-        // $actual = ContentBuilder::toc(1);
-        // $this->assertEquals($expected, $actual->unfold());
+        $this->visit("/toc");
+
+        $items = $this->localBuilder()->handler()->contentStore()->metaMember("toc");
+        if ($items === null) {
+            $items = [];
+        }
+
+        $expected = '<ul><li><a href="/">Root</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/somewhere/else">Else heading</a></li></ul>';
+        $actual = $this->localBuilder()->toc(1, $items)->each(function($ui) { return $ui->unfold(); })->join("");
+        $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testTocObject()

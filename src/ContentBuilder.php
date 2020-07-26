@@ -107,11 +107,11 @@ abstract class ContentBuilder
             abort(404);
         }
 
-        if ($this->useSiteTracker) {
-            SiteTracker::saveTransaction(
+        if ($this->isUsingSiteTracker()) {
+            (new SiteTracker(
                 $this->handler()->trackerStore(),
-                session()->getId()
-            );
+                session()->getId())
+            )->saveTransaction();
         }
 
         return UIKit::webView(
@@ -272,6 +272,7 @@ abstract class ContentBuilder
             ...$this->toc(
                 $currentPage,
                 $this->handler()->store()->plus(...$toc)
+            )
         )->meta(...$this->meta());
     }
 
@@ -280,15 +281,14 @@ abstract class ContentBuilder
     {
         return Type::sanitizeType($items, ESArray::class)
             ->isEmpty(function($result, $items) {
-                return ($result->unfold())
-                    ? Shoop::array([])
-                    : $items->each(function($uri) {
+                if ($result->unfold()) { return Shoop::array([]); }
+
+                return $items->each(function($uri) {
                         $parts = Shoop::string($uri)->divide("/", false);
                         return $this->handler()->contentStore(true, ...$parts)
                             ->isFile(function($result, $store) use ($uri, $parts) {
-                                if (! $result->unfold()) {
-                                    return "";
-                                }
+                                if (! $result->unfold()) { return ""; }
+
                                 $title = $this->handler()
                                     ->title(ContentHandler::HEADING, true, $parts);
                                 return UIKit::anchor($title, $uri);
@@ -296,16 +296,22 @@ abstract class ContentBuilder
                     });
 
             })->isEmpty(function($result, $links) use ($currentPage) {
-                return ($result->unfold())
-                    ? Shoop::array([])
-                    : $links->count()->isEmpty(
+                if ($result->unfold()) { return Shoop::array([]); }
+
+                return $links->count()->isEmpty(
                         function($result, $totalItems) use ($links, $currentPage) {
-                            return ($result->unfold())
-                                ? Shoop::array([])
-                                : Shoop::array([
+                            if ($result->unfold()) { return Shoop::array([]); }
+
+                            if ($totalItems->isGreaterThanUnfolded(10)) {
+                                return Shoop::array([
                                     UIKit::listWith(...$links),
                                     UIKit::pagination($currentPage, $totalItems)
                                 ]);
+                            }
+
+                            return Shoop::array([
+                                UIKit::listWith(...$links)
+                            ]);
                         });
             });
     }

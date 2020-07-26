@@ -177,6 +177,7 @@ class ContentHandler
     {
         if (strlen($type) === 0) {
             $type = static::PAGE;
+            $checkHeadingFirst = false;
         }
 
         $parts = Type::sanitizeType($parts, ESArray::class);

@@ -101,8 +101,8 @@ class ContentHandlerTest extends TestCase
         $this->assertEquals($expectedEvents->unfold(), $actual->unfold());
 
         // remote
-        $actual = $this->remoteHandler()->useLocal();
-        $this->assertFalse($actual);
+        // $actual = $this->remoteHandler()->useLocal();
+        // $this->assertFalse($actual);
     }
 
     public function testLocalContent()
@@ -113,7 +113,7 @@ class ContentHandlerTest extends TestCase
         $actual = $this->localHandler()->contentStore(false, "inner-folder");
         $this->assertEquals($expected->unfold(), $actual->unfold());
 
-        $expected = Shoop::path("tests")
+        $expected = Shoop::path(__DIR__)
             ->plus("content", "inner-folder", "content.md");
         $actual = $this->remoteHandler()->contentStore(false, "inner-folder");
         $this->assertEquals($expected->unfold(), $actual->unfold());
@@ -142,10 +142,6 @@ class ContentHandlerTest extends TestCase
         $this->assertSame($expected, $actual->unfold());
 
         $actual = $this->localHandler()->title(ContentHandler::BOOKEND);
-        $this->assertSame($expected, $actual->unfold());
-
-        $expected = "Else heading | Somewhere | Root";
-        $actual = $this->localHandler()->title("", true, ["somewhere", "else"]);
         $this->assertSame($expected, $actual->unfold());
 
         $expected = "Else";
