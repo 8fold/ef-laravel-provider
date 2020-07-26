@@ -266,7 +266,7 @@ abstract class ContentBuilder
             $this->handler()->title(),
             ...$this->toc(
                 $currentPage,
-                $this->store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
+                $this->contentHandler()->store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
         )->meta(...$this->meta());
     }
 
