@@ -260,8 +260,166 @@ abstract class ContentBuilder
             });
     }
 
+    public function tocView($currentPage = 1, $path = "/feed")
+    {
+        return UIKit::webView(
+            $this->handler()->title(),
+            ...$this->toc(
+                $currentPage,
+                $this->store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
+        )->meta(...$this->meta());
+    }
 
+    // TODO: Move to UIKit
+    public function toc($currentPage, $items = [])
+    {
+        return Type::sanitizeType($items, ESArray::class)
+            ->isEmpty(function($result, $items) {
+                return ($result->unfold())
+                    ? Shoop::array([])
+                    : $items->each(function($uri) {
+                        $parts = Shoop::string($uri)->divide("/", false);
+                        return $this->handler()->contentStore(true, ...$parts)
+                            ->isFile(function($result, $store) use ($uri, $parts) {
+                                if (! $result->unfold()) {
+                                    return "";
+                                }
+                                $title = $this->handler()
+                                    ->title(ContentHandler::HEADING, true, $parts);
+                                return UIKit::anchor($title, $uri);
+                            });
+                    });
 
+            })->isEmpty(function($result, $links) use ($currentPage) {
+                return ($result->unfold())
+                    ? Shoop::array([])
+                    : $links->count()->isEmpty(
+                        function($result, $totalItems) use ($links, $currentPage) {
+                            return ($result->unfold())
+                                ? Shoop::array([])
+                                : Shoop::array([
+                                    UIKit::listWith(...$links),
+                                    UIKit::pagination($currentPage, $totalItems)
+                                ]);
+                        });
+            });
+    }
+
+    public function navNextPrevious()
+    {
+        return Shoop::array([$this->nextAnchor(), $this->previousAnchor()])
+            ->noEmpties()->isEmpty(function($result, $links) {
+                return ($result->unfold())
+                    ? ""
+                    : UIKit::nav(...$links)->attr("class next-previous");
+            });
+    }
+
+    public function nextAnchor()
+    {
+        // Get TOC or root - only in primary categories
+        // find out where I am - the get next
+        $parts = $this->handler()->uri()->divide("/", false)->countIsLessThan(1, function($result, $parts) {
+            return ($result->unfold()) ? "" : $parts->first();
+        });
+
+        if (Shoop::string($parts)->isEmpty) {
+            return "";
+        }
+
+        $toc = $this->handler()->contentStore(true, $parts)->metaMember("toc");
+        $nextPath = $toc->each(function($path, $index, &$break) use ($toc) {
+            $isPathRoot = Shoop::string($path)->divide("/", false)->first()
+                ->start("/")->isUnfolded($this->handler()->uri());
+            $isPath = $this->handler()->uri()->isUnfolded($path);
+            if ($isPathRoot or $isPath) {
+                $break = true;
+                if ($isPathRoot) {
+                    return $toc->first();
+
+                } elseif ($toc->countIsGreaterThanUnfolded($index + 1)) {
+                    return $toc->get($index + 1);
+
+                }
+                return "";
+            }
+            return "";
+
+        })->noEmpties()->isEmpty(function($result, $array) {
+            return ($result->unfold()) ? Shoop::string("") : $array->first();
+        });
+
+        if ($nextPath->isEmpty) {
+            return $nextPath;
+        }
+
+        $title = $this->handler()->title(
+            ContentHandler::HEADING,
+            true,
+            Shoop::string($nextPath)->divide("/", false)
+        )->start("next: ");
+
+        if ($title->isEmpty) {
+            return "";
+        }
+
+        return UIKit::anchor($title, $nextPath)->attr("class next");
+    }
+
+    public function previousAnchor()
+    {
+        // Get TOC or root - only in primary categories
+        // find out where I am - the get previous
+        $parts = $this->handler()->uri()->divide("/", false)->countIsLessThan(1, function($result, $parts) {
+            return ($result->unfold()) ? "" : $parts->first();
+        });
+
+        if (Shoop::string($parts)->isEmpty) {
+            return "";
+        }
+
+        $toc = $this->handler()->contentStore(true, $parts)->metaMember("toc");
+        $previousPath = $toc->each(function($path, $index, &$break) use ($toc) {
+            $isPathRoot = Shoop::string($path)->divide("/", false)->first()
+                ->start("/")->isUnfolded($this->handler()->uri());
+            $isPath = $this->handler()->uri()->isUnfolded($path);
+            if ($isPathRoot) {
+                $break = true;
+                return "";
+
+            } elseif ($isPathRoot or $isPath) {
+                $break = true;
+                if ($isPathRoot) {
+                    return $toc->first();
+
+                } elseif (Shoop::int($index)->isGreaterThanUnfolded(0)) {
+                    return $toc->get($index - 1);
+
+                }
+                return "";
+            }
+            return "";
+
+        })->noEmpties()->reindex()->isEmpty(function($result, $array) {
+            return ($result->unfold()) ? Shoop::string("") : $array->first();
+        });
+
+        if ($previousPath->isEmpty) {
+            return $previousPath;
+        }
+
+        $title = $this->handler()->title(
+            ContentHandler::HEADING,
+            true,
+            Shoop::string($previousPath)->divide("/", false)
+        )->start("previous: ");
+
+        if ($title->isEmpty) {
+            return "";
+        }
+
+        return UIKit::anchor($title, $previousPath)->attr("class previous");
+    }
 
 
 

@@ -25,11 +25,15 @@ class SiteTracker
     private $sessionId;
     private $timestamp;
 
-    public function __construct(ESStore $store, $sessionId)
+    private $sessionStore;
+
+    public function __construct(ESStore $store, $sessionId, $timestampFormat = "YmdGis-v")
     {
         $this->store     = $store;
         $this->sessionId = Type::sanitizeType($sessionId, ESString::class);
-        $this->timestamp = Carbon::now("America/Chicago")->format("YmdGis-v");
+        $this->timestamp = Carbon::now("America/Chicago")->format($timestampFormat);
+
+        $this->sessionStore = Shoop::store($)
     }
 
     /**
