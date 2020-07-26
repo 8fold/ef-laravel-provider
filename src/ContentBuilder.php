@@ -263,17 +263,11 @@ abstract class ContentBuilder
     // TODO: Obviously this needs tests of some kind
     public function tocView($currentPage = 1, $path = "/feed")
     {
-        $toc = Shoop::store($path)->divide("/", true)->meta()->toc;
-        if ($toc === null) {
-            $toc = [];
-        }
+        $items = $this->handler()->contentStore(true, $path)->metaMember("toc");
         return UIKit::webView(
             $this->handler()->title(),
-            ...$this->toc(
-                $currentPage,
-                $this->handler()->store()->plus(...$toc)
-            )
-        )->meta(...$this->meta());
+            ...$this->toc($currentPage, ...$items)
+        )->meta($this->meta());
     }
 
     // TODO: Move to UIKit
@@ -293,7 +287,7 @@ abstract class ContentBuilder
                                     ->title(ContentHandler::HEADING, true, $parts);
                                 return UIKit::anchor($title, $uri);
                             });
-                    });
+                    })->noEmpties();
 
             })->isEmpty(function($result, $links) use ($currentPage) {
                 if ($result->unfold()) { return Shoop::array([]); }
