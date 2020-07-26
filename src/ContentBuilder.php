@@ -260,13 +260,14 @@ abstract class ContentBuilder
             });
     }
 
+    // TODO: Obviously this needs tests of some kind
     public function tocView($currentPage = 1, $path = "/feed")
     {
         return UIKit::webView(
             $this->handler()->title(),
             ...$this->toc(
                 $currentPage,
-                $this->contentHandler()->store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
+                $this->handler()->store()->plus(...Shoop::string($path)->divide("/", true))->meta()->toc())
         )->meta(...$this->meta());
     }
 
