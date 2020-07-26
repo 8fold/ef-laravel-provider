@@ -152,7 +152,7 @@ class SiteTracker
                                 : $string;
                         });
                 }),
-            $this->timestamp
+            $this->timestamp .".pageview"
         );
 
         $store->saveContent($this->baseContent);
