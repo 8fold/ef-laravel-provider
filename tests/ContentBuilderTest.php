@@ -106,6 +106,10 @@ class ContentBuilderTest extends TestCase
         $expected = '<ul><li><a href="/">Root</a></li><li><a href="/somewhere">Somewhere</a></li><li><a href="/somewhere/else">Else heading</a></li></ul>';
         $actual = $this->localBuilder()->toc(1, $items)->each(function($ui) { return $ui->unfold(); })->join("");
         $this->assertEquals($expected, $actual->unfold());
+
+        $expected = '<!doctype html><html lang="en"><head><title>Root</title><meta name="viewport" content="width=device-width,initial-scale=1"><link type="image/x-icon" rel="icon" href="/assets/favicons/favicon.ico"><link rel="apple-touch-icon" href="/assets/favicons/apple-touch-icon.png" sizes="180x180"><link rel="image/png" href="/assets/favicons/favicon-32x32.png" sizes="32x32"><link rel="image/png" href="/assets/favicons/favicon-16x16.png" sizes="16x16"><meta content="website" property="og:type"><meta content="Root" property="og:title"><meta content="http://localhost/toc" property="og:url"><meta content="Root" property="og:description"><meta content="http://localhost/media/poster.jpg" property="og:image"><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="/css/main.css"><script src="/js/main.js"></script></head><body><ul><li><a href="/">Root</a></li></ul></body></html>';
+        $actual = $this->localBuilder()->tocView(1, "/toc");
+        $this->assertEquals($expected, $actual->unfold());
     }
 
     public function testTocObject()
