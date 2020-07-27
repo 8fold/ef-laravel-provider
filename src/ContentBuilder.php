@@ -359,7 +359,7 @@ abstract class ContentBuilder
                     true,
                     $path->divide("/", false)
                 );
-                return UIKit::anchor($title, $path);
+                return UIKit::anchor($title->start("next: "), $path)->attr("class next");
             });
     }
 
@@ -404,7 +404,7 @@ abstract class ContentBuilder
                     true,
                     $path->divide("/", false)
                 );
-                return UIKit::anchor($title, $path);
+                return UIKit::anchor($title->start("previous: "), $path)->attr("class previous");
             });
         // // Get TOC or root - only in primary categories
         // // find out where I am - the get previous
