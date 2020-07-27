@@ -314,116 +314,149 @@ abstract class ContentBuilder
     {
         return Shoop::array([$this->nextAnchor(), $this->previousAnchor()])
             ->noEmpties()->isEmpty(function($result, $links) {
-                return ($result->unfold())
-                    ? ""
-                    : UIKit::nav(...$links)->attr("class next-previous");
+                if ($result->unfold()) { return ""; }
+
+                return UIKit::nav(...$links)->attr("class next-previous");
             });
     }
 
     public function nextAnchor()
     {
-        // Get TOC or root - only in primary categories
-        // find out where I am - the get next
-        $parts = $this->handler()->uri()->divide("/", false)->countIsLessThan(1, function($result, $parts) {
-            return ($result->unfold()) ? "" : $parts->first();
-        });
+        // If the content store has a TOC, we always use the first path;
+        return $this->handler()->contentStore()->metaMember("toc")->isEmpty(
+            function($result, $toc) {
+                if ($result->toggle) { return $toc->first(); }
+                // if not, try parent;
+                return $this->handler()->store()->dropLast()->plus("content.md")
+                    ->metaMember("toc")->isEmpty(function($result, $toc) {
+                        if ($result->unfold()) { return Shoop::string(""); }
 
-        if (Shoop::string($parts)->isEmpty) {
-            return "";
-        }
+                        return $toc->each(function($path, $index, &$break) use ($toc) {
 
-        $toc = $this->handler()->contentStore(true, $parts)->metaMember("toc");
-        $nextPath = $toc->each(function($path, $index, &$break) use ($toc) {
-            $isPathRoot = Shoop::string($path)->divide("/", false)->first()
-                ->start("/")->isUnfolded($this->handler()->uri());
-            $isPath = $this->handler()->uri()->isUnfolded($path);
-            if ($isPathRoot or $isPath) {
-                $break = true;
-                if ($isPathRoot) {
-                    return $toc->first();
+                            $path = Shoop::string($path);
+                            if ($this->handler()->uri()->isUnfolded($path)) {
+                                $break = true;
+                                return $toc->countIsGreaterThan($index + 1, function($result, $toc) use ($index) {
+                                    if ($result->unfold()) { return $toc->get($index + 1); }
 
-                } elseif ($toc->countIsGreaterThanUnfolded($index + 1)) {
-                    return $toc->get($index + 1);
+                                    return Shoop::string("");
+                                });
+                            }
+                            return Shoop::string("");
 
-                }
-                return "";
-            }
-            return "";
+                        })->noEmpties()->countIsGreaterThan(0, function($result, $array) {
+                            if ($result->unfold()) { return $array->first(); }
 
-        })->noEmpties()->isEmpty(function($result, $array) {
-            return ($result->unfold()) ? Shoop::string("") : $array->first();
-        });
+                            return Shoop::string("");
+                        });
+                    });
 
-        if ($nextPath->isEmpty) {
-            return $nextPath;
-        }
+            })->isEmpty(function($result, $path) {
+                if ($result->unfold()) { return Shoop::string(""); }
 
-        $title = $this->handler()->title(
-            ContentHandler::HEADING,
-            true,
-            Shoop::string($nextPath)->divide("/", false)
-        )->start("next: ");
-
-        if ($title->isEmpty) {
-            return "";
-        }
-
-        return UIKit::anchor($title, $nextPath)->attr("class next");
+                $title = $this->handler()->title(
+                    ContentHandler::HEADING,
+                    true,
+                    $path->divide("/", false)
+                );
+                return UIKit::anchor($title, $path);
+            });
     }
 
     public function previousAnchor()
     {
-        // Get TOC or root - only in primary categories
-        // find out where I am - the get previous
-        $parts = $this->handler()->uri()->divide("/", false)->countIsLessThan(1, function($result, $parts) {
-            return ($result->unfold()) ? "" : $parts->first();
-        });
+        // If the content store has a TOC, we always return empty;
+        return $this->handler()->contentStore()->metaMember("toc")->isEmpty(
+            function($result, $toc) {
+                if ($result->toggle) { return Shoop::string(""); }
 
-        if (Shoop::string($parts)->isEmpty) {
-            return "";
-        }
+                // if not, try parent;
+                return $this->handler()->store()->dropLast()->plus("content.md")
+                    ->metaMember("toc")->isEmpty(function($result, $toc) {
+                        if ($result->unfold()) { return Shoop::string(""); }
 
-        $toc = $this->handler()->contentStore(true, $parts)->metaMember("toc");
-        $previousPath = $toc->each(function($path, $index, &$break) use ($toc) {
-            $isPathRoot = Shoop::string($path)->divide("/", false)->first()
-                ->start("/")->isUnfolded($this->handler()->uri());
-            $isPath = $this->handler()->uri()->isUnfolded($path);
-            if ($isPathRoot) {
-                $break = true;
-                return "";
+                        return $toc->each(function($path, $index, &$break) use ($toc) {
+                            $path = Shoop::string($path);
+                            $index = Shoop::int($index);
+                            if ($this->handler()->uri()->isUnfolded($path)) {
+                                $break = true;
+                                return $index->isNot(0, function($result, $index) use ($toc) {
+                                    if ($result->unfold()) { return $toc->get($index->minusUnfolded(1)); }
 
-            } elseif ($isPathRoot or $isPath) {
-                $break = true;
-                if ($isPathRoot) {
-                    return $toc->first();
+                                    return Shoop::string("");
+                                });
+                            }
+                            return Shoop::string("");
 
-                } elseif (Shoop::int($index)->isGreaterThanUnfolded(0)) {
-                    return $toc->get($index - 1);
+                        })->noEmpties()->countIsGreaterThan(0, function($result, $array) {
+                            if ($result->unfold()) { return $array->first(); }
 
-                }
-                return "";
-            }
-            return "";
+                            return $this->handler()->uri(true)->dropLast()
+                                ->join("/")->start("/");
+                        });
+                    });
 
-        })->noEmpties()->reindex()->isEmpty(function($result, $array) {
-            return ($result->unfold()) ? Shoop::string("") : $array->first();
-        });
+            })->isEmpty(function($result, $path) {
+                if ($result->unfold()) { return Shoop::string(""); }
 
-        if ($previousPath->isEmpty) {
-            return $previousPath;
-        }
+                $title = $this->handler()->title(
+                    ContentHandler::HEADING,
+                    true,
+                    $path->divide("/", false)
+                );
+                return UIKit::anchor($title, $path);
+            });
+        // // Get TOC or root - only in primary categories
+        // // find out where I am - the get previous
+        // $parts = $this->handler()->uri()->divide("/", false)->countIsLessThan(1, function($result, $parts) {
+        //     return ($result->unfold()) ? "" : $parts->first();
+        // });
 
-        $title = $this->handler()->title(
-            ContentHandler::HEADING,
-            true,
-            Shoop::string($previousPath)->divide("/", false)
-        )->start("previous: ");
+        // if (Shoop::string($parts)->isEmpty) {
+        //     return "";
+        // }
 
-        if ($title->isEmpty) {
-            return "";
-        }
+        // $toc = $this->handler()->contentStore(true, $parts)->metaMember("toc");
+        // $previousPath = $toc->each(function($path, $index, &$break) use ($toc) {
+        //     $isPathRoot = Shoop::string($path)->divide("/", false)->first()
+        //         ->start("/")->isUnfolded($this->handler()->uri());
+        //     $isPath = $this->handler()->uri()->isUnfolded($path);
+        //     if ($isPathRoot) {
+        //         $break = true;
+        //         return "";
 
-        return UIKit::anchor($title, $previousPath)->attr("class previous");
+        //     } elseif ($isPathRoot or $isPath) {
+        //         $break = true;
+        //         if ($isPathRoot) {
+        //             return $toc->first();
+
+        //         } elseif (Shoop::int($index)->isGreaterThanUnfolded(0)) {
+        //             return $toc->get($index - 1);
+
+        //         }
+        //         return "";
+        //     }
+        //     return "";
+
+        // })->noEmpties()->reindex()->isEmpty(function($result, $array) {
+        //     return ($result->unfold()) ? Shoop::string("") : $array->first();
+        // });
+
+        // if ($previousPath->isEmpty) {
+        //     return $previousPath;
+        // }
+
+        // $title = $this->handler()->title(
+        //     ContentHandler::HEADING,
+        //     true,
+        //     Shoop::string($previousPath)->divide("/", false)
+        // )->start("previous: ");
+
+        // if ($title->isEmpty) {
+        //     return "";
+        // }
+
+        // return UIKit::anchor($title, $previousPath)->attr("class previous");
     }
 
 

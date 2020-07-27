@@ -1,6 +1,6 @@
 ---
+title: Table of contents
 toc:
-- /
-- /somewhere
-- /somewhere/else
+- /toc/toc-child
+- /toc/toc-child-2
 ---
