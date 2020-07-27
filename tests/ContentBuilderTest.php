@@ -116,12 +116,12 @@ class ContentBuilderTest extends TestCase
     public function testNext()
     {
         $this->visit("/toc");
-        $expected = '<a href="/toc/toc-child">Next previous check</a>';
+        $expected = '<a class="next" href="/toc/toc-child">next: Next previous check</a>';
         $actual = $this->localBuilder()->nextAnchor();
         $this->assertEquals($expected, $actual->unfold());
 
         $this->visit("/toc/toc-child");
-        $expected = '<a href="/toc/toc-child-2">Next previous check 2</a>';
+        $expected = '<a class="next" href="/toc/toc-child-2">next: Next previous check 2</a>';
         $actual = $this->localBuilder()->nextAnchor();
         $this->assertEquals($expected, $actual->unfold());
 
@@ -139,12 +139,12 @@ class ContentBuilderTest extends TestCase
         $this->assertEquals($expected, $actual->unfold());
 
         $this->visit("/toc/toc-child");
-        $expected = '<a href="/toc">Table of contents</a>';
+        $expected = '<a class="previous" href="/toc">previous: Table of contents</a>';
         $actual = $this->localBuilder()->previousAnchor();
         $this->assertEquals($expected, $actual->unfold());
 
         $this->visit("/toc/toc-child-2");
-        $expected = '<a href="/toc/toc-child">Next previous check</a>';
+        $expected = '<a class="previous" href="/toc/toc-child">previous: Next previous check</a>';
         $actual = $this->localBuilder()->previousAnchor();
         $this->assertEquals($expected, $actual->unfold());
     }
