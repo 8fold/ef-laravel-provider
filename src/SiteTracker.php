@@ -92,7 +92,7 @@ class SiteTracker
     private function saveCrawler()
     {
         $detect = new CrawlerDetect;
-        $crawler = $detect->matches();
+        $crawler = $detect->getMatches();
         if ($crawler !== null) {
             $store   = $this->store->plus(
                 "crawlers",
