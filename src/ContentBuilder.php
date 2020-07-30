@@ -30,6 +30,7 @@ use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
 use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
 use Eightfold\CommonMarkAccordions\AccordionExtension;
+use Eightfold\CommonMarkAccordions\AccordionGroupExtension;
 
 // end extensions
 
@@ -83,7 +84,8 @@ abstract class ContentBuilder
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
             AbbreviationExtension::class,
-            AccordionExtension::class
+            AccordionExtension::class,
+            AccordionGroupExtension::class
         ]);
     }
 
