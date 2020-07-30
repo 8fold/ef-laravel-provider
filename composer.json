@@ -1,5 +1,5 @@
 {
-	"name": "8fold/laravel-provider",
+	"name": "8fold/ef-laravel-provider",
   "description": "A generic Laravel Service Provider and resources for creating Laravel sites",
 	"type": "library",
 	"license": "MIT",
