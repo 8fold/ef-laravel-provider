@@ -29,6 +29,8 @@ use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
 use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
+use Eightfold\CommonMarkAccorions\AccordionsExtension;
+
 // end extensions
 
 use Eightfold\ShoopExtras\{
@@ -80,7 +82,8 @@ abstract class ContentBuilder
             TaskListExtension::class,
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
-            AbbreviationExtension::class
+            AbbreviationExtension::class,
+            AccordionsExtension::class
         ]);
     }
 
