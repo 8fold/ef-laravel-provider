@@ -83,7 +83,7 @@ abstract class ContentBuilder
             ExternalLinkExtension::class,
             SmartPunctExtension::class,
             AbbreviationExtension::class,
-            AccordionsExtension::class
+            AccordionExtension::class
         ]);
     }
 
