@@ -29,7 +29,7 @@ use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\SmartPunct\SmartPunctExtension;
 
 use Eightfold\CommonMarkAbbreviations\AbbreviationExtension;
-use Eightfold\CommonMarkAccorions\AccordionsExtension;
+use Eightfold\CommonMarkAccordions\AccordionsExtension;
 
 // end extensions
 
