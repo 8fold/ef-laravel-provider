@@ -20,12 +20,10 @@ class ContentBuilderTest extends TestCase
 
     protected function getEnvironmentSetUp($app)
     {
-        if (file_exists(__DIR__ ."/.env")) {
-            // make sure, our .env file is loaded
-            $app->useEnvironmentPath(__DIR__);
-            $app->bootstrapWith([LoadEnvironmentVariables::class]);
-            parent::getEnvironmentSetUp($app);
-        }
+        parent::getEnvironmentSetUp($app);
+
+        $app->make('Illuminate\Contracts\Http\Kernel')
+            ->pushMiddleware('Illuminate\Session\Middleware\StartSession');
     }
 
     private function localBuilder()

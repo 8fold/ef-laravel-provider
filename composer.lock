@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0dda0c7568d48222e9b3b78dc2bb09ac",
+    "content-hash": "98f22dbe7d4e32c2caaab6dd994376f6",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
@@ -107,6 +107,58 @@
                 }
             ],
             "time": "2020-07-31T01:48:21+00:00"
+        },
+        {
+            "name": "8fold/laravel-markup",
+            "version": "0.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/8fold/laravel-markup.git",
+                "reference": "7c863b3bf3fd4d292fe4d316ef1275888da8976e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/8fold/laravel-markup/zipball/7c863b3bf3fd4d292fe4d316ef1275888da8976e",
+                "reference": "7c863b3bf3fd4d292fe4d316ef1275888da8976e",
+                "shasum": ""
+            },
+            "require": {
+                "8fold/php-markup": "~0.1",
+                "php": "~7"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~5.3",
+                "orchestra/testbench-browser-kit": "~5.1",
+                "phpunit/phpunit": "~9.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Eightfold\\LaravelMarkup\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Josh Bruce",
+                    "email": "josh@joshbruce.dev"
+                }
+            ],
+            "description": "A library for implementing HTML UI components in Laravel projects.",
+            "funding": [
+                {
+                    "url": "https://github.com/8fold",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/joshbruce",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-07-31T23:28:36+00:00"
         },
         {
             "name": "8fold/php-events",

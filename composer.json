@@ -6,7 +6,7 @@
 	"require": {
 		"php": "7.*",
 		"8fold/php-events": "dev-master",
-		"8fold/php-markup": "~0.1",
+		"8fold/laravel-markup": "~0.0.0",
 		"jaybizzle/crawler-detect": "^1.2"
 	},
 	"require-dev": {
