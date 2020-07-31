@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e47ce827dfb133283cc01c7b90ab824e",
+    "content-hash": "0dda0c7568d48222e9b3b78dc2bb09ac",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
-            "version": "0.1.1",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/commonmark-abbreviations.git",
-                "reference": "1b7b106b6f0c9671027c1371e04615cba2051d0d"
+                "reference": "0eca757404af97d62c31c967484acbd6ed1537cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/commonmark-abbreviations/zipball/1b7b106b6f0c9671027c1371e04615cba2051d0d",
-                "reference": "1b7b106b6f0c9671027c1371e04615cba2051d0d",
+                "url": "https://api.github.com/repos/8fold/commonmark-abbreviations/zipball/0eca757404af97d62c31c967484acbd6ed1537cd",
+                "reference": "0eca757404af97d62c31c967484acbd6ed1537cd",
                 "shasum": ""
             },
             "require": {
@@ -55,7 +55,58 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-07T03:42:40+00:00"
+            "time": "2020-07-30T23:44:59+00:00"
+        },
+        {
+            "name": "8fold/commonmark-accordions",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/8fold/commonmark-accordions.git",
+                "reference": "f98338bb879c7971fc21ea3955451119e5b2be3b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/8fold/commonmark-accordions/zipball/f98338bb879c7971fc21ea3955451119e5b2be3b",
+                "reference": "f98338bb879c7971fc21ea3955451119e5b2be3b",
+                "shasum": ""
+            },
+            "require": {
+                "8fold/php-shoop": "~0.5",
+                "league/commonmark": "~1.5",
+                "php": "^7.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~9.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Eightfold\\CommonMarkAccordions\\": "./src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Josh Bruce",
+                    "email": "josh@8fold.pro"
+                }
+            ],
+            "description": "An extension of PHP League's CommonMark library to enable abbreviation usage.",
+            "funding": [
+                {
+                    "url": "https://github.com/8fold",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/joshbruce",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-07-31T01:48:21+00:00"
         },
         {
             "name": "8fold/php-events",
@@ -111,20 +162,21 @@
         },
         {
             "name": "8fold/php-markup",
-            "version": "0.1.29",
+            "version": "0.1.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-markup.git",
-                "reference": "378fe3a9372aa7668b80f9caab508df99e465daa"
+                "reference": "b9209605903ce2163e69349749b76716699902b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-markup/zipball/378fe3a9372aa7668b80f9caab508df99e465daa",
-                "reference": "378fe3a9372aa7668b80f9caab508df99e465daa",
+                "url": "https://api.github.com/repos/8fold/php-markup/zipball/b9209605903ce2163e69349749b76716699902b4",
+                "reference": "b9209605903ce2163e69349749b76716699902b4",
                 "shasum": ""
             },
             "require": {
-                "8fold/commonmark-abbreviations": "~0.1",
+                "8fold/commonmark-abbreviations": "~1.0",
+                "8fold/commonmark-accordions": "~1.0",
                 "8fold/php-shoop-extras": "~0.1",
                 "nesbot/carbon": "~2.36",
                 "php": "~7.0"
@@ -159,20 +211,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-21T01:07:05+00:00"
+            "time": "2020-07-31T02:40:55+00:00"
         },
         {
             "name": "8fold/php-shoop",
-            "version": "0.5.1",
+            "version": "0.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop.git",
-                "reference": "b580b494d88d296a8f10d65c66c26ec0ac50cc80"
+                "reference": "d9311bd0c214daba5d855ae85a4ac75e9f498ccd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop/zipball/b580b494d88d296a8f10d65c66c26ec0ac50cc80",
-                "reference": "b580b494d88d296a8f10d65c66c26ec0ac50cc80",
+                "url": "https://api.github.com/repos/8fold/php-shoop/zipball/d9311bd0c214daba5d855ae85a4ac75e9f498ccd",
+                "reference": "d9311bd0c214daba5d855ae85a4ac75e9f498ccd",
                 "shasum": ""
             },
             "require": {
@@ -208,20 +260,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-07T02:41:28+00:00"
+            "time": "2020-07-31T01:15:32+00:00"
         },
         {
             "name": "8fold/php-shoop-extras",
-            "version": "0.1.46",
+            "version": "0.1.47",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-extras.git",
-                "reference": "b7c11dec85c552f4b7f5a5a70a1627a6ff6688da"
+                "reference": "a4ccc18a32480451dccd234a7ff987060c4ee209"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/b7c11dec85c552f4b7f5a5a70a1627a6ff6688da",
-                "reference": "b7c11dec85c552f4b7f5a5a70a1627a6ff6688da",
+                "url": "https://api.github.com/repos/8fold/php-shoop-extras/zipball/a4ccc18a32480451dccd234a7ff987060c4ee209",
+                "reference": "a4ccc18a32480451dccd234a7ff987060c4ee209",
                 "shasum": ""
             },
             "require": {
@@ -264,7 +316,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-24T02:15:37+00:00"
+            "time": "2020-07-31T02:37:40+00:00"
         },
         {
             "name": "cache/adapter-common",
@@ -1002,16 +1054,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.36.1",
+            "version": "2.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "ee7378a36cc62952100e718bcc58be4c7210e55f"
+                "reference": "1f61206de973d67f36ce50f041c792ddac663c3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/ee7378a36cc62952100e718bcc58be4c7210e55f",
-                "reference": "ee7378a36cc62952100e718bcc58be4c7210e55f",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/1f61206de973d67f36ce50f041c792ddac663c3e",
+                "reference": "1f61206de973d67f36ce50f041c792ddac663c3e",
                 "shasum": ""
             },
             "require": {
@@ -1087,7 +1139,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-07-04T12:29:56+00:00"
+            "time": "2020-07-28T06:04:54+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -3377,16 +3429,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v7.21.0",
+            "version": "v7.22.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "3ccdb116524de408fdc00715b6f06a1031ddace9"
+                "reference": "30e851a2b3a2af73fba0b7f4fa22b04260db98e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/3ccdb116524de408fdc00715b6f06a1031ddace9",
-                "reference": "3ccdb116524de408fdc00715b6f06a1031ddace9",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/30e851a2b3a2af73fba0b7f4fa22b04260db98e7",
+                "reference": "30e851a2b3a2af73fba0b7f4fa22b04260db98e7",
                 "shasum": ""
             },
             "require": {
@@ -3530,7 +3582,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2020-07-21T14:26:42+00:00"
+            "time": "2020-07-27T18:25:06+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -4978,16 +5030,16 @@
         },
         {
             "name": "ramsey/uuid",
-            "version": "4.0.1",
+            "version": "4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ramsey/uuid.git",
-                "reference": "ba8fff1d3abb8bb4d35a135ed22a31c6ef3ede3d"
+                "reference": "988dbefc7878d0a35f12afb4df1f7dd0bd153c43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ramsey/uuid/zipball/ba8fff1d3abb8bb4d35a135ed22a31c6ef3ede3d",
-                "reference": "ba8fff1d3abb8bb4d35a135ed22a31c6ef3ede3d",
+                "url": "https://api.github.com/repos/ramsey/uuid/zipball/988dbefc7878d0a35f12afb4df1f7dd0bd153c43",
+                "reference": "988dbefc7878d0a35f12afb4df1f7dd0bd153c43",
                 "shasum": ""
             },
             "require": {
@@ -5002,7 +5054,7 @@
             },
             "require-dev": {
                 "codeception/aspect-mock": "^3",
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2 || ^0.7.0",
                 "doctrine/annotations": "^1.8",
                 "goaop/framework": "^2",
                 "mockery/mockery": "^1.3",
@@ -5011,8 +5063,8 @@
                 "php-mock/php-mock-mockery": "^1.3",
                 "php-mock/php-mock-phpunit": "^2.5",
                 "php-parallel-lint/php-parallel-lint": "^1.1",
+                "phpbench/phpbench": "^0.17.1",
                 "phpstan/extension-installer": "^1.0",
-                "phpstan/phpdoc-parser": "0.4.3",
                 "phpstan/phpstan": "^0.12",
                 "phpstan/phpstan-mockery": "^0.12",
                 "phpstan/phpstan-phpunit": "^0.12",
@@ -5061,7 +5113,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-03-29T20:13:32+00:00"
+            "time": "2020-07-28T16:51:01+00:00"
         },
         {
             "name": "sebastian/code-unit",

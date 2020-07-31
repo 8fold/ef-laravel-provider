@@ -5,11 +5,8 @@
 	"license": "MIT",
 	"require": {
 		"php": "7.*",
-		"8fold/commonmark-abbreviations": "~1.0",
-    "8fold/commonmark-accordions": "~1.0.",
 		"8fold/php-events": "dev-master",
 		"8fold/php-markup": "~0.1",
-		"8fold/php-shoop-extras": "~0.1",
 		"jaybizzle/crawler-detect": "^1.2"
 	},
 	"require-dev": {
