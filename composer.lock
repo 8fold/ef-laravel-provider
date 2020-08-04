@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "98f22dbe7d4e32c2caaab6dd994376f6",
+    "content-hash": "2f84e43a3bd0e73a5f8bcca9e20f7e66",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
@@ -264,6 +264,56 @@
                 }
             ],
             "time": "2020-07-31T02:40:55+00:00"
+        },
+        {
+            "name": "8fold/php-schema",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/8fold/php-schema.git",
+                "reference": "aa0542e0b83b0fb033d5e24672e47faa513ceec1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/8fold/php-schema/zipball/aa0542e0b83b0fb033d5e24672e47faa513ceec1",
+                "reference": "aa0542e0b83b0fb033d5e24672e47faa513ceec1",
+                "shasum": ""
+            },
+            "require": {
+                "8fold/php-shoop": "~0.5",
+                "php": "~7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~9.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Eightfold\\Schema\\": "./src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Josh Bruce",
+                    "email": "josh@8fold.pro"
+                }
+            ],
+            "description": "8fold Schema is designed to make interacting with structured data for the web easier.",
+            "funding": [
+                {
+                    "url": "https://github.com/8fold",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/joshbruce",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-07-08T21:10:24+00:00"
         },
         {
             "name": "8fold/php-shoop",

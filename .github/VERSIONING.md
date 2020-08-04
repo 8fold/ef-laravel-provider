@@ -20,6 +20,10 @@ The zero-major signifies the package is still seeing rapid and consistent change
 
 **Patch (on a zero-major):** Signifies we added features, fixed defects, or both without knowingly changing the way you interact with the package.
 
+## Double aughts
+
+It's like a zero-major only even less predictable. Generally speaking, this is a phase following a proof of concept to move on to "live trials". During a live trial, we attempt to start using the package in our own projects before moving it to those we maintain.
+
 ## Non-versions
 
 If you use a package that is not versioned, you are essentially using a package that could change at any level, at any time, with little to know knowledge of what or how a change might affect you and your application.

@@ -4,6 +4,8 @@ namespace Eightfold\Site;
 
 use Illuminate\Support\ServiceProvider;
 
+use Eightfold\ShoopExtras\Shoop;
+
 class Provider extends ServiceProvider
 {
     public function register()
