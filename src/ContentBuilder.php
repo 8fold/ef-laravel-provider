@@ -146,10 +146,15 @@ abstract class ContentBuilder
     }
 
 // - Extra UI
-    public function markdown()
+    public function markdown(string $suffix = "")
     {
+        $content = $this->contentStore()->markdown()->content();
+        if (Shoop::string($suffix)->isNotEmpty) {
+            $content = $content->string()->plus("\n\n", $suffix);
+        }
+
         return UIKit::markdown(
-            $this->contentStore()->markdown()->content()->unfold(),
+            $content,
             static::markdownConfig()
         )->prepend(
             UIKit::h1(
