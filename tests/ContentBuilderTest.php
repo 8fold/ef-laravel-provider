@@ -25,8 +25,13 @@ class ContentBuilderTest extends TestCase
 
     public function testCanGetUri()
     {
-        $expected = "/";
-        $actual = $this->builder()->handler()->uri();
-        $this->assertSame($expected, $actual->unfold());
+        // $expected = "/";
+        // $actual = $this->builder()->handler()->uri();
+        // $this->assertSame($expected, $actual->unfold());
+
+        // $this->visit("/sub");
+        // $expected = "/sub";
+        // $actual = $this->builder()->handler()->uri();
+        // $this->assertSame($expected, $actual->unfold());
     }
 }
