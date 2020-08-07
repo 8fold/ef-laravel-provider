@@ -63,7 +63,9 @@ class ContentHandler
 
     static public function uri($parts = false) // :ESString|ESArray
     {
-        $base = Shoop::uri(request()->url())->tail();
+        $base = Shoop::url(request()->url())->path(false)->isEmpty(function($result, $path) {
+            return ($result->unfold()) ? Shoop::string("/") : $path;
+        });
         return ($parts) ? $base->divide("/")->noEmpties()->reindex() : $base;
     }
 

@@ -11,12 +11,22 @@ use Eightfold\Site\Tests\TestContentBuilder;
 
 class ContentBuilderTest extends TestCase
 {
+    private function builder()
+    {
+        return TestContentBuilder::fold(Shoop::store(__DIR__)->plus("content"));
+    }
+
     public function testCanAppendMarkdown()
     {
-        $builder = TestContentBuilder::fold(Shoop::store(__DIR__)
-                ->plus("content"));
         $expected = '<h1>Hello, World!</h1><p>How are you?</p>';
-        $actual = $builder->markdown("How are you?");
+        $actual = $this->builder()->markdown("How are you?");
+        $this->assertSame($expected, $actual->unfold());
+    }
+
+    public function testCanGetUri()
+    {
+        $expected = "/";
+        $actual = $this->builder()->handler()->uri();
         $this->assertSame($expected, $actual->unfold());
     }
 }
