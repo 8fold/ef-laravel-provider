@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2f84e43a3bd0e73a5f8bcca9e20f7e66",
+    "content-hash": "67a9306406faec6f0a72ea3688b2e5ec",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
@@ -160,7 +160,7 @@
         },
         {
             "name": "8fold/php-events",
-            "version": "dev-master",
+            "version": "0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-events.git",
@@ -360,20 +360,20 @@
         },
         {
             "name": "8fold/php-schema",
-            "version": "0.0.1",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-schema.git",
-                "reference": "aa0542e0b83b0fb033d5e24672e47faa513ceec1"
+                "reference": "771f60bb46ec8540aaf76dabaa89860e6ac9978a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-schema/zipball/aa0542e0b83b0fb033d5e24672e47faa513ceec1",
-                "reference": "aa0542e0b83b0fb033d5e24672e47faa513ceec1",
+                "url": "https://api.github.com/repos/8fold/php-schema/zipball/771f60bb46ec8540aaf76dabaa89860e6ac9978a",
+                "reference": "771f60bb46ec8540aaf76dabaa89860e6ac9978a",
                 "shasum": ""
             },
             "require": {
-                "8fold/php-shoop": "~0.5",
+                "8fold/php-shoop-shelf": "~0.5",
                 "php": "~7.0"
             },
             "require-dev": {
@@ -406,7 +406,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-08T21:10:24+00:00"
+            "time": "2020-10-07T04:13:16+00:00"
         },
         {
             "name": "8fold/php-shoop",
@@ -7014,7 +7014,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "8fold/php-events": 20
+        "8fold/php-schema": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
