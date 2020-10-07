@@ -5,7 +5,7 @@ namespace Eightfold\Site\Tests;
 use Orchestra\Testbench\BrowserKit\TestCase;
 // use PHPUnit\Framework\TestCase;
 
-use Eightfold\ShoopExtras\Shoop;
+use Eightfold\ShoopShelf\Shoop;
 
 use Eightfold\Site\Tests\TestContentBuilder;
 
@@ -13,7 +13,9 @@ class ContentBuilderTest extends TestCase
 {
     private function builder()
     {
-        return TestContentBuilder::fold(Shoop::store(__DIR__)->plus("content"));
+        return TestContentBuilder::fold(
+            Shoop::store(__DIR__)->append(["content"])
+        );
     }
 
     public function testCanAppendMarkdown()

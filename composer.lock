@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "67a9306406faec6f0a72ea3688b2e5ec",
+    "content-hash": "350e341ee8a06e11b5af6caa9ce58c93",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
@@ -360,16 +360,16 @@
         },
         {
             "name": "8fold/php-schema",
-            "version": "dev-master",
+            "version": "0.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-schema.git",
-                "reference": "771f60bb46ec8540aaf76dabaa89860e6ac9978a"
+                "reference": "3108547e55afcebd7196ce34402e5b76f52cd8de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-schema/zipball/771f60bb46ec8540aaf76dabaa89860e6ac9978a",
-                "reference": "771f60bb46ec8540aaf76dabaa89860e6ac9978a",
+                "url": "https://api.github.com/repos/8fold/php-schema/zipball/3108547e55afcebd7196ce34402e5b76f52cd8de",
+                "reference": "3108547e55afcebd7196ce34402e5b76f52cd8de",
                 "shasum": ""
             },
             "require": {
@@ -406,20 +406,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-10-07T04:13:16+00:00"
+            "time": "2020-10-07T21:55:36+00:00"
         },
         {
             "name": "8fold/php-shoop",
-            "version": "0.10.14",
+            "version": "0.10.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop.git",
-                "reference": "f43eb406accfbf59e2551f0d49e07979dfa4771c"
+                "reference": "2d6241b01f719be222a2324bcecce83633186ce6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop/zipball/f43eb406accfbf59e2551f0d49e07979dfa4771c",
-                "reference": "f43eb406accfbf59e2551f0d49e07979dfa4771c",
+                "url": "https://api.github.com/repos/8fold/php-shoop/zipball/2d6241b01f719be222a2324bcecce83633186ce6",
+                "reference": "2d6241b01f719be222a2324bcecce83633186ce6",
                 "shasum": ""
             },
             "require": {
@@ -457,20 +457,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-10-07T03:25:12+00:00"
+            "time": "2020-10-07T16:31:59+00:00"
         },
         {
             "name": "8fold/php-shoop-shelf",
-            "version": "0.5.0",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/php-shoop-shelf.git",
-                "reference": "443ef5b9c58279917b407628d4340699485d68b1"
+                "reference": "0ed4ca43ac8f268ec055bee115c34429ae4e610b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/php-shoop-shelf/zipball/443ef5b9c58279917b407628d4340699485d68b1",
-                "reference": "443ef5b9c58279917b407628d4340699485d68b1",
+                "url": "https://api.github.com/repos/8fold/php-shoop-shelf/zipball/0ed4ca43ac8f268ec055bee115c34429ae4e610b",
+                "reference": "0ed4ca43ac8f268ec055bee115c34429ae4e610b",
                 "shasum": ""
             },
             "require": {
@@ -509,7 +509,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-10-05T23:44:50+00:00"
+            "time": "2020-10-07T17:01:18+00:00"
         },
         {
             "name": "brick/math",
@@ -2151,12 +2151,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "04c3a31fe8ea94b42c9e2d1acc93d19782133b00"
+                "reference": "ae789a8a2ad189ce7e8216942cdb9b77319f5eb8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/04c3a31fe8ea94b42c9e2d1acc93d19782133b00",
-                "reference": "04c3a31fe8ea94b42c9e2d1acc93d19782133b00",
+                "url": "https://api.github.com/repos/symfony/console/zipball/ae789a8a2ad189ce7e8216942cdb9b77319f5eb8",
+                "reference": "ae789a8a2ad189ce7e8216942cdb9b77319f5eb8",
                 "shasum": ""
             },
             "require": {
@@ -7013,9 +7013,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "8fold/php-schema": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

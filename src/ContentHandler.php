@@ -4,17 +4,8 @@ namespace Eightfold\Site;
 
 use Carbon\Carbon;
 
-use Eightfold\Shoop\{
-    Helpers\Type,
-    ESArray,
-    ESString
-};
-
-use Eightfold\ShoopExtras\{
-    Shoop,
-    ESPath,
-    ESStore
-};
+use Eightfold\ShoopShelf\Shoop;
+use Eightfold\ShoopShelf\FluentTypes\ESStore;
 
 class ContentHandler
 {
@@ -56,7 +47,7 @@ class ContentHandler
     private $remoteRootPath = "";
     private $githubClient = null;
 
-    static public function fold(ESPath $localRootPath, ESPath $remoteRootPath = null)
+    static public function fold(ESStore $localRootPath, ESStore $remoteRootPath = null)
     {
         return new static($localRootPath, $remoteRootPath);
     }
@@ -76,7 +67,7 @@ class ContentHandler
         });
     }
 
-    public function __construct(ESPath $localRootPath, ESPath $remoteRootPath = null)
+    public function __construct(ESStore $localRootPath, ESStore $remoteRootPath = null)
     {
         $this->localRootPath = $localRootPath;
 
@@ -114,12 +105,12 @@ class ContentHandler
         return $this->useLocal;
     }
 
-    public function localRoot(): ESPath
+    public function localRoot(): ESStore
     {
         return $this->localRootPath;
     }
 
-    public function remoteRoot(): ESPath
+    public function remoteRoot(): ESStore
     {
         return $this->remoteRoot;
     }
@@ -129,16 +120,16 @@ class ContentHandler
         return $this->githubClient;
     }
 
-    public function store(bool $useRoot = false, ...$plus): ESPath
+    public function store(bool $useRoot = false, ...$plus): ESStore
     {
         $store = ($this->useLocal())
-            ? Shoop::store($this->localRoot())
+            ? $this->localRoot()
             : $this->githubClient();
 
         if (! $useRoot) {
-            $parts = Shoop::path(request()->path())->parts();
-            if ($parts->countIsGreaterThanUnfolded(0)) {
-                $store = $store->plus(...$parts);
+            $parts = Shoop::store(request()->path())->parts();
+            if ($parts->isEmpty()->reversed()->unfold()) {
+                $store = $store->append($parts->unfold());
             }
         }
 
@@ -150,29 +141,29 @@ class ContentHandler
         return $store;
     }
 
-    public function contentStore(bool $useRoot = false, ...$plus): ESPath // ESStore|ESGitHubClient
+    public function contentStore(bool $useRoot = false, ...$plus): ESStore // ESStore|ESGitHubClient
     {
         return $this->store($useRoot, ...$plus)->plus("content.md");
     }
 
-    public function assetsStore(...$plus): ESPath
+    public function assetsStore(...$plus): ESStore
     {
-        return $this->store(true, ".assets")->plus(...$plus);
+        return $this->store(true, ".assets")->append($plus);
     }
 
-    public function mediaStore(...$plus): ESPath
+    public function mediaStore(...$plus): ESStore
     {
-        return static::store(true, ".media")->plus(...$plus);
+        return static::store(true, ".media")->append($plus);
     }
 
-    public function trackerStore(...$plus): ESPath
+    public function trackerStore(...$plus): ESStore
     {
-        return static::store(true, ".tracker")->plus(...$plus);
+        return static::store(true, ".tracker")->append($plus);
     }
 
-    public function eventStore(...$plus): ESPath
+    public function eventStore(...$plus): ESStore
     {
-        return static::store(true, "events")->plus(...$plus);
+        return static::store(true, "events")->append($plus);
     }
 
     public function title($type = "", $checkHeadingFirst = true, $parts = []): ESString
@@ -191,18 +182,18 @@ class ContentHandler
         if ($checkHeadingFirst and
             Shoop::string(static::HEADING)->isUnfolded($type)
         ) {
-            $titles = $titles->plus(
+            $titles = $titles->append(
                 $this->titles($checkHeadingFirst, $parts)->first()
             );
 
         } elseif (Shoop::string(static::TITLE)->isUnfolded($type)) {
-            $titles = $titles->plus(
+            $titles = $titles->append(
                 $this->titles(false, $parts)->first()
             );
 
         } elseif (Shoop::string(static::BOOKEND)->isUnfolded($type)) {
             if ($this->uri(true)->isEmpty) {
-                $titles = $titles->plus(
+                $titles = $titles->append(
                     $this->titles($checkHeadingFirst, $parts)->first()
                 );
 
@@ -216,7 +207,7 @@ class ContentHandler
                     $root = $this->contentStore(true)->markdown()->meta()->title();
                 }
 
-                $titles = $titles->plus($start, $root);
+                $titles = $titles->append($start, $root);
             }
 
         } elseif (Shoop::string(static::PAGE)->isUnfolded($type)) {
@@ -232,7 +223,7 @@ class ContentHandler
                 );
                 $start = $start->start($eventTitles->month, $eventTitles->year);
             }
-            $titles = $titles->plus(...$start)->plus(...$root);
+            $titles = $titles->append($start)->append($root);
 
         }
         return $titles->noEmpties()->join(" | ");
@@ -247,7 +238,7 @@ class ContentHandler
         $store = $this->store(true, ...$parts);
 
         return $parts->each(function($part) use (&$store, $checkHeadingFirst) {
-            $s = $store->plus("content.md");
+            $s = $store->append(["content.md"]);
             $title = (! $checkHeadingFirst)
                 ? $s->metaMember("title")
                 : $s->metaMember("heading")->countIsGreaterThan(0,
@@ -262,7 +253,7 @@ class ContentHandler
             }
             return $title;
 
-        })->noEmpties()->plus(
+        })->noEmpties()->append(
             (! $checkHeadingFirst)
                 ? $this->contentStore(true)->metaMember("title")
                 : $this->contentStore(true)->metaMember("heading")

@@ -18,11 +18,9 @@ use League\CommonMark\Environment;
 use League\CommonMark\HtmlRenderer;
 
 // available extensions
-use League\CommonMark\Extension\{
-    Strikethrough\StrikethroughExtension,
-    Table\TableExtension,
-    TaskList\TaskListExtension
-};
+use League\CommonMark\Extension\Strikethrough\StrikethroughExtension;
+use League\CommonMark\Extension\Table\TableExtension;
+use League\CommonMark\Extension\TaskList\TaskListExtension;
 
 use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
@@ -34,20 +32,11 @@ use Eightfold\CommonMarkAccordions\AccordionGroupExtension;
 
 // end extensions
 
-use Eightfold\ShoopExtras\{
-    Shoop,
-    ESStore,
-    ESPath
-};
+use Eightfold\ShoopShelf\Shoop;
+use Eightfold\ShoopShelf\FluentTypes\ESStore;
+// use Eightfold\ShoopShelf\ESPath;
 
 use Eightfold\Shoop\Helpers\Type;
-
-use Eightfold\Shoop\{
-    ESArray,
-    ESBool,
-    ESString,
-    ESInt
-};
 
 use Eightfold\Markup\UIKit;
 use Eightfold\Markup\Element;
@@ -60,7 +49,7 @@ abstract class ContentBuilder
 {
     private $useSiteTracker = false;
 
-    static public function fold(ESPath $localRootPath)
+    static public function fold(ESStore $localRootPath)
     {
         return new static($localRootPath);
     }
@@ -91,7 +80,7 @@ abstract class ContentBuilder
 
     protected $handler;
 
-    public function __construct(ESPath $localRootPath)
+    public function __construct(ESStore $localRootPath)
     {
         $this->handler = ContentHandler::fold($localRootPath);
     }
