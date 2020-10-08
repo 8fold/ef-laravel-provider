@@ -38,5 +38,6 @@
 			"dont-discover": []
 		}
 	},
+  "minimum-stability": "beta",
 	"prefer-stable": true
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "350e341ee8a06e11b5af6caa9ce58c93",
+    "content-hash": "72f041187b60aef0d557a54a283eecc5",
     "packages": [
         {
             "name": "8fold/commonmark-abbreviations",
@@ -108,16 +108,16 @@
         },
         {
             "name": "8fold/laravel-markup",
-            "version": "0.0.27",
+            "version": "0.0.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/8fold/laravel-markup.git",
-                "reference": "a6098affd6abfe630e179c74310a3a075a51028c"
+                "reference": "04f670969b1de036bc53f6f87a3b8561bd1eb2a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/8fold/laravel-markup/zipball/a6098affd6abfe630e179c74310a3a075a51028c",
-                "reference": "a6098affd6abfe630e179c74310a3a075a51028c",
+                "url": "https://api.github.com/repos/8fold/laravel-markup/zipball/04f670969b1de036bc53f6f87a3b8561bd1eb2a6",
+                "reference": "04f670969b1de036bc53f6f87a3b8561bd1eb2a6",
                 "shasum": ""
             },
             "require": {
@@ -156,7 +156,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-10-07T03:01:47+00:00"
+            "time": "2020-10-08T17:13:00+00:00"
         },
         {
             "name": "8fold/php-events",
@@ -7012,7 +7012,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
